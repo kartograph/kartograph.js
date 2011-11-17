@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>proj.js test</title>
+<script src="lib/proj.js"></script>
+<script src="lib/bbox.js"></script>
+<script src="lib/view.js"></script>
+<style>
+canvas {
+	margin: 10px;
+}
+</style>
+<script>
+window.onload = function() {	
+	var P,
+	
+	createCanvas = function(id,w,h) {
+		var canvas = document.createElement("canvas");
+		canvas.setAttribute("id", id);
+		canvas.setAttribute("width", w+"px");
+		canvas.setAttribute("height", h+"px");		
+		document.body.appendChild(canvas);
+		var ctx = canvas.getContext("2d");
+		return ctx;
+	};
+	
+	for (p in svgmap.proj) {
+		P = new svgmap.proj[p](12,34);
+		xy = P.project(13,14);
+		if (isNaN(xy[0]) || isNaN(xy[1]))
+			console.error(p, P, xy);
+
+		var lon, lat, i,
+		grat = 15,
+		sea = [], 
+		bbox = new svgmap.BBox(),
+		view,
+		ctx = createCanvas("p_"+p, 300,220);
+		
+		var len = ctx.measureText(p.toUpperCase()).width;
+		ctx.fillText(p.toUpperCase(),(300-len)/2,220);
+		
+		ctx.fillStyle ="#dde";
+		
+		bbox.update(P.project(-180,0));
+		bbox.update(P.project(180,0));
+		bbox.update(P.project(0, 90));
+		bbox.update(P.project(0, -90));
+				
+		view = new svgmap.View(bbox, 300, 200, 10);
+		
+		for (lon=0;lon<360;lon++) sea.push([lon-180,90]);
+		for (lat=0;lat<180;lat++) sea.push([180, 90-lat])
+		for (lon=0;lon<360;lon++) sea.push([180-lon,-90]);
+		for (lat=0;lat<=180;lat++) sea.push([-180, lat-90]);
+			
+		for (i=0;i<sea.length;i++) {
+			lon = sea[i][0]; lat = sea[i][1];
+			xy = view.project(P.project(lon, lat));
+			if (i==0) ctx.moveTo(xy[0], xy[1]);
+			else ctx.lineTo(xy[0], xy[1]);
+		}
+		ctx.stroke();
+		ctx.fill();			
+			
+	}	
+	
+
+};
+</script>
+</head>
+<body>
+</body>
+</html>
