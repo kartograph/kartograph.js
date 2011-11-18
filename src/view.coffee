@@ -27,7 +27,6 @@ class View
 		me.padding = padding
 		me.height = height
 		me.scale = Math.min (width-padding*2) / bbox.width, (height-padding*2) / bbox.height
-		console.log me.bbox
 		
 	project: (x, y) ->
 		if not y?

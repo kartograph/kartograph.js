@@ -20,7 +20,7 @@ class BBox
 	###
 	2D bounding box
 	###
-	constructor: (width=null, height=null, left=0, top=0) ->
+	constructor: (left=0, top=0, width=null, height=null) ->
 		s = @
 		if width == null
 			s.xmin = Number.MAX_VALUE

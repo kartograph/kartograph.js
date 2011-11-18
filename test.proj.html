@@ -2,6 +2,9 @@
 <html>
 <head>
 <title>proj.js test</title>
+<script src="lib/vendor/jquery.min.js"></script>
+<script src="lib/vendor/dat.gui.min.js"></script>
+
 <script src="lib/proj.js"></script>
 <script src="lib/bbox.js"></script>
 <script src="lib/view.js"></script>
@@ -11,10 +14,58 @@ canvas {
 }
 </style>
 <script>
-window.onload = function() {	
+
+
+// Cross browser, backward compatible solution
+(function( window, Date ) {
+// feature testing
+var raf = window.mozRequestAnimationFrame    ||
+          window.webkitRequestAnimationFrame ||
+          window.msRequestAnimationFrame     ||
+          window.oRequestAnimationFrame;
+
+window.animLoop = function( render, element ) {
+  var running, lastFrame = +new Date;
+  function loop( now ) {
+    if ( running !== false ) {
+      raf ?
+        raf( loop, element ) :
+        // fallback to setTimeout
+        setTimeout( loop, 16 );
+      // Make sure to use a valid time, since:
+      // - Chrome 10 doesn't return it at all
+      // - setTimeout returns the actual timeout
+      now = now && now > 1E4 ? now : +new Date;
+      var deltaT = now - lastFrame;
+      // do not render frame when deltaT is too high
+      if ( deltaT < 160 ) {
+        running = render( deltaT, lastFrame = now );
+      }
+    }
+  }
+  loop();
+};
+})( window, Date );
+
+
+var GlobeOpt = function() {
+	this.lon0 = 0;
+	this.lat0 = 0;
+	this.dist = 2;
+	this.up = 0;
+};
+
+var globeopt = new GlobeOpt();
+
+$(function() {
 	var P,
 	
 	createCanvas = function(id,w,h) {
+		if (document.getElementById(id) != null) {
+			var ctx = document.getElementById(id).getContext("2d");
+			ctx.clearRect(0,0,w,h+20);
+			return ctx;
+		}
 		var canvas = document.createElement("canvas");
 		canvas.setAttribute("id", id);
 		canvas.setAttribute("width", w+"px");
@@ -22,51 +73,134 @@ window.onload = function() {
 		document.body.appendChild(canvas);
 		var ctx = canvas.getContext("2d");
 		return ctx;
-	};
+	},
 	
-	for (p in svgmap.proj) {
-		P = new svgmap.proj[p](12,34);
+	showMap = function(p, coastlines) {
+	
+		P = new svgmap.proj[p](globeopt.lon0,globeopt.lat0,globeopt.dist, globeopt.up);
 		xy = P.project(13,14);
-		if (isNaN(xy[0]) || isNaN(xy[1]))
+		if (isNaN(xy[0]) || isNaN(xy[1])) {
 			console.error(p, P, xy);
+			return;
+		}
 
 		var lon, lat, i,
+		w = 600,
+		h = 600,
 		grat = 15,
-		sea = [], 
-		bbox = new svgmap.BBox(),
+		sea = P.sea(), 
+		bbox = P.world_bbox(),
 		view,
-		ctx = createCanvas("p_"+p, 300,220);
+		ctx = createCanvas("p_"+p, w,h+20);
 		
 		var len = ctx.measureText(p.toUpperCase()).width;
-		ctx.fillText(p.toUpperCase(),(300-len)/2,220);
+		ctx.fillText(p.toUpperCase(),(w-len)/2,h+20);
+
+		ctx.beginPath();		
+		ctx.fillStyle ="#fff";
 		
-		ctx.fillStyle ="#dde";
-		
-		bbox.update(P.project(-180,0));
-		bbox.update(P.project(180,0));
-		bbox.update(P.project(0, 90));
-		bbox.update(P.project(0, -90));
-				
-		view = new svgmap.View(bbox, 300, 200, 10);
-		
-		for (lon=0;lon<360;lon++) sea.push([lon-180,90]);
-		for (lat=0;lat<180;lat++) sea.push([180, 90-lat])
-		for (lon=0;lon<360;lon++) sea.push([180-lon,-90]);
-		for (lat=0;lat<=180;lat++) sea.push([-180, lat-90]);
+		view = new svgmap.View(bbox, w, h, 10);
 			
 		for (i=0;i<sea.length;i++) {
-			lon = sea[i][0]; lat = sea[i][1];
-			xy = view.project(P.project(lon, lat));
+			xy = view.project(sea[i]);
 			if (i==0) ctx.moveTo(xy[0], xy[1]);
 			else ctx.lineTo(xy[0], xy[1]);
 		}
 		ctx.stroke();
-		ctx.fill();			
-			
-	}	
+		ctx.fill();
+		
+		ctx.lineWidth = 0.2;
+		ctx.beginPath();
+		
+		for (lat=0;lat<90;lat+=grat) {
+			var lats = lat == 0 ? [0] : [lat,-lat];
+			for (var l in lats) {
+				var lat_ = lats[l];
+				var line = [];
+				for (lon=-180+globeopt.lon0;lon<180+globeopt.lon0;lon++) {
+					if (P._visible(lon,lat_)) {
+						line.push(view.project(P.project(lon,lat_)));
+					}
+				}
+				for (i=0;i<line.length;i++) {
+					if (i==0) ctx.moveTo(line[i][0], line[i][1]);
+					else ctx.lineTo(line[i][0], line[i][1]);
+				}
+			}
+		}
+		for (lon=0;lon<181;lon+=grat) {
+			var lons = lon == 0 || lon == 180 ? [lon] : [lon,-lon];
+			for (var l in lons) {
+				var lon_ = lons[l];
+				var line = [];
+				for (lat=-90;lat<90;lat++) {
+					if (P._visible(lon_,lat)) {
+						line.push(view.project(P.project(lon_,lat)));
+					}
+				}
+				var r = Math.round;
+				for (i=0;i<line.length;i++) {
+					if (i==0) ctx.moveTo(line[i][0], (line[i][1]));
+					else ctx.lineTo(line[i][0], (line[i][1]));
+				}
+				//ctx.stroke();
+			}
+		}
+		ctx.stroke();
+		
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		
+		var cl,line,p0,p1;
+		for (cl=0; cl<coastlines.length; cl++) {
+			line = coastlines[cl];
+			for (i=0;i<line.length-1;i++) {
+				p0 = line[i];
+				p1 = line[i+1];
+				if (P._visible(p0[0],p0[1]) && P._visible(p1[0],p1[1])) {
+					
+					p0 = view.project(P.project(p0[0],p0[1]));
+					p1 = view.project(P.project(p1[0],p1[1]));
+					ctx.moveTo(p0[0],p0[1]);
+					ctx.lineTo(p1[0],p1[1]);
+				}
+			}
+		}
+		
+		ctx.stroke();
+	},
+	
+	frame = 0,
+	
+	renderFrame = function() {
+		//for (p in svgmap.proj) {
+			showMap('satellite', coastlines);
+		//}	
+		//window.mozRequestAnimationFrame(renderFrame)
+	};
+	
+	$.ajax({
+		url: '../misc/coastline/coastline.json',
+		success: function(coastlines) {
+			window.coastlines = coastlines;
+			//window.mozRequestAnimationFrame(renderFrame);
+			//animLoop(renderFrame, this );
+			renderFrame();
+		},
+		context: this
+	});
+	
+	var gui = new dat.GUI();
+	gui.remember(globeopt);
+
+	gui.add(globeopt, 'lon0',-180,180).onChange(renderFrame);
+	gui.add(globeopt, 'lat0', -90,90).onChange(renderFrame);
+	gui.add(globeopt, 'dist', 1.01, 2).step(0.01).onChange(renderFrame);
+	gui.add(globeopt, 'up', -90,90).onChange(renderFrame);	
 	
 
-};
+
+});
 </script>
 </head>
 <body>

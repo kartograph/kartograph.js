@@ -21,24 +21,31 @@ root.svgmap ?= {}
 
 __proj = root.svgmap.proj = {}
 
+
+Function::bind = (scope) ->
+	_function = @
+	->
+		_function.apply scope,arguments
+
+
 class Proj
 	
 	constructor: (@lon0 = 0, @lat0 = 0) ->
-		@HALFPI = Math.PI * .5
-		@QUARTERPI = Math.PI * .25
-		@RAD = Math.PI / 180
-		@DEG = 180 / Math.PI
-		@lam0 = @rad(@lon0)
-		@phi0 = @rad(@lat0)
+		me = @
+		me.PI = Math.PI
+		me.HALFPI = me.PI * .5
+		me.QUARTERPI = me.PI * .25
+		me.RAD = me.PI / 180
+		me.DEG = 180 / me.PI
+		me.lam0 = me.rad(@lon0)
+		me.phi0 = me.rad(@lat0)
 		
 	rad: (a) ->
 		a * @RAD
 	
 	deg: (a) ->
-		a * @RAD
+		a * @DEG
 		
-	@projections = {}
-	
 	plot: (polygon, truncate=true) ->
 		points = []
 		ignore = true
@@ -53,33 +60,66 @@ class Proj
 				points.push [x,y]
 		if ignore then null else [points]
 	
-	
+
+# ---------------------------------
+# Family of Cylindrical Projecitons
+# ---------------------------------
+
 class Cylindrical extends Proj
 	###
 	Base class for cylindrical projections
 	###
 	_visible: (lon, lat) ->
 		true
-	
+		
+	sea: ->
+		s = @
+		p = s.project.bind @
+		o = []
+		l0 = s.lon0
+		o.push(p(lon,90)) for lon in [-180..180] 
+		o.push(p(180,lat)) for lat in [90..-90] 
+		o.push(p(lon,-90)) for lon in [180..-180] 
+		o.push(p(180,lat)) for lat in [-90..90]
+		o
+		
+	world_bbox: ->
+		p = @project.bind @
+		bbox = new svgmap.BBox()
+		bbox.update(p(-180,0))
+		bbox.update(p(180,0))
+		bbox.update(p(0, 90))
+		bbox.update(p(0, -90))
+		bbox
+		
+	clon: (lon) ->
+		lon -= @lon0
+		if lon < -180
+			lon += 360
+		else if lon > 180
+			lon -= 360
+		lon
+		
 	
 class Equirectangular extends Cylindrical
 	###
 	Equirectangular Projection aka Lonlat aka Plate Carree
 	###
 	project: (lon, lat) ->
+		lon = @clon(lon)
 		[(lon+180) * Math.cos(@phi0)*2.777, (lat*-1+90)*2.7777]
 
 __proj['lonlat'] = Equirectangular
-	
+
 
 class CEA extends Cylindrical
 	###
 	Cylindrical Equal Area Projection
 	###
 	project: (lon, lat) ->
-		lam = @rad(lon)
+		lam = @rad(@clon(lon))
 		phi = @rad(lat*-1)
-		x = (lam - @lam0) * Math.cos(@phi0)
+		x = (lam) * Math.cos(@phi0)
 		y = Math.sin(phi) / Math.cos(@phi0)
 		[x*1000,y*1000]
 
@@ -125,6 +165,10 @@ class Balthasart extends CEA
 	
 __proj['balthasart'] = Balthasart
 
+
+# ----------------------------------------
+# Family of Pseudo-Cylindrical Projecitons
+# ----------------------------------------
 
 class PseudoCylindrical extends Cylindrical
 	###
@@ -348,13 +392,226 @@ class WagnerV extends Mollweide
 __proj['wagner5'] = WagnerV
 
 
-
+###
 class Vis4 extends Mollweide
 	constructor: (lon0=0, lat0=0) ->
 		# p=math.pi/3
 		super lon0,lat0,Math.PI/2.5
 
-#__proj['vis4'] = Vis4
-###	
+__proj['vis4'] = Vis4	
+###
 
+
+# -------------------------------
+# Family of Azimuthal Projecitons
+# -------------------------------
+
+class Azimuthal extends Proj
+	###
+	Base class for azimuthal projections
+	###
+	constructor: (lon0=0, lat0=0, rad=1000) ->
+		super lon0,lat0
+		me = @
+		me.r = rad
+		me.elevation0 = me.to_elevation(lat0)
+		me.azimuth0 = me.to_azimuth(lon0)
+
+	to_elevation: (lat) ->
+		me = @
+		((lat + 90) / 180) * me.PI - me.HALFPI
+	
+	to_azimuth: (lon) ->
+		me = @
+		((lon + 180) / 360) * me.PI *2 - me.PI
+		
+	_visible: (lon, lat) ->
+		me = @
+		math = Math
+		elevation = me.to_elevation(lat)
+		azimuth = me.to_azimuth(lon)   
+		# work out if the point is visible
+		cosc = math.sin(elevation)*math.sin(me.elevation0)+math.cos(me.elevation0)*math.cos(elevation)*math.cos(azimuth-me.azimuth0)
+		cosc >= 0.0		
+		
+	_truncate: (x, y) ->
+		math = Math
+		r = @r
+		theta = math.atan2(y-r,x-r)
+		x1 = r + r * math.cos(theta)
+		y1 = r + r * math.sin(theta)
+		[x1,y1]
+				
+	sea: ->
+		out = []
+		r = @r
+		math = Math
+		for phi in [0..360]
+			out.push([r + math.cos(@rad(phi)) * r, r + math.sin(@rad(phi)) * r])
+		out
+	
+	world_bbox: ->
+		r = @r
+		new svgmap.BBox(0,0,r*2, r*2)
+
+
+class Orthographic extends Azimuthal
+	###
+	Orthographic Azimuthal Projection
+	
+	implementation taken from http://www.mccarroll.net/snippets/svgworld/
+	###
+	project: (lon, lat) ->
+		me = @
+		math = Math
+		elevation = me.to_elevation(lat)
+		azimuth = me.to_azimuth(lon)
+		xo = me.r*math.cos(elevation)*math.sin(azimuth-me.azimuth0)
+		yo = -me.r*(math.cos(me.elevation0)*math.sin(elevation)-math.sin(me.elevation0)*math.cos(elevation)*math.cos(azimuth-me.azimuth0))
+		x = me.r + xo
+		y = me.r + yo
+		[x,y]
+		
+__proj['ortho'] = Orthographic
+
+
+
+class LAEA extends Azimuthal
+	###
+	Lambert Azimuthal Equal-Area Projection
+	
+	implementation taken from 
+	Snyder, Map projections - A working manual
+	###
+	constructor: (lon0=0, lat0=0) ->
+		super lon0,lat0
+		@scale = Math.sqrt(2)*0.5	
+		
+		
+	project: (lon, lat) ->
+		phi = @rad(lat)
+		lam = @rad(lon)
+		math = Math
+		sin = math.sin
+		cos = math.cos
+		
+		if false and math.abs(lon - @lon0) == 180
+			xo = @r*2
+			yo = 0
+		else
+			k = math.pow(2 / (1 + sin(@phi0) * sin(phi) + cos(@phi0)*cos(phi)*cos(lam - @lam0)), .5)
+			k *= @scale#.70738033
+				
+			xo = @r * k * cos(phi) * sin(lam - @lam0)
+			yo = -@r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
+		
+		x = @r + xo
+		y = @r + yo
+		
+		[x,y]
+
+__proj['laea'] = LAEA
+
+
+class Stereographic extends Azimuthal
+	###
+	Stereographic projection
+	
+	implementation taken from 
+	Snyder, Map projections - A working manual
+	###
+		
+	project: (lon, lat) ->
+		phi = @rad(lat)
+		lam = @rad(lon)
+		math = Math
+		sin = math.sin
+		cos = math.cos
+
+		k0 = 0.5
+		k = 2*k0 / (1 + sin(@phi0) * sin(phi) + cos(@phi0)*cos(phi)*cos(lam - @lam0))
+		
+		xo = @r * k * cos(phi) * sin(lam - @lam0)
+		yo = -@r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
+		
+		x = @r + xo
+		y = @r + yo
+		
+		[x,y]
+
+__proj['stereo'] = Stereographic
+
+
+
+class Satellite extends Azimuthal
+	###
+	General perspective projection, aka Satellite projection
+	
+	implementation taken from 
+	Snyder, Map projections - A working manual
+	
+	up .. angle the camera is turned away from north (clockwise)
+	tilt .. angle the camera is tilted 
+	###
+	constructor: (lon0=0.0,lat0=0.0,dist=3.45,up=35, tilt=0) ->
+		super 0,0
+		@dist = dist
+		@up = @rad(up)
+		@tilt = @rad(tilt)
+		
+		@scale = 1
+		xmin = Number.MAX_VALUE
+		xmax = Number.MAX_VALUE*-1
+		for lat in [0..179]
+			for lon in [0..360]
+				xy = @project(lon-180,lat-90)
+				xmin = Math.min(xy[0], xmin)
+				xmax = Math.max(xy[0], xmax)
+		@scale = (@r*2)/(xmax-xmin) 
+		super lon0,lat0
+		return
+		
+		
+	project: (lon, lat) ->
+	
+		phi = @rad(lat)
+		lam = @rad(lon)
+		math = Math
+		sin = math.sin
+		cos = math.cos
+
+		cos_c = sin(@phi0) * sin(phi) + cos(@phi0) * cos(phi) * cos(lam - @lam0)
+		k = (@dist - 1) / (@dist - cos_c)
+		k = (@dist - 1) / (@dist - cos_c)
+		
+		k *= @scale
+		
+		xo = @r * k * cos(phi) * sin(lam - @lam0)
+		yo = -@r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
+		
+		# tilt
+		cos_up = cos(@up)
+		sin_up = sin(@up)
+		cos_tilt = cos(@tilt)
+		sin_tilt = sin(@tilt)
+		
+		H = @r * (@dist - 1)
+		A = ((yo * cos_up + xo * sin_up) * sin(@tilt/H)) + cos_tilt
+		xt = (xo * cos_up - yo * sin_up) * cos(@tilt/A)
+		yt = (yo * cos_up + xo * sin_up) / A
+		
+		x = @r + xt
+		y = @r + yt	
+		
+		[x,y]	
+
+	_visible: (lon, lat) ->
+		elevation = @to_elevation(lat)
+		azimuth = @to_azimuth(lon)  
+		math = Math
+		# work out if the point is visible
+		cosc = math.sin(elevation)*math.sin(@elevation0)+math.cos(@elevation0)*math.cos(elevation)*math.cos(azimuth-@azimuth0)
+		cosc >= (1.0/@dist)
+
+__proj['satellite'] = Satellite
 ###
