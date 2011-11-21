@@ -1,1 +1,1249 @@
-(function(){var a,b,c,d;b=typeof exports!="undefined"&&exports!==null?exports:this,c=(d=b.svgmap)!=null?d:b.svgmap={},a=function(){function a(a,b,c,d){var e;a==null&&(a=0),b==null&&(b=0),c==null&&(c=null),d==null&&(d=null),e=this,c===null?(e.xmin=Number.MAX_VALUE,e.xmax=Number.MAX_VALUE*-1):(e.xmin=e.left=a,e.xmax=e.right=a+c,e.width=c),d===null?(e.ymin=Number.MAX_VALUE,e.ymax=Number.MAX_VALUE*-1):(e.ymin=e.top=b,e.ymax=e.bottom=d+b,e.height=d);return}a.prototype.update=function(a,b){var c;b==null&&(b=a[1],a=a[0]),c=this,c.xmin=Math.min(c.xmin,a),c.ymin=Math.min(c.ymin,b),c.xmax=Math.max(c.xmax,a),c.ymax=Math.max(c.ymax,b),c.left=c.xmin,c.top=c.ymin,c.right=c.xmax,c.bottom=c.ymax,c.width=c.xmax-c.xmin,c.height=c.ymax-c.ymin;return this},a.prototype.intersects=function(a){return a.left<s.right&&a.right>s.left&&a.top<s.bottom&&a.bottom>s.top},a.prototype.join=function(a){s.update(a.left,a.top),s.update(a.right,a.bottom);return this};return a}(),c.BBox=a}).call(this),function(){var a,b,c,d,e,f=Object.prototype.hasOwnProperty,g=function(a,b){function d(){this.constructor=a}for(var c in b)f.call(b,c)&&(a[c]=b[c]);d.prototype=b.prototype,a.prototype=new d,a.__super__=b.prototype;return a};c=typeof exports!="undefined"&&exports!==null?exports:this,d=(e=c.svgmap)!=null?e:c.svgmap={},b=function(){function a(a,b){this.lon=a,this.lat=b}return a}(),a=function(){function a(b,c){a.__super__.constructor.call(this,c,b)}g(a,b);return a}(),d.LonLat=b,d.LatLon=a}.call(this),function(){var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z=Object.prototype.hasOwnProperty,A=function(a,b){function d(){this.constructor=a}for(var c in b)z.call(b,c)&&(a[c]=b[c]);d.prototype=b.prototype,a.prototype=new d,a.__super__=b.prototype;return a};v=typeof exports!="undefined"&&exports!==null?exports:this,w=(y=v.svgmap)!=null?y:v.svgmap={},x=w.proj={},Function.prototype.bind=function(a){var b;b=this;return function(){return b.apply(a,arguments)}},n=function(){function a(a,b){var c;this.lon0=a!=null?a:0,this.lat0=b!=null?b:0,c=this,c.PI=Math.PI,c.HALFPI=c.PI*.5,c.QUARTERPI=c.PI*.25,c.RAD=c.PI/180,c.DEG=180/c.PI,c.lam0=c.rad(this.lon0),c.phi0=c.rad(this.lat0)}a.prototype.rad=function(a){return a*this.RAD},a.prototype.deg=function(a){return a*this.DEG},a.prototype.plot=function(a,b){var c,d,e,f,g,h,i,j,k,l,m;b==null&&(b=!0),f=[],c=!0;for(j=0,k=a.length;j<k;j++)l=a[j],e=l[0],d=l[1],g=this._visible(e,d),g&&(c=!1),m=this.project(e,d),h=m[0],i=m[1],!g&&b?f.push(this._truncate(h,i)):f.push([h,i]);return c?null:[f]};return a}(),e=function(){function a(){a.__super__.constructor.apply(this,arguments)}A(a,n),a.prototype._visible=function(a,b){return!0},a.prototype.sea=function(){var a,b,c,d,e,f;f=this,e=f.project.bind(this),d=[],a=f.lon0,f.lon0=0;for(c=-180;c<=180;c++)d.push(e(c,90));for(b=90;b>=-90;b--)d.push(e(180,b));for(c=180;c>=-180;c--)d.push(e(c,-90));for(b=-90;b<=90;b++)d.push(e(-180,b));f.lon0=a;return d},a.prototype.world_bbox=function(){var a,b,c,d,e,f;b=this.project.bind(this),d=this.sea(),a=new w.BBox;for(e=0,f=d.length;e<f;e++)c=d[e],a.update(c[0],c[1]);return a},a.prototype.clon=function(a){a-=this.lon0,a<-180?a+=360:a>180&&(a-=360);return a};return a}(),g=function(){function a(){a.__super__.constructor.apply(this,arguments)}A(a,e),a.prototype.project=function(a,b){a=this.clon(a);return[(a+180)*Math.cos(this.phi0)*2.777,(b*-1+90)*2.7777]};return a}(),x.lonlat=g,d=function(){function a(){a.__super__.constructor.apply(this,arguments)}A(a,e),a.prototype.project=function(a,b){var c,d,e,f;c=this.rad(this.clon(a)),d=this.rad(b*-1),e=c*Math.cos(this.phi0),f=Math.sin(d)/Math.cos(this.phi0);return[e*1e3,f*1e3]};return a}(),x.cea=d,h=function(){function a(b,c){a.__super__.constructor.call(this,b,45)}A(a,d);return a}(),x.gallpeters=h,i=function(){function a(b,c){a.__super__.constructor.call(this,b,37.7)}A(a,d);return a}(),x.hobodyer=i,c=function(){function a(b,c){a.__super__.constructor.call(this,b,30)}A(a,d);return a}(),x.behrmann=c,b=function(){function a(b,c){a.__super__.constructor.call(this,b,50)}A(a,d);return a}(),x.balthasart=b,o=function(){function a(){a.__super__.constructor.apply(this,arguments)}A(a,e);return a}(),l=function(){function a(b,c){var d;a.__super__.constructor.call(this,b,c),d=this,d.A0=.8707,d.A1=-0.131979,d.A2=-0.013791,d.A3=.003971,d.A4=-0.001529,d.B0=1.007226,d.B1=.015085,d.B2=-0.044475,d.B3=.028874,d.B4=-0.005916,d.C0=d.B0,d.C1=3*d.B1,d.C2=7*d.B2,d.C3=9*d.B3,d.C4=11*d.B4,d.EPS=1e-11,d.MAX_Y=.8707*.52*Math.PI;return}A(a,o),a.prototype.project=function(a,b){var c,d,e,f,g,h,i;g=this,c=g.rad(g.clon(a)),d=g.rad(b*-1),e=d*d,f=e*e,h=c*(g.A0+e*(g.A1+e*(g.A2+f*e*(g.A3+e*g.A4))))*180+500,i=d*(g.B0+e*(g.B1+f*(g.B2+g.B3*e+g.B4*f)))*180+270;return[h,i]};return a}(),x.naturalearth=l,p=function(){function a(b,c){var d;a.__super__.constructor.call(this,b,c),d=this,d.X=[1,-5.67239e-12,-0.0000715511,311028e-11,.9986,-0.000482241,-0.000024897,-0.00000133094,.9954,-0.000831031,-0.000044861,-9.86588e-7,.99,-0.00135363,-0.0000596598,367749e-11,.9822,-0.00167442,-0.0000044975,-0.00000572394,.973,-0.00214869,-0.0000903565,1.88767e-8,.96,-0.00305084,-0.0000900732,164869e-11,.9427,-0.00382792,-0.0000653428,-0.00000261493,.9216,-0.00467747,-0.000104566,48122e-10,.8962,-0.00536222,-0.0000323834,-0.00000543445,.8679,-0.00609364,-0.0001139,332521e-11,.835,-0.00698325,-0.0000640219,9.34582e-7,.7986,-0.00755337,-0.0000500038,9.35532e-7,.7597,-0.00798325,-0.0000359716,-0.00000227604,.7186,-0.00851366,-0.000070112,-0.00000863072,.6732,-0.00986209,-0.000199572,191978e-10,.6213,-0.010418,883948e-10,624031e-11,.5722,-0.00906601,181999e-9,624033e-11,.5322,0,0,0],d.Y=[0,.0124,3.72529e-10,1.15484e-9,.062,.0124001,1.76951e-8,-5.92321e-9,.124,.0123998,-7.09668e-8,2.25753e-8,.186,.0124008,2.66917e-7,-8.44523e-8,.248,.0123971,-9.99682e-7,3.15569e-7,.31,.0124108,373349e-11,-0.0000011779,.372,.0123598,-0.000013935,439588e-11,.434,.0125501,520034e-10,-0.0000100051,.4968,.0123198,-0.0000980735,922397e-11,.5571,.0120308,402857e-10,-0.0000052901,.6176,.0120369,-0.0000390662,7.36117e-7,.6769,.0117015,-0.0000280246,-8.54283e-7,.7346,.0113572,-0.0000408389,-5.18524e-7,.7903,.0109099,-0.0000486169,-0.0000010718,.8435,.0103433,-0.0000646934,5.36384e-9,.8936,.00969679,-0.0000646129,-0.00000854894,.9394,.00840949,-0.000192847,-0.00000421023,.9761,.00616525,-0.000256001,-0.00000421021,1,0,0,0],d.NODES=18,d.FXC=.8487,d.FYC=1.3523,d.C1=11.459155902616464,d.RC1=.08726646259971647,d.ONEEPS=1.000001,d.EPS=1e-8;return}A(a,o),a.prototype._poly=function(a,b,c){return a[b]+c*(a[b+1]+c*(a[b+2]+c*a[b+3]))},a.prototype.project=function(a,b){var c,d,e,f,g,h,i;g=this,a=g.clon(a),d=g.rad(a),e=g.rad(b*-1),f=Math.abs(e),c=Math.floor(f*g.C1),c>=g.NODES&&(c=g.NODES-1),f=g.deg(f-g.RC1*c),c*=4,h=g._poly(g.X,c,f)*g.FXC*d,i=g._poly(g.Y,c,f)*g.FYC,e<0&&(i=-i);return[h,i]};return a}(),x.robinson=p,f=function(){function a(b,c){var d;b==null&&(b=0),c==null&&(c=0),a.__super__.constructor.call(this,b,c),d=this,d.C_x=.4222382003157712,d.C_y=1.3265004281770023,d.RC_y=.7538633073600218,d.C_p=3.5707963267948966,d.RC_p=.2800495767557787,d.EPS=1e-7,d.NITER=6}A(a,o),a.prototype.project=function(a,b){var c,d,e,f,g,h,i,j,k,l;h=this,f=h.rad(h.clon(a)),g=h.rad(b*-1),i=h.C_p*Math.sin(g),c=g*g,g*=.895168+c*(.0218849+c*.00826809),e=h.NITER;while(e>0){d=Math.cos(g),j=Math.sin(g),c=(g+j*(d+2)-i)/(1+d*(d+2)-j*j),g-=c;if(Math.abs(c)<h.EPS)break;e-=1}e===0?(k=h.C_x*f,l=g<0?-h.C_y:h.C_y):(k=h.C_x*f*(1+Math.cos(g)),l=h.C_y*Math.sin(g));return[k,l]};return a}(),x.eckert4=f,r=function(){function a(){a.__super__.constructor.apply(this,arguments)}A(a,o),a.prototype.project=function(a,b){var c,d,e,f,g;d=this,c=d.rad(d.clon(a)),e=d.rad(b*-1),f=c*Math.cos(e),g=e;return[f,g]};return a}(),x.sinusoidal=r,k=function(){function a(b,c,d,e,f,g){var h,i,j,k;b==null&&(b=0),c==null&&(c=0),d==null&&(d=1.5707963267948966),e==null&&(e=null),f==null&&(f=null),g==null&&(g=null),a.__super__.constructor.call(this,b,c),h=this,h.MAX_ITER=10,h.TOLERANCE=1e-7,d!=null?(i=d+d,k=Math.sin(d),j=Math.sqrt(Math.PI*2*k/(i+Math.sin(i))),h.cx=2*j/Math.PI,h.cy=j/k,h.cp=i+Math.sin(i)):e!=null&&f!=null&&typeof cz!="undefined"&&cz!==null?(h.cx=e,h.cy=f,h.cp=g):console.error("svgmap.proj.Mollweide: either p or cx,cy,cp must be defined")}A(a,o),a.prototype.project=function(a,b){var c,d,e,f,g,h,i,j,k,l;h=this,g=Math,c=g.abs,f=h.rad(h.clon(a)),i=h.rad(b),e=h.cp*g.sin(i),d=h.MAX_ITER;while(d!==0){j=(i+g.sin(i)-e)/(1+g.cos(i)),i-=j;if(c(j)<h.TOLERANCE)break;d-=1}d===0?i=i>=0?h.HALFPI:-h.HALFPI:i*=.5,k=h.cx*f*g.cos(i),l=h.cy*g.sin(i);return[k,l*-1]};return a}(),x.mollweide=k,t=function(){function a(b,c){b==null&&(b=0),c==null&&(c=0),a.__super__.constructor.call(this,b,c,1.0471975511965976)}A(a,k);return a}(),x.wagner4=t,u=function(){function a(b,c){b==null&&(b=0),c==null&&(c=0),a.__super__.constructor.call(this,b,c,null,.90977,1.65014,3.00896)}A(a,k);return a}(),x.wagner5=u,a=function(){function a(b,c,d){var e;b==null&&(b=0),c==null&&(c=0),d==null&&(d=1e3),a.__super__.constructor.call(this,b,c),e=this,e.r=d,e.elevation0=e.to_elevation(c),e.azimuth0=e.to_azimuth(b)}A(a,n),a.prototype.to_elevation=function(a){var b;b=this;return(a+90)/180*b.PI-b.HALFPI},a.prototype.to_azimuth=function(a){var b;b=this;return(a+180)/360*b.PI*2-b.PI},a.prototype._visible=function(a,b){var c,d,e,f,g;g=this,f=Math,e=g.to_elevation(b),c=g.to_azimuth(a),d=f.sin(e)*f.sin(g.elevation0)+f.cos(g.elevation0)*f.cos(e)*f.cos(c-g.azimuth0);return d>=0},a.prototype._truncate=function(a,b){var c,d,e,f,g;c=Math,d=this.r,e=c.atan2(b-d,a-d),f=d+d*c.cos(e),g=d+d*c.sin(e);return[f,g]},a.prototype.sea=function(){var a,b,c,d;b=[],d=this.r,a=Math;for(c=0;c<=360;c++)b.push([d+a.cos(this.rad(c))*d,d+a.sin(this.rad(c))*d]);return b},a.prototype.world_bbox=function(){var a;a=this.r;return new w.BBox(0,0,a*2,a*2)};return a}(),m=function(){function b(){b.__super__.constructor.apply(this,arguments)}A(b,a),b.prototype.project=function(a,b){var c,d,e,f,g,h,i,j;f=this,e=Math,d=f.to_elevation(b),c=f.to_azimuth(a),h=f.r*e.cos(d)*e.sin(c-f.azimuth0),j=-f.r*(e.cos(f.elevation0)*e.sin(d)-e.sin(f.elevation0)*e.cos(d)*e.cos(c-f.azimuth0)),g=f.r+h,i=f.r+j;return[g,i]};return b}(),x.ortho=m,j=function(){function b(a,c){a==null&&(a=0),c==null&&(c=0),b.__super__.constructor.call(this,a,c),this.scale=Math.sqrt(2)*.5}A(b,a),b.prototype.project=function(a,b){var c,d,e,f,g,h,i,j,k,l;g=this.rad(b),e=this.rad(a),f=Math,h=f.sin,c=f.cos,d=f.pow(2/(1+h(this.phi0)*h(g)+c(this.phi0)*c(g)*c(e-this.lam0)),.5),d*=this.scale,j=this.r*d*c(g)*h(e-this.lam0),l=-this.r*d*(c(this.phi0)*h(g)-h(this.phi0)*c(g)*c(e-this.lam0)),i=this.r+j,k=this.r+l;return[i,k]};return b}(),x.laea=j,s=function(){function b(){b.__super__.constructor.apply(this,arguments)}A(b,a),b.prototype.project=function(a,b){var c,d,e,f,g,h,i,j,k,l,m;h=this.rad(b),f=this.rad(a),g=Math,i=g.sin,c=g.cos,e=.5,d=2*e/(1+i(this.phi0)*i(h)+c(this.phi0)*c(h)*c(f-this.lam0)),k=this.r*d*c(h)*i(f-this.lam0),m=-this.r*d*(c(this.phi0)*i(h)-i(this.phi0)*c(h)*c(f-this.lam0)),j=this.r+k,l=this.r+m;return[j,l]};return b}(),x.stereo=s,q=function(){function b(a,c,d,e,f){var g,h,i,j,k;a==null&&(a=0),c==null&&(c=0),d==null&&(d=3.45),e==null&&(e=35),f==null&&(f=0),b.__super__.constructor.call(this,0,0),this.dist=d,this.up=this.rad(e),this.tilt=this.rad(f),this.scale=1,j=Number.MAX_VALUE,i=Number.MAX_VALUE*-1;for(g=0;g<=179;g++)for(h=0;h<=360;h++)k=this.project(h-180,g-90),j=Math.min(k[0],j),i=Math.max(k[0],i);this.scale=this.r*2/(i-j),b.__super__.constructor.call(this,a,c);return}A(b,a),b.prototype.project=function(a,b){var c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u;l=this.rad(b),j=this.rad(a),k=Math,m=k.sin,e=k.cos,f=m(this.phi0)*m(l)+e(this.phi0)*e(l)*e(j-this.lam0),i=(this.dist-1)/(this.dist-f),i=(this.dist-1)/(this.dist-f),i*=this.scale,q=this.r*i*e(l)*m(j-this.lam0),t=-this.r*i*(e(this.phi0)*m(l)-m(this.phi0)*e(l)*e(j-this.lam0)),h=e(this.up),o=m(this.up),g=e(this.tilt),n=m(this.tilt),d=this.r*(this.dist-1),c=(t*h+q*o)*m(this.tilt/d)+g,r=(q*h-t*o)*e(this.tilt/c),u=(t*h+q*o)/c,p=this.r+r,s=this.r+u;return[p,s]},b.prototype._visible=function(a,b){var c,d,e,f;e=this.to_elevation(b),c=this.to_azimuth(a),f=Math,d=f.sin(e)*f.sin(this.elevation0)+f.cos(this.elevation0)*f.cos(e)*f.cos(c-this.azimuth0);return d>=1/this.dist};return b}(),x.satellite=q}.call(this),function(){var a,b,c,d,e,f,g,h,i=Object.prototype.hasOwnProperty,j=function(a,b){function d(){this.constructor=a}for(var c in b)i.call(b,c)&&(a[c]=b[c]);d.prototype=b.prototype,a.prototype=new d,a.__super__=b.prototype;return a};f=typeof exports!="undefined"&&exports!==null?exports:this,g=(h=f.svgmap)!=null?h:f.svgmap={},g.version="0.1.0",e=function(){function a(a){var b;b=this,b.container=$(a),b.layers=[]}a.prototype.loadMap=function(a,b){var c;c=this,c.mapLoadCallback=b;return $.ajax({src:a,onSuccess:c.mapLoaded})},a.prototype.addLayer=function(a,b){var c;b==null&&(b=a),c={id:b,src:a,paths:p};return this.layers.push(c)},a.prototype.addMarker=function(a){},a.prototype.display=function(){},a.prototype.mapLoaded=function(a){},a.prototype.render=function(){},a.prototype.project=function(a,b){};return a}(),d=function(){function a(a,b,c){c==null&&(c=[0,0])}return a}(),c=function(){function a(a,b){}j(a,d);return a}(),b=function(){function a(a,b){}j(a,d);return a}(),a=function(){function a(){}return a}()}.call(this),function(){var a,b,c;a=function(){function a(a,b,c,d){var e;d==null&&(d=0),e=this,e.bbox=a,e.width=b,e.padding=d,e.height=c,e.scale=Math.min((b-d*2)/a.width,(c-d*2)/a.height)}a.prototype.project=function(a,b){var c,d,e,f,g;b==null&&(b=a[1],a=a[0]),e=this,f=e.scale,c=e.bbox,d=e.height,g=e.width,a=(a-c.left)*f+(g-c.width*f)*.5,b=(b-c.top)*f+(d-c.height*f)*.5;return[a,b]};return a}(),b=typeof exports!="undefined"&&exports!==null?exports:this,(c=b.svgmap)==null&&(b.svgmap={}),b.svgmap.View=a}.call(this)
+(function() {
+
+  /*
+      svgmap - a simple toolset that helps creating interactive thematic maps
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var BBox, root, svgmap, _ref;
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+
+  BBox = (function() {
+
+    /*
+    	2D bounding box
+    */
+
+    function BBox(left, top, width, height) {
+      var s;
+      if (left == null) left = 0;
+      if (top == null) top = 0;
+      if (width == null) width = null;
+      if (height == null) height = null;
+      s = this;
+      if (width === null) {
+        s.xmin = Number.MAX_VALUE;
+        s.xmax = Number.MAX_VALUE * -1;
+      } else {
+        s.xmin = s.left = left;
+        s.xmax = s.right = left + width;
+        s.width = width;
+      }
+      if (height === null) {
+        s.ymin = Number.MAX_VALUE;
+        s.ymax = Number.MAX_VALUE * -1;
+      } else {
+        s.ymin = s.top = top;
+        s.ymax = s.bottom = height + top;
+        s.height = height;
+      }
+      return;
+    }
+
+    BBox.prototype.update = function(x, y) {
+      var s;
+      if (!(y != null)) {
+        y = x[1];
+        x = x[0];
+      }
+      s = this;
+      s.xmin = Math.min(s.xmin, x);
+      s.ymin = Math.min(s.ymin, y);
+      s.xmax = Math.max(s.xmax, x);
+      s.ymax = Math.max(s.ymax, y);
+      s.left = s.xmin;
+      s.top = s.ymin;
+      s.right = s.xmax;
+      s.bottom = s.ymax;
+      s.width = s.xmax - s.xmin;
+      s.height = s.ymax - s.ymin;
+      return this;
+    };
+
+    BBox.prototype.intersects = function(bbox) {
+      return bbox.left < s.right && bbox.right > s.left && bbox.top < s.bottom && bbox.bottom > s.top;
+    };
+
+    BBox.prototype.join = function(bbox) {
+      s.update(bbox.left, bbox.top);
+      s.update(bbox.right, bbox.bottom);
+      return this;
+    };
+
+    return BBox;
+
+  })();
+
+  svgmap.BBox = BBox;
+
+}).call(this);
+(function() {
+
+  /*
+      svgmap - a simple toolset that helps creating interactive thematic maps
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var LatLon, LonLat, root, svgmap, _ref;
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+
+  LonLat = (function() {
+
+    /*
+    	represents a Point
+    */
+
+    function LonLat(lon, lat) {
+      this.lon = lon;
+      this.lat = lat;
+    }
+
+    return LonLat;
+
+  })();
+
+  LatLon = (function() {
+
+    __extends(LatLon, LonLat);
+
+    function LatLon(lat, lon) {
+      LatLon.__super__.constructor.call(this, lon, lat);
+    }
+
+    return LatLon;
+
+  })();
+
+  svgmap.LonLat = LonLat;
+
+  svgmap.LatLon = LatLon;
+
+}).call(this);
+(function() {
+
+  /*
+      svgmap - a simple toolset that helps creating interactive thematic maps
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var Azimuthal, Balthasart, Behrmann, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+
+  __proj = svgmap.proj = {};
+
+  Function.prototype.bind = function(scope) {
+    var _function;
+    _function = this;
+    return function() {
+      return _function.apply(scope, arguments);
+    };
+  };
+
+  Proj = (function() {
+
+    function Proj(lon0, lat0) {
+      var me;
+      this.lon0 = lon0 != null ? lon0 : 0;
+      this.lat0 = lat0 != null ? lat0 : 0;
+      me = this;
+      me.PI = Math.PI;
+      me.HALFPI = me.PI * .5;
+      me.QUARTERPI = me.PI * .25;
+      me.RAD = me.PI / 180;
+      me.DEG = 180 / me.PI;
+      me.lam0 = me.rad(this.lon0);
+      me.phi0 = me.rad(this.lat0);
+    }
+
+    Proj.prototype.rad = function(a) {
+      return a * this.RAD;
+    };
+
+    Proj.prototype.deg = function(a) {
+      return a * this.DEG;
+    };
+
+    Proj.prototype.plot = function(polygon, truncate) {
+      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref2, _ref3;
+      if (truncate == null) truncate = true;
+      points = [];
+      ignore = true;
+      for (_i = 0, _len = polygon.length; _i < _len; _i++) {
+        _ref2 = polygon[_i], lon = _ref2[0], lat = _ref2[1];
+        vis = this._visible(lon, lat);
+        if (vis) ignore = false;
+        _ref3 = this.project(lon, lat), x = _ref3[0], y = _ref3[1];
+        if (!vis && truncate) {
+          points.push(this._truncate(x, y));
+        } else {
+          points.push([x, y]);
+        }
+      }
+      if (ignore) {
+        return null;
+      } else {
+        return [points];
+      }
+    };
+
+    return Proj;
+
+  })();
+
+  Cylindrical = (function() {
+
+    __extends(Cylindrical, Proj);
+
+    function Cylindrical() {
+      Cylindrical.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Base class for cylindrical projections
+    */
+
+    Cylindrical.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    Cylindrical.prototype.sea = function() {
+      var l0, lat, lon, o, p, s;
+      s = this;
+      p = s.project.bind(this);
+      o = [];
+      l0 = s.lon0;
+      s.lon0 = 0;
+      for (lon = -180; lon <= 180; lon++) {
+        o.push(p(lon, 90));
+      }
+      for (lat = 90; lat >= -90; lat--) {
+        o.push(p(180, lat));
+      }
+      for (lon = 180; lon >= -180; lon--) {
+        o.push(p(lon, -90));
+      }
+      for (lat = -90; lat <= 90; lat++) {
+        o.push(p(-180, lat));
+      }
+      s.lon0 = l0;
+      return o;
+    };
+
+    Cylindrical.prototype.world_bbox = function() {
+      var bbox, p, s, sea, _i, _len;
+      p = this.project.bind(this);
+      sea = this.sea();
+      bbox = new svgmap.BBox();
+      for (_i = 0, _len = sea.length; _i < _len; _i++) {
+        s = sea[_i];
+        bbox.update(s[0], s[1]);
+      }
+      return bbox;
+    };
+
+    Cylindrical.prototype.clon = function(lon) {
+      lon -= this.lon0;
+      if (lon < -180) {
+        lon += 360;
+      } else if (lon > 180) {
+        lon -= 360;
+      }
+      return lon;
+    };
+
+    return Cylindrical;
+
+  })();
+
+  Equirectangular = (function() {
+
+    __extends(Equirectangular, Cylindrical);
+
+    function Equirectangular() {
+      Equirectangular.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Equirectangular Projection aka Lonlat aka Plate Carree
+    */
+
+    Equirectangular.prototype.project = function(lon, lat) {
+      lon = this.clon(lon);
+      return [(lon + 180) * Math.cos(this.phi0) * 2.777, (lat * -1 + 90) * 2.7777];
+    };
+
+    return Equirectangular;
+
+  })();
+
+  __proj['lonlat'] = Equirectangular;
+
+  CEA = (function() {
+
+    __extends(CEA, Cylindrical);
+
+    function CEA() {
+      CEA.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Cylindrical Equal Area Projection
+    */
+
+    CEA.prototype.project = function(lon, lat) {
+      var lam, phi, x, y;
+      lam = this.rad(this.clon(lon));
+      phi = this.rad(lat * -1);
+      x = lam * Math.cos(this.phi0);
+      y = Math.sin(phi) / Math.cos(this.phi0);
+      return [x * 1000, y * 1000];
+    };
+
+    return CEA;
+
+  })();
+
+  __proj['cea'] = CEA;
+
+  GallPeters = (function() {
+
+    __extends(GallPeters, CEA);
+
+    /*
+    	Gall-Peters Projection
+    */
+
+    function GallPeters(lon0, lat0) {
+      GallPeters.__super__.constructor.call(this, lon0, 45);
+    }
+
+    return GallPeters;
+
+  })();
+
+  __proj['gallpeters'] = GallPeters;
+
+  HoboDyer = (function() {
+
+    __extends(HoboDyer, CEA);
+
+    /*
+    	Hobo-Dyer Projection
+    */
+
+    function HoboDyer(lon0, lat0) {
+      HoboDyer.__super__.constructor.call(this, lon0, 37.7);
+    }
+
+    return HoboDyer;
+
+  })();
+
+  __proj['hobodyer'] = HoboDyer;
+
+  Behrmann = (function() {
+
+    __extends(Behrmann, CEA);
+
+    /*
+    	Behrmann Projection
+    */
+
+    function Behrmann(lon0, lat0) {
+      Behrmann.__super__.constructor.call(this, lon0, 30);
+    }
+
+    return Behrmann;
+
+  })();
+
+  __proj['behrmann'] = Behrmann;
+
+  Balthasart = (function() {
+
+    __extends(Balthasart, CEA);
+
+    /*
+    	Balthasart Projection
+    */
+
+    function Balthasart(lon0, lat0) {
+      Balthasart.__super__.constructor.call(this, lon0, 50);
+    }
+
+    return Balthasart;
+
+  })();
+
+  __proj['balthasart'] = Balthasart;
+
+  PseudoCylindrical = (function() {
+
+    __extends(PseudoCylindrical, Cylindrical);
+
+    function PseudoCylindrical() {
+      PseudoCylindrical.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Base class for pseudo cylindrical projections
+    */
+
+    return PseudoCylindrical;
+
+  })();
+
+  NaturalEarth = (function() {
+
+    __extends(NaturalEarth, PseudoCylindrical);
+
+    /*
+    	Natural Earth Projection
+    	see here http://www.shadedrelief.com/NE_proj/
+    */
+
+    function NaturalEarth(lon0, lat0) {
+      var s;
+      NaturalEarth.__super__.constructor.call(this, lon0, lat0);
+      s = this;
+      s.A0 = 0.8707;
+      s.A1 = -0.131979;
+      s.A2 = -0.013791;
+      s.A3 = 0.003971;
+      s.A4 = -0.001529;
+      s.B0 = 1.007226;
+      s.B1 = 0.015085;
+      s.B2 = -0.044475;
+      s.B3 = 0.028874;
+      s.B4 = -0.005916;
+      s.C0 = s.B0;
+      s.C1 = 3 * s.B1;
+      s.C2 = 7 * s.B2;
+      s.C3 = 9 * s.B3;
+      s.C4 = 11 * s.B4;
+      s.EPS = 1e-11;
+      s.MAX_Y = 0.8707 * 0.52 * Math.PI;
+      return;
+    }
+
+    NaturalEarth.prototype.project = function(lon, lat) {
+      var lplam, lpphi, phi2, phi4, s, x, y;
+      s = this;
+      lplam = s.rad(s.clon(lon));
+      lpphi = s.rad(lat * -1);
+      phi2 = lpphi * lpphi;
+      phi4 = phi2 * phi2;
+      x = lplam * (s.A0 + phi2 * (s.A1 + phi2 * (s.A2 + phi4 * phi2 * (s.A3 + phi2 * s.A4)))) * 180 + 500;
+      y = lpphi * (s.B0 + phi2 * (s.B1 + phi4 * (s.B2 + s.B3 * phi2 + s.B4 * phi4))) * 180 + 270;
+      return [x, y];
+    };
+
+    return NaturalEarth;
+
+  })();
+
+  __proj['naturalearth'] = NaturalEarth;
+
+  Robinson = (function() {
+
+    __extends(Robinson, PseudoCylindrical);
+
+    /*
+    	Robinson Projection
+    */
+
+    function Robinson(lon0, lat0) {
+      var s;
+      Robinson.__super__.constructor.call(this, lon0, lat0);
+      s = this;
+      s.X = [1, -5.67239e-12, -7.15511e-05, 3.11028e-06, 0.9986, -0.000482241, -2.4897e-05, -1.33094e-06, 0.9954, -0.000831031, -4.4861e-05, -9.86588e-07, 0.99, -0.00135363, -5.96598e-05, 3.67749e-06, 0.9822, -0.00167442, -4.4975e-06, -5.72394e-06, 0.973, -0.00214869, -9.03565e-05, 1.88767e-08, 0.96, -0.00305084, -9.00732e-05, 1.64869e-06, 0.9427, -0.00382792, -6.53428e-05, -2.61493e-06, 0.9216, -0.00467747, -0.000104566, 4.8122e-06, 0.8962, -0.00536222, -3.23834e-05, -5.43445e-06, 0.8679, -0.00609364, -0.0001139, 3.32521e-06, 0.835, -0.00698325, -6.40219e-05, 9.34582e-07, 0.7986, -0.00755337, -5.00038e-05, 9.35532e-07, 0.7597, -0.00798325, -3.59716e-05, -2.27604e-06, 0.7186, -0.00851366, -7.0112e-05, -8.63072e-06, 0.6732, -0.00986209, -0.000199572, 1.91978e-05, 0.6213, -0.010418, 8.83948e-05, 6.24031e-06, 0.5722, -0.00906601, 0.000181999, 6.24033e-06, 0.5322, 0, 0, 0];
+      s.Y = [0, 0.0124, 3.72529e-10, 1.15484e-09, 0.062, 0.0124001, 1.76951e-08, -5.92321e-09, 0.124, 0.0123998, -7.09668e-08, 2.25753e-08, 0.186, 0.0124008, 2.66917e-07, -8.44523e-08, 0.248, 0.0123971, -9.99682e-07, 3.15569e-07, 0.31, 0.0124108, 3.73349e-06, -1.1779e-06, 0.372, 0.0123598, -1.3935e-05, 4.39588e-06, 0.434, 0.0125501, 5.20034e-05, -1.00051e-05, 0.4968, 0.0123198, -9.80735e-05, 9.22397e-06, 0.5571, 0.0120308, 4.02857e-05, -5.2901e-06, 0.6176, 0.0120369, -3.90662e-05, 7.36117e-07, 0.6769, 0.0117015, -2.80246e-05, -8.54283e-07, 0.7346, 0.0113572, -4.08389e-05, -5.18524e-07, 0.7903, 0.0109099, -4.86169e-05, -1.0718e-06, 0.8435, 0.0103433, -6.46934e-05, 5.36384e-09, 0.8936, 0.00969679, -6.46129e-05, -8.54894e-06, 0.9394, 0.00840949, -0.000192847, -4.21023e-06, 0.9761, 0.00616525, -0.000256001, -4.21021e-06, 1, 0, 0, 0];
+      s.NODES = 18;
+      s.FXC = 0.8487;
+      s.FYC = 1.3523;
+      s.C1 = 11.45915590261646417544;
+      s.RC1 = 0.08726646259971647884;
+      s.ONEEPS = 1.000001;
+      s.EPS = 1e-8;
+      return;
+    }
+
+    Robinson.prototype._poly = function(arr, offs, z) {
+      return arr[offs] + z * (arr[offs + 1] + z * (arr[offs + 2] + z * arr[offs + 3]));
+    };
+
+    Robinson.prototype.project = function(lon, lat) {
+      var i, lplam, lpphi, phi, s, x, y;
+      s = this;
+      lon = s.clon(lon);
+      lplam = s.rad(lon);
+      lpphi = s.rad(lat * -1);
+      phi = Math.abs(lpphi);
+      i = Math.floor(phi * s.C1);
+      if (i >= s.NODES) i = s.NODES - 1;
+      phi = s.deg(phi - s.RC1 * i);
+      i *= 4;
+      x = s._poly(s.X, i, phi) * s.FXC * lplam;
+      y = s._poly(s.Y, i, phi) * s.FYC;
+      if (lpphi < 0.0) y = -y;
+      return [x, y];
+    };
+
+    return Robinson;
+
+  })();
+
+  __proj['robinson'] = Robinson;
+
+  EckertIV = (function() {
+
+    __extends(EckertIV, PseudoCylindrical);
+
+    /*
+    	Eckert IV Projection
+    */
+
+    function EckertIV(lon0, lat0) {
+      var me;
+      if (lon0 == null) lon0 = 0.0;
+      if (lat0 == null) lat0 = 0;
+      EckertIV.__super__.constructor.call(this, lon0, lat0);
+      me = this;
+      me.C_x = .42223820031577120149;
+      me.C_y = 1.32650042817700232218;
+      me.RC_y = .75386330736002178205;
+      me.C_p = 3.57079632679489661922;
+      me.RC_p = .28004957675577868795;
+      me.EPS = 1e-7;
+      me.NITER = 6;
+    }
+
+    EckertIV.prototype.project = function(lon, lat) {
+      var V, c, i, lplam, lpphi, me, p, s, x, y;
+      me = this;
+      lplam = me.rad(me.clon(lon));
+      lpphi = me.rad(lat * -1);
+      p = me.C_p * Math.sin(lpphi);
+      V = lpphi * lpphi;
+      lpphi *= 0.895168 + V * (0.0218849 + V * 0.00826809);
+      i = me.NITER;
+      while (i > 0) {
+        c = Math.cos(lpphi);
+        s = Math.sin(lpphi);
+        V = (lpphi + s * (c + 2) - p) / (1 + c * (c + 2) - s * s);
+        lpphi -= V;
+        if (Math.abs(V) < me.EPS) break;
+        i -= 1;
+      }
+      if (i === 0) {
+        x = me.C_x * lplam;
+        y = lpphi < 0 ? -me.C_y : me.C_y;
+      } else {
+        x = me.C_x * lplam * (1 + Math.cos(lpphi));
+        y = me.C_y * Math.sin(lpphi);
+      }
+      return [x, y];
+    };
+
+    return EckertIV;
+
+  })();
+
+  __proj['eckert4'] = EckertIV;
+
+  Sinusoidal = (function() {
+
+    __extends(Sinusoidal, PseudoCylindrical);
+
+    function Sinusoidal() {
+      Sinusoidal.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Sinusoidal Projection
+    */
+
+    Sinusoidal.prototype.project = function(lon, lat) {
+      var lam, me, phi, x, y;
+      me = this;
+      lam = me.rad(me.clon(lon));
+      phi = me.rad(lat * -1);
+      x = lam * Math.cos(phi);
+      y = phi;
+      return [x, y];
+    };
+
+    return Sinusoidal;
+
+  })();
+
+  __proj['sinusoidal'] = Sinusoidal;
+
+  Mollweide = (function() {
+
+    __extends(Mollweide, PseudoCylindrical);
+
+    /*
+    	Mollweide Projection
+    */
+
+    function Mollweide(lon0, lat0, p, cx, cy, cp) {
+      var me, p2, r, sp;
+      if (lon0 == null) lon0 = 0;
+      if (lat0 == null) lat0 = 0;
+      if (p == null) p = 1.5707963267948966;
+      if (cx == null) cx = null;
+      if (cy == null) cy = null;
+      if (cp == null) cp = null;
+      Mollweide.__super__.constructor.call(this, lon0, lat0);
+      me = this;
+      me.MAX_ITER = 10;
+      me.TOLERANCE = 1e-7;
+      if (p != null) {
+        p2 = p + p;
+        sp = Math.sin(p);
+        r = Math.sqrt(Math.PI * 2.0 * sp / (p2 + Math.sin(p2)));
+        me.cx = 2 * r / Math.PI;
+        me.cy = r / sp;
+        me.cp = p2 + Math.sin(p2);
+      } else if ((cx != null) && (cy != null) && (typeof cz !== "undefined" && cz !== null)) {
+        me.cx = cx;
+        me.cy = cy;
+        me.cp = cp;
+      } else {
+        console.error('svgmap.proj.Mollweide: either p or cx,cy,cp must be defined');
+      }
+    }
+
+    Mollweide.prototype.project = function(lon, lat) {
+      var abs, i, k, lam, math, me, phi, v, x, y;
+      me = this;
+      math = Math;
+      abs = math.abs;
+      lam = me.rad(me.clon(lon));
+      phi = me.rad(lat);
+      k = me.cp * math.sin(phi);
+      i = me.MAX_ITER;
+      while (i !== 0) {
+        v = (phi + math.sin(phi) - k) / (1 + math.cos(phi));
+        phi -= v;
+        if (abs(v) < me.TOLERANCE) break;
+        i -= 1;
+      }
+      if (i === 0) {
+        phi = phi >= 0 ? me.HALFPI : -me.HALFPI;
+      } else {
+        phi *= 0.5;
+      }
+      x = me.cx * lam * math.cos(phi);
+      y = me.cy * math.sin(phi);
+      return [x, y * -1];
+    };
+
+    return Mollweide;
+
+  })();
+
+  __proj['mollweide'] = Mollweide;
+
+  WagnerIV = (function() {
+
+    __extends(WagnerIV, Mollweide);
+
+    /*
+    	Wagner IV Projection
+    */
+
+    function WagnerIV(lon0, lat0) {
+      if (lon0 == null) lon0 = 0;
+      if (lat0 == null) lat0 = 0;
+      WagnerIV.__super__.constructor.call(this, lon0, lat0, 1.0471975511965976);
+    }
+
+    return WagnerIV;
+
+  })();
+
+  __proj['wagner4'] = WagnerIV;
+
+  WagnerV = (function() {
+
+    __extends(WagnerV, Mollweide);
+
+    /*
+    	Wagner V Projection
+    */
+
+    function WagnerV(lon0, lat0) {
+      if (lon0 == null) lon0 = 0;
+      if (lat0 == null) lat0 = 0;
+      WagnerV.__super__.constructor.call(this, lon0, lat0, null, 0.90977, 1.65014, 3.00896);
+    }
+
+    return WagnerV;
+
+  })();
+
+  __proj['wagner5'] = WagnerV;
+
+  /*
+  class Vis4 extends Mollweide
+  	constructor: (lon0=0, lat0=0) ->
+  		# p=math.pi/3
+  		super lon0,lat0,Math.PI/2.5
+  
+  __proj['vis4'] = Vis4
+  */
+
+  Azimuthal = (function() {
+
+    __extends(Azimuthal, Proj);
+
+    /*
+    	Base class for azimuthal projections
+    */
+
+    function Azimuthal(lon0, lat0, rad) {
+      var me;
+      if (lon0 == null) lon0 = 0;
+      if (lat0 == null) lat0 = 0;
+      if (rad == null) rad = 1000;
+      Azimuthal.__super__.constructor.call(this, lon0, lat0);
+      me = this;
+      me.r = rad;
+      me.elevation0 = me.to_elevation(lat0);
+      me.azimuth0 = me.to_azimuth(lon0);
+    }
+
+    Azimuthal.prototype.to_elevation = function(lat) {
+      var me;
+      me = this;
+      return ((lat + 90) / 180) * me.PI - me.HALFPI;
+    };
+
+    Azimuthal.prototype.to_azimuth = function(lon) {
+      var me;
+      me = this;
+      return ((lon + 180) / 360) * me.PI * 2 - me.PI;
+    };
+
+    Azimuthal.prototype._visible = function(lon, lat) {
+      var azimuth, cosc, elevation, math, me;
+      me = this;
+      math = Math;
+      elevation = me.to_elevation(lat);
+      azimuth = me.to_azimuth(lon);
+      cosc = math.sin(elevation) * math.sin(me.elevation0) + math.cos(me.elevation0) * math.cos(elevation) * math.cos(azimuth - me.azimuth0);
+      return cosc >= 0.0;
+    };
+
+    Azimuthal.prototype._truncate = function(x, y) {
+      var math, r, theta, x1, y1;
+      math = Math;
+      r = this.r;
+      theta = math.atan2(y - r, x - r);
+      x1 = r + r * math.cos(theta);
+      y1 = r + r * math.sin(theta);
+      return [x1, y1];
+    };
+
+    Azimuthal.prototype.sea = function() {
+      var math, out, phi, r;
+      out = [];
+      r = this.r;
+      math = Math;
+      for (phi = 0; phi <= 360; phi++) {
+        out.push([r + math.cos(this.rad(phi)) * r, r + math.sin(this.rad(phi)) * r]);
+      }
+      return out;
+    };
+
+    Azimuthal.prototype.world_bbox = function() {
+      var r;
+      r = this.r;
+      return new svgmap.BBox(0, 0, r * 2, r * 2);
+    };
+
+    return Azimuthal;
+
+  })();
+
+  Orthographic = (function() {
+
+    __extends(Orthographic, Azimuthal);
+
+    function Orthographic() {
+      Orthographic.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Orthographic Azimuthal Projection
+    	
+    	implementation taken from http://www.mccarroll.net/snippets/svgworld/
+    */
+
+    Orthographic.prototype.project = function(lon, lat) {
+      var azimuth, elevation, math, me, x, xo, y, yo;
+      me = this;
+      math = Math;
+      elevation = me.to_elevation(lat);
+      azimuth = me.to_azimuth(lon);
+      xo = me.r * math.cos(elevation) * math.sin(azimuth - me.azimuth0);
+      yo = -me.r * (math.cos(me.elevation0) * math.sin(elevation) - math.sin(me.elevation0) * math.cos(elevation) * math.cos(azimuth - me.azimuth0));
+      x = me.r + xo;
+      y = me.r + yo;
+      return [x, y];
+    };
+
+    return Orthographic;
+
+  })();
+
+  __proj['ortho'] = Orthographic;
+
+  LAEA = (function() {
+
+    __extends(LAEA, Azimuthal);
+
+    /*
+    	Lambert Azimuthal Equal-Area Projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    */
+
+    function LAEA(lon0, lat0) {
+      if (lon0 == null) lon0 = 0;
+      if (lat0 == null) lat0 = 0;
+      LAEA.__super__.constructor.call(this, lon0, lat0);
+      this.scale = Math.sqrt(2) * 0.5;
+    }
+
+    LAEA.prototype.project = function(lon, lat) {
+      var cos, k, lam, math, phi, sin, x, xo, y, yo;
+      phi = this.rad(lat);
+      lam = this.rad(lon);
+      math = Math;
+      sin = math.sin;
+      cos = math.cos;
+      if (false && math.abs(lon - this.lon0) === 180) {
+        xo = this.r * 2;
+        yo = 0;
+      } else {
+        k = math.pow(2 / (1 + sin(this.phi0) * sin(phi) + cos(this.phi0) * cos(phi) * cos(lam - this.lam0)), .5);
+        k *= this.scale;
+        xo = this.r * k * cos(phi) * sin(lam - this.lam0);
+        yo = -this.r * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      }
+      x = this.r + xo;
+      y = this.r + yo;
+      return [x, y];
+    };
+
+    return LAEA;
+
+  })();
+
+  __proj['laea'] = LAEA;
+
+  Stereographic = (function() {
+
+    __extends(Stereographic, Azimuthal);
+
+    function Stereographic() {
+      Stereographic.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Stereographic projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    */
+
+    Stereographic.prototype.project = function(lon, lat) {
+      var cos, k, k0, lam, math, phi, sin, x, xo, y, yo;
+      phi = this.rad(lat);
+      lam = this.rad(lon);
+      math = Math;
+      sin = math.sin;
+      cos = math.cos;
+      k0 = 0.5;
+      k = 2 * k0 / (1 + sin(this.phi0) * sin(phi) + cos(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      xo = this.r * k * cos(phi) * sin(lam - this.lam0);
+      yo = -this.r * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      x = this.r + xo;
+      y = this.r + yo;
+      return [x, y];
+    };
+
+    return Stereographic;
+
+  })();
+
+  __proj['stereo'] = Stereographic;
+
+  Satellite = (function() {
+
+    __extends(Satellite, Azimuthal);
+
+    /*
+    	General perspective projection, aka Satellite projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    	
+    	up .. angle the camera is turned away from north (clockwise)
+    	tilt .. angle the camera is tilted
+    */
+
+    function Satellite(lon0, lat0, dist, up, tilt) {
+      var lat, lon, xmax, xmin, xy;
+      if (lon0 == null) lon0 = 0.0;
+      if (lat0 == null) lat0 = 0.0;
+      if (dist == null) dist = 3.45;
+      if (up == null) up = 35;
+      if (tilt == null) tilt = 0;
+      Satellite.__super__.constructor.call(this, 0, 0);
+      this.dist = dist;
+      this.up = this.rad(up);
+      this.tilt = this.rad(tilt);
+      this.scale = 1;
+      xmin = Number.MAX_VALUE;
+      xmax = Number.MAX_VALUE * -1;
+      for (lat = 0; lat <= 179; lat++) {
+        for (lon = 0; lon <= 360; lon++) {
+          xy = this.project(lon - 180, lat - 90);
+          xmin = Math.min(xy[0], xmin);
+          xmax = Math.max(xy[0], xmax);
+        }
+      }
+      this.scale = (this.r * 2) / (xmax - xmin);
+      Satellite.__super__.constructor.call(this, lon0, lat0);
+      return;
+    }
+
+    Satellite.prototype.project = function(lon, lat) {
+      var A, H, cos, cos_c, cos_tilt, cos_up, k, lam, math, phi, sin, sin_tilt, sin_up, x, xo, xt, y, yo, yt;
+      phi = this.rad(lat);
+      lam = this.rad(lon);
+      math = Math;
+      sin = math.sin;
+      cos = math.cos;
+      cos_c = sin(this.phi0) * sin(phi) + cos(this.phi0) * cos(phi) * cos(lam - this.lam0);
+      k = (this.dist - 1) / (this.dist - cos_c);
+      k = (this.dist - 1) / (this.dist - cos_c);
+      k *= this.scale;
+      xo = this.r * k * cos(phi) * sin(lam - this.lam0);
+      yo = -this.r * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      cos_up = cos(this.up);
+      sin_up = sin(this.up);
+      cos_tilt = cos(this.tilt);
+      sin_tilt = sin(this.tilt);
+      H = this.r * (this.dist - 1);
+      A = ((yo * cos_up + xo * sin_up) * sin(this.tilt / H)) + cos_tilt;
+      xt = (xo * cos_up - yo * sin_up) * cos(this.tilt / A);
+      yt = (yo * cos_up + xo * sin_up) / A;
+      x = this.r + xt;
+      y = this.r + yt;
+      return [x, y];
+    };
+
+    Satellite.prototype._visible = function(lon, lat) {
+      var azimuth, cosc, elevation, math;
+      elevation = this.to_elevation(lat);
+      azimuth = this.to_azimuth(lon);
+      math = Math;
+      cosc = math.sin(elevation) * math.sin(this.elevation0) + math.cos(this.elevation0) * math.cos(elevation) * math.cos(azimuth - this.azimuth0);
+      return cosc >= (1.0 / this.dist);
+    };
+
+    return Satellite;
+
+  })();
+
+  __proj['satellite'] = Satellite;
+
+}).call(this);
+(function() {
+
+  /*
+      svgmap - a simple toolset that helps creating interactive thematic maps
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var Balloon, IconMarker, LabelMarker, MapMarker, SVGMap, root, svgmap, _ref;
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+
+  svgmap.version = "0.1.0";
+
+  /*
+  Usage:
+  
+  svgmap = new SVGMap(container);
+  
+  // load a new map, will reset everything, so you need to setup the layers again
+  
+  svgmap.loadMap('map.svg', function(layers) {
+  	svgmap.addLayer('sea');
+  	svgmap.addLayer('countries','country_bg');
+  	svgmap.addLayer('graticule');
+  	svgmap.addLayer('countries');
+  });
+  
+  // setup layers
+  
+  // load data
+  */
+
+  SVGMap = (function() {
+
+    function SVGMap(container) {
+      var me;
+      me = this;
+      me.container = $(container);
+      me.layers = [];
+    }
+
+    SVGMap.prototype.loadMap = function(url, callback) {
+      var me;
+      me = this;
+      me.mapLoadCallback = callback;
+      return $.ajax({
+        src: url,
+        onSuccess: me.mapLoaded
+      });
+    };
+
+    SVGMap.prototype.addLayer = function(id, new_id) {
+      var layer;
+      if (new_id == null) new_id = id;
+      layer = {
+        id: new_id,
+        src: id,
+        paths: p
+      };
+      return this.layers.push(layer);
+    };
+
+    SVGMap.prototype.addMarker = function(marker) {};
+
+    SVGMap.prototype.display = function() {
+      /*
+      		finally displays the svgmap, needs to be called after
+      		layer and marker setup is finished
+      */
+    };
+
+    /*
+    	end of public API
+    */
+
+    SVGMap.prototype.mapLoaded = function(response) {};
+
+    SVGMap.prototype.render = function() {};
+
+    SVGMap.prototype.project = function(lon, lat) {};
+
+    return SVGMap;
+
+  })();
+
+  /*
+  Marker concept:
+  - markers have to be registered in SVGMap instance
+  - markers render their own content (output html code)
+  - SVGMap will position marker div over map
+  - marker will handle events
+  */
+
+  MapMarker = (function() {
+
+    function MapMarker(lonlat, content, offset) {
+      if (offset == null) offset = [0, 0];
+      /*
+      		lonlat - array [lon,lat]
+      		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
+      		offset - x and y offset for the marker
+      */
+    }
+
+    return MapMarker;
+
+  })();
+
+  LabelMarker = (function() {
+
+    __extends(LabelMarker, MapMarker);
+
+    /*
+    	a simple label
+    */
+
+    function LabelMarker(lonlat, label) {}
+
+    return LabelMarker;
+
+  })();
+
+  IconMarker = (function() {
+
+    __extends(IconMarker, MapMarker);
+
+    /*
+    */
+
+    function IconMarker(lonlat, icon) {}
+
+    return IconMarker;
+
+  })();
+
+  Balloon = (function() {
+
+    function Balloon() {}
+
+    /*
+    	opens a 'singleton' Balloon at a defined geo-location
+    	balloons may contain arbitrary html content
+    	balloons are 100% css-styled
+    */
+
+    return Balloon;
+
+  })();
+
+}).call(this);
+(function() {
+
+  /*
+      svgmap - a simple toolset that helps creating interactive thematic maps
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more detailme.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var View, root, _ref;
+
+  View = (function() {
+
+    /*
+    	2D coordinate transfomation
+    */
+
+    function View(bbox, width, height, padding) {
+      var me;
+      if (padding == null) padding = 0;
+      me = this;
+      me.bbox = bbox;
+      me.width = width;
+      me.padding = padding;
+      me.height = height;
+      me.scale = Math.min((width - padding * 2) / bbox.width, (height - padding * 2) / bbox.height);
+    }
+
+    View.prototype.project = function(x, y) {
+      var bbox, h, me, s, w;
+      if (!(y != null)) {
+        y = x[1];
+        x = x[0];
+      }
+      me = this;
+      s = me.scale;
+      bbox = me.bbox;
+      h = me.height;
+      w = me.width;
+      x = (x - bbox.left) * s + (w - bbox.width * s) * .5;
+      y = (y - bbox.top) * s + (h - bbox.height * s) * .5;
+      return [x, y];
+    };
+
+    return View;
+
+  })();
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  if ((_ref = root.svgmap) == null) root.svgmap = {};
+
+  root.svgmap.View = View;
+
+}).call(this);
