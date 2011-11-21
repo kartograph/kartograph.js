@@ -5,9 +5,10 @@
 <script src="lib/vendor/jquery.min.js"></script>
 <script src="lib/vendor/dat.gui.min.js"></script>
 
-<script src="lib/proj.js"></script>
+<!--<script src="lib/proj.js"></script>
 <script src="lib/bbox.js"></script>
-<script src="lib/view.js"></script>
+<script src="lib/view.js"></script>-->
+<script src="svgmap.js"></script>
 <style>
 canvas {
 	margin: 10px;
@@ -53,6 +54,7 @@ var GlobeOpt = function() {
 	this.lat0 = 0;
 	this.dist = 2;
 	this.up = 0;
+	this.proj = 'ortho';
 };
 
 var globeopt = new GlobeOpt();
@@ -91,7 +93,7 @@ $(function() {
 		sea = P.sea(), 
 		bbox = P.world_bbox(),
 		view,
-		ctx = createCanvas("p_"+p, w,h+20);
+		ctx = createCanvas("proj", w,h+20);
 		
 		var len = ctx.measureText(p.toUpperCase()).width;
 		ctx.fillText(p.toUpperCase(),(w-len)/2,h+20);
@@ -117,14 +119,19 @@ $(function() {
 			for (var l in lats) {
 				var lat_ = lats[l];
 				var line = [];
-				for (lon=-180+globeopt.lon0;lon<180+globeopt.lon0;lon++) {
-					if (P._visible(lon,lat_)) {
-						line.push(view.project(P.project(lon,lat_)));
-					}
+				for (lon=-180;lon<180;lon++) {
+					line.push([lon,lat_]);
 				}
-				for (i=0;i<line.length;i++) {
-					if (i==0) ctx.moveTo(line[i][0], line[i][1]);
-					else ctx.lineTo(line[i][0], line[i][1]);
+				for (var i=0;i<line.length-1;i++) {
+					p0 = line[i];
+					p1 = line[i+1];
+					d = P.clon ? Math.abs(P.clon(p0[0])-P.clon(p1[0])) : 0;
+					if (P._visible(p0[0],p0[1]) && P._visible(p1[0],p1[1]) && d < 100) {
+						p0 = view.project(P.project(p0[0],p0[1]));
+						p1 = view.project(P.project(p1[0],p1[1]));
+						ctx.moveTo(p0[0],p0[1]);
+						ctx.lineTo(p1[0],p1[1]);
+					}
 				}
 			}
 		}
@@ -133,15 +140,19 @@ $(function() {
 			for (var l in lons) {
 				var lon_ = lons[l];
 				var line = [];
-				for (lat=-90;lat<90;lat++) {
-					if (P._visible(lon_,lat)) {
-						line.push(view.project(P.project(lon_,lat)));
-					}
+				for (lat=-90+(lon % 90 == 0 ? 0 : grat);lat<90-(lon%90 == 0 ? 0 : grat)+1;lat++) {
+					line.push([lon_,lat]);
 				}
-				var r = Math.round;
-				for (i=0;i<line.length;i++) {
-					if (i==0) ctx.moveTo(line[i][0], (line[i][1]));
-					else ctx.lineTo(line[i][0], (line[i][1]));
+				for (var i=0;i<line.length-1;i++) {
+					p0 = line[i];
+					p1 = line[i+1];
+					d = P.clon ? Math.abs(P.clon(p0[0])-P.clon(p1[0])) : 0;
+					if (P._visible(p0[0],p0[1]) && P._visible(p1[0],p1[1]) && d < 100) {
+						p0 = view.project(P.project(p0[0],p0[1]));
+						p1 = view.project(P.project(p1[0],p1[1]));
+						ctx.moveTo(p0[0],p0[1]);
+						ctx.lineTo(p1[0],p1[1]);
+					}
 				}
 				//ctx.stroke();
 			}
@@ -151,14 +162,14 @@ $(function() {
 		ctx.lineWidth = 1;
 		ctx.beginPath();
 		
-		var cl,line,p0,p1;
+		var cl,line,p0,p1,d;
 		for (cl=0; cl<coastlines.length; cl++) {
 			line = coastlines[cl];
 			for (i=0;i<line.length-1;i++) {
 				p0 = line[i];
 				p1 = line[i+1];
-				if (P._visible(p0[0],p0[1]) && P._visible(p1[0],p1[1])) {
-					
+				d = P.clon ? Math.abs(P.clon(p0[0])-P.clon(p1[0])) : 0;
+				if (P._visible(p0[0],p0[1]) && P._visible(p1[0],p1[1]) && d < 100) {
 					p0 = view.project(P.project(p0[0],p0[1]));
 					p1 = view.project(P.project(p1[0],p1[1]));
 					ctx.moveTo(p0[0],p0[1]);
@@ -173,10 +184,8 @@ $(function() {
 	frame = 0,
 	
 	renderFrame = function() {
-		//for (p in svgmap.proj) {
-			showMap('satellite', coastlines);
-		//}	
-		//window.mozRequestAnimationFrame(renderFrame)
+		showMap(globeopt.proj, coastlines);
+		// Iterate over all controllers
 	};
 	
 	$.ajax({
@@ -190,14 +199,20 @@ $(function() {
 		context: this
 	});
 	
-	var gui = new dat.GUI();
+	window.gui = new dat.GUI();
 	gui.remember(globeopt);
 
-	gui.add(globeopt, 'lon0',-180,180).onChange(renderFrame);
-	gui.add(globeopt, 'lat0', -90,90).onChange(renderFrame);
-	gui.add(globeopt, 'dist', 1.01, 2).step(0.01).onChange(renderFrame);
-	gui.add(globeopt, 'up', -90,90).onChange(renderFrame);	
+	var proj = [];
+	for (var p in svgmap.proj) proj.push(p);
 	
+	gui.add(globeopt, 'proj', proj).onChange(renderFrame);
+	gui.add(globeopt, 'lon0',-180,180).step(1).onChange(renderFrame);
+	gui.add(globeopt, 'lat0', -90,90).onChange(renderFrame);
+	gui.add(globeopt, 'dist', 1.01, 10).step(0.01).onChange(renderFrame);
+	gui.add(globeopt, 'up', -180,180).onChange(renderFrame);	
+	
+// Choose from named values
+
 
 
 });

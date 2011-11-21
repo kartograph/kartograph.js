@@ -18,14 +18,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, __proj, _ref;
+  var Azimuthal, Balthasart, Behrmann, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  if ((_ref = root.svgmap) == null) root.svgmap = {};
+  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
 
-  __proj = root.svgmap.proj = {};
+  __proj = svgmap.proj = {};
 
   Function.prototype.bind = function(scope) {
     var _function;
@@ -108,6 +108,7 @@
       p = s.project.bind(this);
       o = [];
       l0 = s.lon0;
+      s.lon0 = 0;
       for (lon = -180; lon <= 180; lon++) {
         o.push(p(lon, 90));
       }
@@ -118,19 +119,21 @@
         o.push(p(lon, -90));
       }
       for (lat = -90; lat <= 90; lat++) {
-        o.push(p(180, lat));
+        o.push(p(-180, lat));
       }
+      s.lon0 = l0;
       return o;
     };
 
     Cylindrical.prototype.world_bbox = function() {
-      var bbox, p;
+      var bbox, p, s, sea, _i, _len;
       p = this.project.bind(this);
+      sea = this.sea();
       bbox = new svgmap.BBox();
-      bbox.update(p(-180, 0));
-      bbox.update(p(180, 0));
-      bbox.update(p(0, 90));
-      bbox.update(p(0, -90));
+      for (_i = 0, _len = sea.length; _i < _len; _i++) {
+        s = sea[_i];
+        bbox.update(s[0], s[1]);
+      }
       return bbox;
     };
 
@@ -322,7 +325,7 @@
     NaturalEarth.prototype.project = function(lon, lat) {
       var lplam, lpphi, phi2, phi4, s, x, y;
       s = this;
-      lplam = s.rad(lon);
+      lplam = s.rad(s.clon(lon));
       lpphi = s.rad(lat * -1);
       phi2 = lpphi * lpphi;
       phi4 = phi2 * phi2;
@@ -368,6 +371,7 @@
     Robinson.prototype.project = function(lon, lat) {
       var i, lplam, lpphi, phi, s, x, y;
       s = this;
+      lon = s.clon(lon);
       lplam = s.rad(lon);
       lpphi = s.rad(lat * -1);
       phi = Math.abs(lpphi);
@@ -378,7 +382,7 @@
       x = s._poly(s.X, i, phi) * s.FXC * lplam;
       y = s._poly(s.Y, i, phi) * s.FYC;
       if (lpphi < 0.0) y = -y;
-      return [x * 180 + 500, y * 180 + 270];
+      return [x, y];
     };
 
     return Robinson;
@@ -413,7 +417,7 @@
     EckertIV.prototype.project = function(lon, lat) {
       var V, c, i, lplam, lpphi, me, p, s, x, y;
       me = this;
-      lplam = me.rad(lon);
+      lplam = me.rad(me.clon(lon));
       lpphi = me.rad(lat * -1);
       p = me.C_p * Math.sin(lpphi);
       V = lpphi * lpphi;
@@ -458,7 +462,7 @@
     Sinusoidal.prototype.project = function(lon, lat) {
       var lam, me, phi, x, y;
       me = this;
-      lam = me.rad(lon);
+      lam = me.rad(me.clon(lon));
       phi = me.rad(lat * -1);
       x = lam * Math.cos(phi);
       y = phi;
@@ -512,7 +516,7 @@
       me = this;
       math = Math;
       abs = math.abs;
-      lam = me.rad(lon);
+      lam = me.rad(me.clon(lon));
       phi = me.rad(lat);
       k = me.cp * math.sin(phi);
       i = me.MAX_ITER;

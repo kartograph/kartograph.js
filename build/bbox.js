@@ -18,7 +18,11 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var BBox, root, _ref;
+  var BBox, root, svgmap, _ref;
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
 
   BBox = (function() {
 
@@ -86,10 +90,6 @@
 
   })();
 
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  if ((_ref = root.svgmap) == null) root.svgmap = {};
-
-  root.svgmap.BBox = BBox;
+  svgmap.BBox = BBox;
 
 }).call(this);

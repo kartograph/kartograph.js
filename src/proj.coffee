@@ -17,10 +17,9 @@
 ###
 
 root = (exports ? this)	
-root.svgmap ?= {}
+svgmap = root.svgmap ?= {}
 
-__proj = root.svgmap.proj = {}
-
+__proj = svgmap.proj = {}
 
 Function::bind = (scope) ->
 	_function = @
@@ -77,19 +76,20 @@ class Cylindrical extends Proj
 		p = s.project.bind @
 		o = []
 		l0 = s.lon0
+		s.lon0 = 0
 		o.push(p(lon,90)) for lon in [-180..180] 
 		o.push(p(180,lat)) for lat in [90..-90] 
 		o.push(p(lon,-90)) for lon in [180..-180] 
-		o.push(p(180,lat)) for lat in [-90..90]
+		o.push(p(-180,lat)) for lat in [-90..90]
+		s.lon0 = l0
 		o
 		
 	world_bbox: ->
 		p = @project.bind @
+		sea = @sea()
 		bbox = new svgmap.BBox()
-		bbox.update(p(-180,0))
-		bbox.update(p(180,0))
-		bbox.update(p(0, 90))
-		bbox.update(p(0, -90))
+		for s in sea
+			bbox.update(s[0],s[1])
 		bbox
 		
 	clon: (lon) ->
@@ -205,7 +205,7 @@ class NaturalEarth extends PseudoCylindrical
 		
 	project: (lon, lat) ->
 		s = @
-		lplam = s.rad(lon)
+		lplam = s.rad(s.clon(lon))
 		lpphi = s.rad(lat*-1)
 		phi2 = lpphi * lpphi
 		phi4 = phi2 * phi2
@@ -241,6 +241,8 @@ class Robinson extends PseudoCylindrical
 
 	project: (lon, lat) ->
 		s = @
+		lon = s.clon(lon)
+		
 		lplam = s.rad lon
 		lpphi = s.rad lat*-1
 		phi = Math.abs lpphi
@@ -253,7 +255,7 @@ class Robinson extends PseudoCylindrical
 		y = s._poly(s.Y, i, phi) * s.FYC;
 		if lpphi < 0.0
 			y = -y
-		[x * 180 + 500,y*180+270]
+		[x ,y]
 
 __proj['robinson'] = Robinson
 
@@ -275,7 +277,7 @@ class EckertIV extends PseudoCylindrical
 	
 	project: (lon, lat) ->
 		me = @
-		lplam = me.rad(lon)
+		lplam = me.rad(me.clon(lon))
 		lpphi = me.rad(lat*-1)
 		
 		p = me.C_p * Math.sin(lpphi)
@@ -309,7 +311,7 @@ class Sinusoidal extends PseudoCylindrical
 	###
 	project: (lon, lat) ->
 		me = @
-		lam = me.rad(lon)
+		lam = me.rad(me.clon(lon))
 		phi = me.rad(lat*-1)
 		x = lam * Math.cos(phi)
 		y = phi
@@ -346,7 +348,7 @@ class Mollweide extends PseudoCylindrical
 		me = @
 		math = Math
 		abs = math.abs
-		lam = me.rad(lon)
+		lam = me.rad(me.clon(lon))
 		phi = me.rad(lat)
 		
 		k = me.cp * math.sin(phi)
@@ -362,7 +364,7 @@ class Mollweide extends PseudoCylindrical
 			phi = if phi>=0 then me.HALFPI else -me.HALFPI
 		else
 			phi *= 0.5
-		
+			
 		x = me.cx * lam * math.cos(phi)
 		y = me.cy * math.sin(phi)
 		[x,y*-1]
@@ -507,7 +509,6 @@ class LAEA extends Azimuthal
 		
 		x = @r + xo
 		y = @r + yo
-		
 		[x,y]
 
 __proj['laea'] = LAEA
@@ -536,7 +537,6 @@ class Stereographic extends Azimuthal
 		
 		x = @r + xo
 		y = @r + yo
-		
 		[x,y]
 
 __proj['stereo'] = Stereographic
@@ -614,4 +614,4 @@ class Satellite extends Azimuthal
 		cosc >= (1.0/@dist)
 
 __proj['satellite'] = Satellite
-###
+

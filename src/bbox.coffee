@@ -16,6 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
 
+root = (exports ? this)	
+svgmap = root.svgmap ?= {}
+
 class BBox
 	###
 	2D bounding box
@@ -64,6 +67,4 @@ class BBox
 		s.update(bbox.right, bbox.bottom)
 		@
 		
-root = (exports ? this)	
-root.svgmap ?= {}
-root.svgmap.BBox = BBox
+svgmap.BBox = BBox
