@@ -29,8 +29,10 @@ Function::bind = (scope) ->
 
 class Proj
 	
-	constructor: (@lon0 = 0, @lat0 = 0) ->
+	constructor: (opts) ->
 		me = @
+		me.lon0 = opts.lon0 ? 0
+		me.lat0 = opts.lat0 ? 0
 		me.PI = Math.PI
 		me.HALFPI = me.PI * .5
 		me.QUARTERPI = me.PI * .25
@@ -58,8 +60,20 @@ class Proj
 			else
 				points.push [x,y]
 		if ignore then null else [points]
-	
 
+	
+Proj.fromXML = (xml) ->
+	###
+	reconstructs a projection from xml description
+	###
+	console.log(xml)
+	id = xml.getAttribute('id')
+	console.log id
+	console.log svgmap.proj[id]
+	"foo"
+	
+svgmap.Proj = Proj
+	
 # ---------------------------------
 # Family of Cylindrical Projecitons
 # ---------------------------------
@@ -140,8 +154,9 @@ class HoboDyer extends CEA
 	###
 	Hobo-Dyer Projection
 	###
-	constructor: (lon0, lat0) ->
-		super lon0,37.7
+	constructor: (opts) ->
+		opts.lat0 = 37.7
+		super opts
 
 __proj['hobodyer'] = HoboDyer
 
@@ -150,8 +165,9 @@ class Behrmann extends CEA
 	###
 	Behrmann Projection
 	###
-	constructor: (lon0, lat0) ->
-		super lon0,30
+	constructor: (opts) ->
+		opts.lat0 = 30
+		super opts
 		
 __proj['behrmann'] = Behrmann
 
@@ -160,8 +176,9 @@ class Balthasart extends CEA
 	###
 	Balthasart Projection
 	###
-	constructor: (lon0, lat0) ->
-		super lon0,50
+	constructor: (opts) ->
+		opts.lat0 = 50
+		super opts
 	
 __proj['balthasart'] = Balthasart
 
@@ -181,8 +198,8 @@ class NaturalEarth extends PseudoCylindrical
 	Natural Earth Projection
 	see here http://www.shadedrelief.com/NE_proj/
 	###
-	constructor: (lon0, lat0) ->
-		super lon0,lat0
+	constructor: (opts) ->
+		super opts
 		s = @
 		s.A0 = 0.8707
 		s.A1 = -0.131979
@@ -221,8 +238,8 @@ class Robinson extends PseudoCylindrical
 	###
 	Robinson Projection
 	###
-	constructor: (lon0, lat0) ->
-		super lon0,lat0
+	constructor: (opts) ->
+		super opts
 		s = @
 		
 		s.X = [1, -5.67239e-12, -7.15511e-05, 3.11028e-06,  0.9986, -0.000482241, -2.4897e-05, -1.33094e-06, 0.9954, -0.000831031, -4.4861e-05, -9.86588e-07, 0.99, -0.00135363, -5.96598e-05, 3.67749e-06, 0.9822, -0.00167442, -4.4975e-06, -5.72394e-06, 0.973, -0.00214869, -9.03565e-05, 1.88767e-08, 0.96, -0.00305084, -9.00732e-05, 1.64869e-06, 0.9427, -0.00382792, -6.53428e-05, -2.61493e-06, 0.9216, -0.00467747, -0.000104566, 4.8122e-06, 0.8962, -0.00536222, -3.23834e-05, -5.43445e-06, 0.8679, -0.00609364, -0.0001139, 3.32521e-06, 0.835, -0.00698325, -6.40219e-05, 9.34582e-07, 0.7986, -0.00755337, -5.00038e-05, 9.35532e-07, 0.7597, -0.00798325, -3.59716e-05, -2.27604e-06, 0.7186, -0.00851366, -7.0112e-05, -8.63072e-06, 0.6732, -0.00986209, -0.000199572, 1.91978e-05, 0.6213, -0.010418, 8.83948e-05, 6.24031e-06, 0.5722, -0.00906601, 0.000181999, 6.24033e-06, 0.5322,  0,  0,  0]
@@ -264,8 +281,8 @@ class EckertIV extends PseudoCylindrical
 	###
 	Eckert IV Projection
 	###
-	constructor: (lon0=0.0, lat0=0) ->
-		super lon0,lat0
+	constructor: (opts) ->
+		super opts
 		me = @
 		me.C_x = .42223820031577120149
 		me.C_y = 1.32650042817700232218
@@ -324,8 +341,8 @@ class Mollweide extends PseudoCylindrical
 	###
 	Mollweide Projection
 	###
-	constructor: (lon0=0, lat0=0, p=1.5707963267948966, cx=null, cy=null, cp=null) ->
-		super lon0,lat0
+	constructor: (opts, p=1.5707963267948966, cx=null, cy=null, cp=null) ->
+		super opts
 		me = @
 		me.MAX_ITER = 10
 		me.TOLERANCE = 1e-7
@@ -376,9 +393,9 @@ class WagnerIV extends Mollweide
 	###
 	Wagner IV Projection
 	###
-	constructor: (lon0=0, lat0=0) ->
+	constructor: (opts) ->
 		# p=math.pi/3
-		super lon0,lat0,1.0471975511965976
+		super opts, 1.0471975511965976
 
 __proj['wagner4'] = WagnerIV
 
@@ -387,9 +404,9 @@ class WagnerV extends Mollweide
 	###
 	Wagner V Projection
 	###
-	constructor: (lon0=0, lat0=0) ->
+	constructor: (opts) ->
 		# p=math.pi/3
-		super lon0,lat0,null,0.90977,1.65014,3.00896
+		super opts,null,0.90977,1.65014,3.00896
 
 __proj['wagner5'] = WagnerV
 
@@ -412,12 +429,12 @@ class Azimuthal extends Proj
 	###
 	Base class for azimuthal projections
 	###
-	constructor: (lon0=0, lat0=0, rad=1000) ->
-		super lon0,lat0
+	constructor: (opts, rad=1000) ->
+		super opts
 		me = @
 		me.r = rad
-		me.elevation0 = me.to_elevation(lat0)
-		me.azimuth0 = me.to_azimuth(lon0)
+		me.elevation0 = me.to_elevation(me.lat0)
+		me.azimuth0 = me.to_azimuth(me.lon0)
 
 	to_elevation: (lat) ->
 		me = @
@@ -485,8 +502,8 @@ class LAEA extends Azimuthal
 	implementation taken from 
 	Snyder, Map projections - A working manual
 	###
-	constructor: (lon0=0, lat0=0) ->
-		super lon0,lat0
+	constructor: (opts) ->
+		super opts
 		@scale = Math.sqrt(2)*0.5	
 		
 		
@@ -553,11 +570,11 @@ class Satellite extends Azimuthal
 	up .. angle the camera is turned away from north (clockwise)
 	tilt .. angle the camera is tilted 
 	###
-	constructor: (lon0=0.0,lat0=0.0,dist=3.45,up=35, tilt=0) ->
-		super 0,0
-		@dist = dist
-		@up = @rad(up)
-		@tilt = @rad(tilt)
+	constructor: (opts) ->
+		super { lon0: 0, lat0: 0 }
+		@dist = opts.dist ? 3
+		@up = @rad(opts.up ? 0)
+		@tilt = @rad(opts.tilt ? 0)
 		
 		@scale = 1
 		xmin = Number.MAX_VALUE
@@ -568,7 +585,7 @@ class Satellite extends Azimuthal
 				xmin = Math.min(xy[0], xmin)
 				xmax = Math.max(xy[0], xmax)
 		@scale = (@r*2)/(xmax-xmin) 
-		super lon0,lat0
+		super opts
 		return
 		
 		

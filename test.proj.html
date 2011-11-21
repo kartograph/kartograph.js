@@ -2,8 +2,8 @@
 <html>
 <head>
 <title>proj.js test</title>
-<script src="lib/vendor/jquery.min.js"></script>
-<script src="lib/vendor/dat.gui.min.js"></script>
+<script src="lib/jquery.min.js"></script>
+<script src="lib/dat.gui.min.js"></script>
 
 <!--<script src="lib/proj.js"></script>
 <script src="lib/bbox.js"></script>
@@ -79,7 +79,7 @@ $(function() {
 	
 	showMap = function(p, coastlines) {
 	
-		P = new svgmap.proj[p](globeopt.lon0,globeopt.lat0,globeopt.dist, globeopt.up);
+		P = new svgmap.proj[p](globeopt);
 		xy = P.project(13,14);
 		if (isNaN(xy[0]) || isNaN(xy[1])) {
 			console.error(p, P, xy);

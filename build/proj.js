@@ -37,11 +37,11 @@
 
   Proj = (function() {
 
-    function Proj(lon0, lat0) {
-      var me;
-      this.lon0 = lon0 != null ? lon0 : 0;
-      this.lat0 = lat0 != null ? lat0 : 0;
+    function Proj(opts) {
+      var me, _ref2, _ref3;
       me = this;
+      me.lon0 = (_ref2 = opts.lon0) != null ? _ref2 : 0;
+      me.lat0 = (_ref3 = opts.lat0) != null ? _ref3 : 0;
       me.PI = Math.PI;
       me.HALFPI = me.PI * .5;
       me.QUARTERPI = me.PI * .25;
@@ -85,6 +85,20 @@
     return Proj;
 
   })();
+
+  Proj.fromXML = function(xml) {
+    /*
+    	reconstructs a projection from xml description
+    */
+    var id;
+    console.log(xml);
+    id = xml.getAttribute('id');
+    console.log(id);
+    console.log(svgmap.proj[id]);
+    return "foo";
+  };
+
+  svgmap.Proj = Proj;
 
   Cylindrical = (function() {
 
@@ -227,8 +241,9 @@
     	Hobo-Dyer Projection
     */
 
-    function HoboDyer(lon0, lat0) {
-      HoboDyer.__super__.constructor.call(this, lon0, 37.7);
+    function HoboDyer(opts) {
+      opts.lat0 = 37.7;
+      HoboDyer.__super__.constructor.call(this, opts);
     }
 
     return HoboDyer;
@@ -245,8 +260,9 @@
     	Behrmann Projection
     */
 
-    function Behrmann(lon0, lat0) {
-      Behrmann.__super__.constructor.call(this, lon0, 30);
+    function Behrmann(opts) {
+      opts.lat0 = 30;
+      Behrmann.__super__.constructor.call(this, opts);
     }
 
     return Behrmann;
@@ -263,8 +279,9 @@
     	Balthasart Projection
     */
 
-    function Balthasart(lon0, lat0) {
-      Balthasart.__super__.constructor.call(this, lon0, 50);
+    function Balthasart(opts) {
+      opts.lat0 = 50;
+      Balthasart.__super__.constructor.call(this, opts);
     }
 
     return Balthasart;
@@ -298,9 +315,9 @@
     	see here http://www.shadedrelief.com/NE_proj/
     */
 
-    function NaturalEarth(lon0, lat0) {
+    function NaturalEarth(opts) {
       var s;
-      NaturalEarth.__super__.constructor.call(this, lon0, lat0);
+      NaturalEarth.__super__.constructor.call(this, opts);
       s = this;
       s.A0 = 0.8707;
       s.A1 = -0.131979;
@@ -348,9 +365,9 @@
     	Robinson Projection
     */
 
-    function Robinson(lon0, lat0) {
+    function Robinson(opts) {
       var s;
-      Robinson.__super__.constructor.call(this, lon0, lat0);
+      Robinson.__super__.constructor.call(this, opts);
       s = this;
       s.X = [1, -5.67239e-12, -7.15511e-05, 3.11028e-06, 0.9986, -0.000482241, -2.4897e-05, -1.33094e-06, 0.9954, -0.000831031, -4.4861e-05, -9.86588e-07, 0.99, -0.00135363, -5.96598e-05, 3.67749e-06, 0.9822, -0.00167442, -4.4975e-06, -5.72394e-06, 0.973, -0.00214869, -9.03565e-05, 1.88767e-08, 0.96, -0.00305084, -9.00732e-05, 1.64869e-06, 0.9427, -0.00382792, -6.53428e-05, -2.61493e-06, 0.9216, -0.00467747, -0.000104566, 4.8122e-06, 0.8962, -0.00536222, -3.23834e-05, -5.43445e-06, 0.8679, -0.00609364, -0.0001139, 3.32521e-06, 0.835, -0.00698325, -6.40219e-05, 9.34582e-07, 0.7986, -0.00755337, -5.00038e-05, 9.35532e-07, 0.7597, -0.00798325, -3.59716e-05, -2.27604e-06, 0.7186, -0.00851366, -7.0112e-05, -8.63072e-06, 0.6732, -0.00986209, -0.000199572, 1.91978e-05, 0.6213, -0.010418, 8.83948e-05, 6.24031e-06, 0.5722, -0.00906601, 0.000181999, 6.24033e-06, 0.5322, 0, 0, 0];
       s.Y = [0, 0.0124, 3.72529e-10, 1.15484e-09, 0.062, 0.0124001, 1.76951e-08, -5.92321e-09, 0.124, 0.0123998, -7.09668e-08, 2.25753e-08, 0.186, 0.0124008, 2.66917e-07, -8.44523e-08, 0.248, 0.0123971, -9.99682e-07, 3.15569e-07, 0.31, 0.0124108, 3.73349e-06, -1.1779e-06, 0.372, 0.0123598, -1.3935e-05, 4.39588e-06, 0.434, 0.0125501, 5.20034e-05, -1.00051e-05, 0.4968, 0.0123198, -9.80735e-05, 9.22397e-06, 0.5571, 0.0120308, 4.02857e-05, -5.2901e-06, 0.6176, 0.0120369, -3.90662e-05, 7.36117e-07, 0.6769, 0.0117015, -2.80246e-05, -8.54283e-07, 0.7346, 0.0113572, -4.08389e-05, -5.18524e-07, 0.7903, 0.0109099, -4.86169e-05, -1.0718e-06, 0.8435, 0.0103433, -6.46934e-05, 5.36384e-09, 0.8936, 0.00969679, -6.46129e-05, -8.54894e-06, 0.9394, 0.00840949, -0.000192847, -4.21023e-06, 0.9761, 0.00616525, -0.000256001, -4.21021e-06, 1, 0, 0, 0];
@@ -399,11 +416,9 @@
     	Eckert IV Projection
     */
 
-    function EckertIV(lon0, lat0) {
+    function EckertIV(opts) {
       var me;
-      if (lon0 == null) lon0 = 0.0;
-      if (lat0 == null) lat0 = 0;
-      EckertIV.__super__.constructor.call(this, lon0, lat0);
+      EckertIV.__super__.constructor.call(this, opts);
       me = this;
       me.C_x = .42223820031577120149;
       me.C_y = 1.32650042817700232218;
@@ -483,15 +498,13 @@
     	Mollweide Projection
     */
 
-    function Mollweide(lon0, lat0, p, cx, cy, cp) {
+    function Mollweide(opts, p, cx, cy, cp) {
       var me, p2, r, sp;
-      if (lon0 == null) lon0 = 0;
-      if (lat0 == null) lat0 = 0;
       if (p == null) p = 1.5707963267948966;
       if (cx == null) cx = null;
       if (cy == null) cy = null;
       if (cp == null) cp = null;
-      Mollweide.__super__.constructor.call(this, lon0, lat0);
+      Mollweide.__super__.constructor.call(this, opts);
       me = this;
       me.MAX_ITER = 10;
       me.TOLERANCE = 1e-7;
@@ -550,10 +563,8 @@
     	Wagner IV Projection
     */
 
-    function WagnerIV(lon0, lat0) {
-      if (lon0 == null) lon0 = 0;
-      if (lat0 == null) lat0 = 0;
-      WagnerIV.__super__.constructor.call(this, lon0, lat0, 1.0471975511965976);
+    function WagnerIV(opts) {
+      WagnerIV.__super__.constructor.call(this, opts, 1.0471975511965976);
     }
 
     return WagnerIV;
@@ -570,10 +581,8 @@
     	Wagner V Projection
     */
 
-    function WagnerV(lon0, lat0) {
-      if (lon0 == null) lon0 = 0;
-      if (lat0 == null) lat0 = 0;
-      WagnerV.__super__.constructor.call(this, lon0, lat0, null, 0.90977, 1.65014, 3.00896);
+    function WagnerV(opts) {
+      WagnerV.__super__.constructor.call(this, opts, null, 0.90977, 1.65014, 3.00896);
     }
 
     return WagnerV;
@@ -599,16 +608,14 @@
     	Base class for azimuthal projections
     */
 
-    function Azimuthal(lon0, lat0, rad) {
+    function Azimuthal(opts, rad) {
       var me;
-      if (lon0 == null) lon0 = 0;
-      if (lat0 == null) lat0 = 0;
       if (rad == null) rad = 1000;
-      Azimuthal.__super__.constructor.call(this, lon0, lat0);
+      Azimuthal.__super__.constructor.call(this, opts);
       me = this;
       me.r = rad;
-      me.elevation0 = me.to_elevation(lat0);
-      me.azimuth0 = me.to_azimuth(lon0);
+      me.elevation0 = me.to_elevation(me.lat0);
+      me.azimuth0 = me.to_azimuth(me.lon0);
     }
 
     Azimuthal.prototype.to_elevation = function(lat) {
@@ -708,10 +715,8 @@
     	Snyder, Map projections - A working manual
     */
 
-    function LAEA(lon0, lat0) {
-      if (lon0 == null) lon0 = 0;
-      if (lat0 == null) lat0 = 0;
-      LAEA.__super__.constructor.call(this, lon0, lat0);
+    function LAEA(opts) {
+      LAEA.__super__.constructor.call(this, opts);
       this.scale = Math.sqrt(2) * 0.5;
     }
 
@@ -793,17 +798,15 @@
     	tilt .. angle the camera is tilted
     */
 
-    function Satellite(lon0, lat0, dist, up, tilt) {
-      var lat, lon, xmax, xmin, xy;
-      if (lon0 == null) lon0 = 0.0;
-      if (lat0 == null) lat0 = 0.0;
-      if (dist == null) dist = 3.45;
-      if (up == null) up = 35;
-      if (tilt == null) tilt = 0;
-      Satellite.__super__.constructor.call(this, 0, 0);
-      this.dist = dist;
-      this.up = this.rad(up);
-      this.tilt = this.rad(tilt);
+    function Satellite(opts) {
+      var lat, lon, xmax, xmin, xy, _ref2, _ref3, _ref4;
+      Satellite.__super__.constructor.call(this, {
+        lon0: 0,
+        lat0: 0
+      });
+      this.dist = (_ref2 = opts.dist) != null ? _ref2 : 3;
+      this.up = this.rad((_ref3 = opts.up) != null ? _ref3 : 0);
+      this.tilt = this.rad((_ref4 = opts.tilt) != null ? _ref4 : 0);
       this.scale = 1;
       xmin = Number.MAX_VALUE;
       xmax = Number.MAX_VALUE * -1;
@@ -815,7 +818,7 @@
         }
       }
       this.scale = (this.r * 2) / (xmax - xmin);
-      Satellite.__super__.constructor.call(this, lon0, lat0);
+      Satellite.__super__.constructor.call(this, opts);
       return;
     }
 

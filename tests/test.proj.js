@@ -8,7 +8,7 @@ var svgmap = exports.svgmap = require('../svgmap.js').svgmap;
 for (var p in svgmap.proj) {
 	try {
 	
-		var proj = new svgmap.proj[p](10, 40);
+		var proj = new svgmap.proj[p]({ lon0: 10, lat0: 40 });
 		var xy = proj.project(0,20);
 		if (isNaN(xy[0]) || isNaN(xy[1])) {
 			throw "projection is NaN "+xy;	
