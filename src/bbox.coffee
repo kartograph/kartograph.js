@@ -63,8 +63,10 @@ class BBox
 		bbox.left < s.right and bbox.right > s.left and bbox.top < s.bottom and bbox.bottom > s.top
 				
 	join: (bbox) ->
+		s = @
 		s.update(bbox.left, bbox.top)
 		s.update(bbox.right, bbox.bottom)
 		@
 		
 svgmap.BBox = BBox
+

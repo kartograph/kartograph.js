@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>svgmap test</title>
+<script src="../lib/jquery.min.js"></script>
+<script src="../lib/dat.gui.min.js"></script>
+<script src="../svgmap.js"></script>
+
+<script>
+
+
+	$(function() {
+		
+		
+		window.mymap = new svgmap.SVGMap('#container');
+		
+		console.log(mymap);
+		mymap.loadMap('FRA.svg', function() {
+			console.log('load complete');
+			console.log(mymap);
+		});
+		
+		/*
+	
+		$.ajax({
+			url: '../misc/coastline/coastline.json',
+			success: function(coastlines) {
+				window.coastlines = coastlines;
+				//window.mozRequestAnimationFrame(renderFrame);
+				//animLoop(renderFrame, this );
+				renderFrame();
+			},
+			context: this
+		});
+		
+		*/
+	
+	
+	});
+</script>
+<style>
+	body { background: #eee }
+	
+	#container {
+		margin: 30px;
+		border: 2px solid #aaa;
+		background: #fff;
+		width: 80%;
+		height: 550px;
+		box-shadow: 3px 3px 3px #ddd;
+	}
+</style>
+</head>
+<body>
+	<div id="container">
+	
+	</div>
+</body>
+</html>

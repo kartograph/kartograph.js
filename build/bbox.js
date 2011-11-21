@@ -81,6 +81,8 @@
     };
 
     BBox.prototype.join = function(bbox) {
+      var s;
+      s = this;
       s.update(bbox.left, bbox.top);
       s.update(bbox.right, bbox.bottom);
       return this;

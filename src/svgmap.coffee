@@ -18,8 +18,8 @@
 
 root = (exports ? this)	
 svgmap = root.svgmap ?= {}
-svgmap.version = "0.1.0"
 
+svgmap.version = "0.1.0"
 
 ###
 Usage:
@@ -48,14 +48,20 @@ class SVGMap
 		me = @
 		me.container = $(container)
 		me.layers = []
+		me.markers = []
 	
-	loadMap: (url, callback) ->
+	
+	loadMap: (mapurl, callback) ->
 		# load svg map
 		me = @
 		me.mapLoadCallback = callback
+		console.log 'loadMap',mapurl
 		$.ajax 
-			src: url
-			onSuccess: me.mapLoaded
+			url: mapurl
+			success: me.mapLoaded
+			context: me
+		return
+	
 	
 	addLayer: (id, new_id) ->
 		# add new layer
@@ -68,23 +74,33 @@ class SVGMap
 			
 		@.layers.push layer
 	
+	
 	addMarker: (marker) ->
-		#
+		me = @
+		me.markers.push(marker)
+		
 		
 	display: () ->
 		###
 		finally displays the svgmap, needs to be called after
 		layer and marker setup is finished
 		###
-		
+		@render()
 	
-	###
+	### 
 	end of public API
-	###
+	### 
 	
 	mapLoaded: (response) ->
+		me = @
+		me.svgSrc = response
+		console.log response
+		me.proj = svgmap.Proj.fromXML $('proj', response)[0]
 		# reconstruct projection
+		
 		# read layers
+		
+		me.mapLoadCallback()
 	
 	render: ->
 		# render all layer
@@ -92,43 +108,5 @@ class SVGMap
 	project: (lon, lat) ->
 		# 
 		
-###
-Marker concept:
-- markers have to be registered in SVGMap instance
-- markers render their own content (output html code)
-- SVGMap will position marker div over map
-- marker will handle events
-###
 
-
-class MapMarker
-	constructor: (lonlat, content, offset = [0,0]) ->
-		###
-		lonlat - array [lon,lat]
-		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
-		offset - x and y offset for the marker
-		###
-
-
-class LabelMarker extends MapMarker
-	###
-	a simple label
-	###
-	constructor: (lonlat, label) ->
-	
-
-class IconMarker extends MapMarker
-	###
-	
-	###
-	constructor: (lonlat, icon) ->
-
-
-class Balloon
-	###
-	opens a 'singleton' Balloon at a defined geo-location
-	balloons may contain arbitrary html content
-	balloons are 100% css-styled 
-	###
-	
-	
+svgmap.SVGMap = SVGMap

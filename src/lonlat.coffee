@@ -33,3 +33,4 @@ class LatLon extends LonLat
 		
 svgmap.LonLat = LonLat
 svgmap.LatLon = LatLon
+

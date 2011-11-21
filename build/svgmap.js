@@ -18,8 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Balloon, IconMarker, LabelMarker, MapMarker, SVGMap, root, svgmap, _ref;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+  var SVGMap, root, svgmap, _ref;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -53,15 +52,18 @@
       me = this;
       me.container = $(container);
       me.layers = [];
+      me.markers = [];
     }
 
-    SVGMap.prototype.loadMap = function(url, callback) {
+    SVGMap.prototype.loadMap = function(mapurl, callback) {
       var me;
       me = this;
       me.mapLoadCallback = callback;
-      return $.ajax({
-        src: url,
-        onSuccess: me.mapLoaded
+      console.log('loadMap', mapurl);
+      $.ajax({
+        url: mapurl,
+        success: me.mapLoaded,
+        context: me
       });
     };
 
@@ -76,20 +78,31 @@
       return this.layers.push(layer);
     };
 
-    SVGMap.prototype.addMarker = function(marker) {};
+    SVGMap.prototype.addMarker = function(marker) {
+      var me;
+      me = this;
+      return me.markers.push(marker);
+    };
 
     SVGMap.prototype.display = function() {
       /*
       		finally displays the svgmap, needs to be called after
       		layer and marker setup is finished
-      */
+      */      return this.render();
     };
 
-    /*
+    /* 
     	end of public API
     */
 
-    SVGMap.prototype.mapLoaded = function(response) {};
+    SVGMap.prototype.mapLoaded = function(response) {
+      var me;
+      me = this;
+      me.svgSrc = response;
+      console.log(response);
+      me.proj = svgmap.Proj.fromXML($('proj', response)[0]);
+      return me.mapLoadCallback();
+    };
 
     SVGMap.prototype.render = function() {};
 
@@ -99,68 +112,6 @@
 
   })();
 
-  /*
-  Marker concept:
-  - markers have to be registered in SVGMap instance
-  - markers render their own content (output html code)
-  - SVGMap will position marker div over map
-  - marker will handle events
-  */
-
-  MapMarker = (function() {
-
-    function MapMarker(lonlat, content, offset) {
-      if (offset == null) offset = [0, 0];
-      /*
-      		lonlat - array [lon,lat]
-      		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
-      		offset - x and y offset for the marker
-      */
-    }
-
-    return MapMarker;
-
-  })();
-
-  LabelMarker = (function() {
-
-    __extends(LabelMarker, MapMarker);
-
-    /*
-    	a simple label
-    */
-
-    function LabelMarker(lonlat, label) {}
-
-    return LabelMarker;
-
-  })();
-
-  IconMarker = (function() {
-
-    __extends(IconMarker, MapMarker);
-
-    /*
-    */
-
-    function IconMarker(lonlat, icon) {}
-
-    return IconMarker;
-
-  })();
-
-  Balloon = (function() {
-
-    function Balloon() {}
-
-    /*
-    	opens a 'singleton' Balloon at a defined geo-location
-    	balloons may contain arbitrary html content
-    	balloons are 100% css-styled
-    */
-
-    return Balloon;
-
-  })();
+  svgmap.SVGMap = SVGMap;
 
 }).call(this);

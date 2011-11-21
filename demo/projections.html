@@ -2,13 +2,9 @@
 <html>
 <head>
 <title>proj.js test</title>
-<script src="lib/jquery.min.js"></script>
-<script src="lib/dat.gui.min.js"></script>
-
-<!--<script src="lib/proj.js"></script>
-<script src="lib/bbox.js"></script>
-<script src="lib/view.js"></script>-->
-<script src="svgmap.js"></script>
+<script src="../lib/jquery.min.js"></script>
+<script src="../lib/dat.gui.min.js"></script>
+<script src="../svgmap.js"></script>
 <style>
 canvas {
 	margin: 10px;
@@ -189,7 +185,7 @@ $(function() {
 	};
 	
 	$.ajax({
-		url: '../misc/coastline/coastline.json',
+		url: 'coastline.json',
 		success: function(coastlines) {
 			window.coastlines = coastlines;
 			//window.mozRequestAnimationFrame(renderFrame);
