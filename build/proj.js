@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Azimuthal, Balthasart, Behrmann, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, Loximuthal, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -596,14 +596,39 @@
 
   __proj['wagner5'] = WagnerV;
 
-  /*
-  class Vis4 extends Mollweide
-  	constructor: (lon0=0, lat0=0) ->
-  		# p=math.pi/3
-  		super lon0,lat0,Math.PI/2.5
-  
-  __proj['vis4'] = Vis4
-  */
+  Loximuthal = (function() {
+    var maxLat, minLat;
+
+    __extends(Loximuthal, PseudoCylindrical);
+
+    function Loximuthal() {
+      Loximuthal.__super__.constructor.apply(this, arguments);
+    }
+
+    minLat = -89;
+
+    maxLat = 89;
+
+    Loximuthal.prototype.project = function(lon, lat) {
+      var lam, math, me, phi, x, y;
+      me = this;
+      math = Math;
+      lam = me.rad(me.clon(lon));
+      phi = me.rad(lat);
+      if (phi === me.phi0) {
+        x = lam * math.cos(me.phi0);
+      } else {
+        x = lam * (phi - me.phi0) / (math.log(math.tan(me.QUARTERPI + phi * 0.5)) - math.log(math.tan(me.QUARTERPI + me.phi0 * 0.5)));
+      }
+      y = phi - me.phi0;
+      return [x, y * -1];
+    };
+
+    return Loximuthal;
+
+  })();
+
+  __proj['loximuthal'] = Loximuthal;
 
   Azimuthal = (function() {
 

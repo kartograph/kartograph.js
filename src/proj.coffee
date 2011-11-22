@@ -419,15 +419,25 @@ class WagnerV extends Mollweide
 __proj['wagner5'] = WagnerV
 
 
-###
-class Vis4 extends Mollweide
-	constructor: (lon0=0, lat0=0) ->
-		# p=math.pi/3
-		super lon0,lat0,Math.PI/2.5
+class Loximuthal extends PseudoCylindrical
 
-__proj['vis4'] = Vis4	
-###
+	minLat = -89
+	maxLat = 89
 
+	project: (lon, lat) ->
+		me = @
+		math = Math
+		lam = me.rad(me.clon(lon))
+		phi = me.rad(lat)
+		
+		if phi == me.phi0
+			x = lam * math.cos(me.phi0)
+		else
+			x = lam * (phi - me.phi0) / (math.log(math.tan(me.QUARTERPI + phi*0.5)) - math.log(math.tan(me.QUARTERPI + me.phi0*0.5)))
+		y = phi - me.phi0
+		[x,y*-1]
+
+__proj['loximuthal'] = Loximuthal
 
 # -------------------------------
 # Family of Azimuthal Projecitons
