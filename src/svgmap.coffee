@@ -46,7 +46,9 @@ class SVGMap
 	constructor: (container) ->
 		#
 		me = @
-		me.container = $(container)
+		me.container = cnt = $(container)
+		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
+		me.paper = Raphael(cnt[0], vp.width, vp.height)
 		me.layers = []
 		me.markers = []
 	
@@ -63,21 +65,44 @@ class SVGMap
 		return
 	
 	
-	addLayer: (id, new_id) ->
+	addLayer: (src_id, new_id) ->
 		# add new layer
-		new_id ?= id
+		me = @
+		new_id ?= src_id
+
+		svg = me.svgSrc
+		$layer = $('g#'+src_id, svg)[0]
+		$paths = $('path', $layer)
+		for path in $paths
+			path_str = path.getAttribute('d')
+			out_contours = []
+			for contour_str in path_str.split('M')
+				out_contour = ''
+				if contour_str != ""
+					for pt_str in contour_str.substr(0,contour_str.length-1).split('L')
+						[x,y] = pt_str.split(',')
+						xy = me.viewBC.project(x,y)
+						out_contour += 'L' if out_contour != ""
+						out_contour += xy[0]+','+xy[1]
+				out_contours.push(out_contour)
+			
+			out_path = out_contours.join('M')+'Z'
+			
+			me.paper.path(out_path).node.setAttribute('class', 'polygon '+new_id)
 
 		layer = 
 			id: new_id
-			src: id
-			paths: p
+			src: src_id
+			#paths: p
 			
-		@.layers.push layer
+		me.layers.push layer
 	
 	
 	addMarker: (marker) ->
 		me = @
 		me.markers.push(marker)
+		xy = me.viewBC.project me.viewAB.project me.proj.project marker.lonlat.lon, marker.lonlat.lat
+		marker.render(xy[0],xy[1],me.container, me.paper)
 		
 		
 	display: () ->
@@ -91,16 +116,52 @@ class SVGMap
 	end of public API
 	### 
 	
-	mapLoaded: (response) ->
+	mapLoaded: (xml) ->
 		me = @
-		me.svgSrc = response
-		console.log response
-		me.proj = svgmap.Proj.fromXML $('proj', response)[0]
-		# reconstruct projection
-		
+		me.svgSrc = xml
+		vp = me.viewport
+		$view = $('view', xml)[0] # use first view
+		me.viewAB = AB = svgmap.View.fromXML $view
+		me.viewBC = new svgmap.View AB.asBBox(),vp.width,vp.height
+		console.log  me.viewAB, me.viewBC
+		me.proj = svgmap.Proj.fromXML $('proj', $view)[0]		
+		#me.loadCoastline()
 		# read layers
 		
+		
 		me.mapLoadCallback()
+	
+	loadCoastline: ->
+		me = @
+		$.ajax
+			url: 'coastline.json'
+			success: me.renderCoastline
+			context: me
+	
+	renderCoastline: (coastlines) ->
+		me = @
+		P = me.proj
+		vp = me.viewport
+		view0 = me.viewAB
+		view1 = me.viewBC
+		
+		
+		for line in coastlines
+			pathstr = ''
+			for i in [0..line.length-2]
+				p0 = line[i]
+				p1 = line[i+1]
+				d = 0
+				# console.log(P._visible(-2.77, 42.1))
+				if true and P._visible(p0[0],p0[1]) and P._visible(p1[0],p1[1])					
+					p0 = view1.project(view0.project(P.project(p0[0],p0[1])))
+					p1 = view1.project(view0.project(P.project(p1[0],p1[1])))
+					if vp.inside(p0[0],p0[1]) or vp.inside(p1[0],p1[1])
+						pathstr += 'M'+p0[0]+','+p0[1]+'L'+p1[0]+','+p1[1]	
+			if pathstr != ""
+				me.paper.path(pathstr).attr('opacity',.8)
+		
+		# for debugging purposes
 	
 	render: ->
 		# render all layer

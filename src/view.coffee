@@ -41,6 +41,21 @@ class View
 		y = (y - bbox.top) * s + (h - bbox.height * s) * .5
 		[x,y]
 		
+	asBBox: ->
+		me = @
+		new svgmap.BBox 0,0,me.width,me.height
+
+View.fromXML = (xml) ->
+	###
+	constructs a view from XML
+	###
+	w = Number(xml.getAttribute('w'))
+	h = Number(xml.getAttribute('h'))
+	pad = Number(xml.getAttribute('padding'))
+	bbox_xml = xml.getElementsByTagName('bbox')[0]
+	bbox = BBox.fromXML(bbox_xml)
+	new svgmap.View bbox,w,h,pad
+		
 root = (exports ? this)	
 root.svgmap ?= {}
 root.svgmap.View = View

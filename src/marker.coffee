@@ -18,7 +18,7 @@
 
 root = (exports ? this)	
 svgmap = root.svgmap ?= {}
-
+svgmap.marker ?= {}
 
 ###
 Marker concept:
@@ -30,16 +30,22 @@ Marker concept:
 
 class MapMarker
 	
-	constructor: (ll, content = '', offset = [0,0]) ->
+	constructor: (ll) ->
 		###
 		lonlat - LonLat instance
 		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
 		offset - x and y offset for the marker
 		###
 		me = @
+		me.lonlat = ll
 		me.visible = true
+		
+	render: (x,y,cont,paper) ->
+		###
+		this function will be called by svgmap to render the marker
+		###
 	
-svgmap.MapMarker = MapMarker
+svgmap.marker.MapMarker = MapMarker
 
 
 class LabelMarker extends MapMarker
@@ -47,8 +53,24 @@ class LabelMarker extends MapMarker
 	a simple label
 	###
 	constructor: (ll, label) ->
+		super ll
+		@label = label
 	
-svgmap.LabelMarker = LabelMarker
+svgmap.marker.LabelMarker = LabelMarker
+
+
+class DotMarker extends LabelMarker
+	
+	constructor: (ll, label, rad) ->
+		super ll, label
+		@rad = rad
+	
+	render: (x,y,cont,paper) ->
+		node = paper.circle(x,y,@rad).node
+		node.setAttribute('class', 'dotMarker')
+		node.setAttribute('title', @label)
+
+svgmap.marker.DotMarker = DotMarker
 
 
 class IconMarker extends MapMarker
@@ -57,7 +79,7 @@ class IconMarker extends MapMarker
 	###
 	constructor: (ll, icon) ->
 
-svgmap.IconMarker = IconMarker
+svgmap.marker.IconMarker = IconMarker
 
 
 class BubbleMarker extends MapMarker

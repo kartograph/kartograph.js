@@ -90,12 +90,14 @@
     /*
     	reconstructs a projection from xml description
     */
-    var id;
-    console.log(xml);
+    var attr, i, id, opts, _ref2;
     id = xml.getAttribute('id');
-    console.log(id);
-    console.log(svgmap.proj[id]);
-    return "foo";
+    opts = {};
+    for (i = 0, _ref2 = xml.attributes.length - 1; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+      attr = xml.attributes[i];
+      if (attr.name !== "id") opts[attr.name] = attr.value;
+    }
+    return new svgmap.proj[id](opts);
   };
 
   svgmap.Proj = Proj;
@@ -179,7 +181,7 @@
 
     Equirectangular.prototype.project = function(lon, lat) {
       lon = this.clon(lon);
-      return [(lon + 180) * Math.cos(this.phi0) * 2.777, (lat * -1 + 90) * 2.7777];
+      return [lon * Math.cos(this.phi0) * 1000, lat * -1 * 1000];
     };
 
     return Equirectangular;
@@ -192,8 +194,11 @@
 
     __extends(CEA, Cylindrical);
 
-    function CEA() {
-      CEA.__super__.constructor.apply(this, arguments);
+    function CEA(opts) {
+      var _ref2;
+      CEA.__super__.constructor.call(this, opts);
+      this.lat1 = (_ref2 = opts.lat1) != null ? _ref2 : 0;
+      this.phi1 = this.rad(this.lat1);
     }
 
     /*
@@ -204,8 +209,8 @@
       var lam, phi, x, y;
       lam = this.rad(this.clon(lon));
       phi = this.rad(lat * -1);
-      x = lam * Math.cos(this.phi0);
-      y = Math.sin(phi) / Math.cos(this.phi0);
+      x = lam * Math.cos(this.phi1);
+      y = Math.sin(phi) / Math.cos(this.phi1);
       return [x * 1000, y * 1000];
     };
 

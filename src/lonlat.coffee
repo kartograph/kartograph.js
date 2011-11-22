@@ -23,8 +23,9 @@ class LonLat
 	###
 	represents a Point
 	###
-	constructor: (@lon, @lat) ->
-		
+	constructor: (lon, lat) ->
+		@lon = Number(lon)
+		@lat = Number(lat)
 	
 class LatLon extends LonLat
 	constructor: (lat, lon) ->
@@ -33,4 +34,5 @@ class LatLon extends LonLat
 		
 svgmap.LonLat = LonLat
 svgmap.LatLon = LatLon
+
 

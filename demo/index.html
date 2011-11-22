@@ -4,6 +4,7 @@
 <title>svgmap test</title>
 <script src="../lib/jquery.min.js"></script>
 <script src="../lib/dat.gui.min.js"></script>
+<script src="../lib/raphael-min.js"></script>
 <script src="../svgmap.js"></script>
 
 <script>
@@ -14,41 +15,61 @@
 		
 		window.mymap = new svgmap.SVGMap('#container');
 		
-		console.log(mymap);
-		mymap.loadMap('FRA.svg', function() {
-			console.log('load complete');
-			console.log(mymap);
+		mymap.loadMap('USA-sat.svg', function() {
+			
+			console.log(mymap.proj);
+			//mymap.addLayer('context');
+			mymap.addLayer('USA','bg');
+			mymap.addLayer('USA','fg');
+			
+			$.ajax({
+				url: 'cities.json',
+				success: function(cities) {
+					var m = svgmap.marker
+					for (var c in cities) {
+						var city = cities[c];
+						var rad = Math.sqrt(city[3]/8175133)*15+1;
+						var ll = new svgmap.LonLat(city[1], city[2]);
+						var marker = new m.DotMarker(ll,city[0],rad);
+						mymap.addMarker(marker);
+					}
+				}
+			});
 		});
 		
-		/*
-	
-		$.ajax({
-			url: '../misc/coastline/coastline.json',
-			success: function(coastlines) {
-				window.coastlines = coastlines;
-				//window.mozRequestAnimationFrame(renderFrame);
-				//animLoop(renderFrame, this );
-				renderFrame();
-			},
-			context: this
-		});
 		
-		*/
-	
 	
 	});
 </script>
 <style>
-	body { background: #eee }
+	body,html { background: #fff; height:100%; }
 	
 	#container {
-		margin: 30px;
-		border: 2px solid #aaa;
 		background: #fff;
-		width: 80%;
-		height: 550px;
-		box-shadow: 3px 3px 3px #ddd;
+		width: 100%;
+		height: 95%;
 	}
+	svg path { stroke-linejoin: round }
+
+	svg .polygon.bg {
+		stroke: #ddd;
+		stroke-width:10px;
+	}
+	svg .polygon.fg {
+		stroke: #000;
+		stroke-width:1px;
+		fill: #fff
+	}
+	svg .dotMarker {
+		stroke: #833;
+		fill: #833;
+		fill-opacity: .4;
+	}
+	svg .dotMarker:hover {
+		stroke: #000;
+		fill: #f33;
+		fill-opacity: .7;
+	}	
 </style>
 </head>
 <body>

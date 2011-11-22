@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, BBox, Balthasart, Behrmann, BubbleMarker, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, IconMarker, LAEA, LabelMarker, LatLon, LonLat, MapMarker, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, root, svgmap, __proj, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+  var Azimuthal, BBox, Balthasart, Behrmann, BubbleMarker, CEA, Cylindrical, DotMarker, EckertIV, Equirectangular, GallPeters, HoboDyer, IconMarker, LAEA, LabelMarker, LatLon, LonLat, MapMarker, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, root, svgmap, __proj, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -103,6 +103,12 @@
       return bbox.left < s.right && bbox.right > s.left && bbox.top < s.bottom && bbox.bottom > s.top;
     };
 
+    BBox.prototype.inside = function(x, y) {
+      var s;
+      s = this;
+      return x >= s.left && x <= s.right && y >= s.top && y <= s.bottom;
+    };
+
     BBox.prototype.join = function(bbox) {
       var s;
       s = this;
@@ -114,6 +120,15 @@
     return BBox;
 
   })();
+
+  BBox.fromXML = function(xml) {
+    var h, w, x, y;
+    x = Number(xml.getAttribute('x'));
+    y = Number(xml.getAttribute('y'));
+    w = Number(xml.getAttribute('w'));
+    h = Number(xml.getAttribute('h'));
+    return new svgmap.BBox(x, y, w, h);
+  };
 
   svgmap.BBox = BBox;
 
@@ -146,8 +161,8 @@
     */
 
     function LonLat(lon, lat) {
-      this.lon = lon;
-      this.lat = lat;
+      this.lon = Number(lon);
+      this.lat = Number(lat);
     }
 
     return LonLat;
@@ -192,6 +207,8 @@
 
   svgmap = (_ref3 = root.svgmap) != null ? _ref3 : root.svgmap = {};
 
+  if ((_ref4 = svgmap.marker) == null) svgmap.marker = {};
+
   /*
   Marker concept:
   - markers have to be registered in SVGMap instance
@@ -202,24 +219,29 @@
 
   MapMarker = (function() {
 
-    function MapMarker(ll, content, offset) {
-      var me;
-      if (content == null) content = '';
-      if (offset == null) offset = [0, 0];
+    function MapMarker(ll) {
       /*
       		lonlat - LonLat instance
       		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
       		offset - x and y offset for the marker
       */
+      var me;
       me = this;
+      me.lonlat = ll;
       me.visible = true;
     }
+
+    MapMarker.prototype.render = function(x, y, cont, paper) {
+      /*
+      		this function will be called by svgmap to render the marker
+      */
+    };
 
     return MapMarker;
 
   })();
 
-  svgmap.MapMarker = MapMarker;
+  svgmap.marker.MapMarker = MapMarker;
 
   LabelMarker = (function() {
 
@@ -229,13 +251,38 @@
     	a simple label
     */
 
-    function LabelMarker(ll, label) {}
+    function LabelMarker(ll, label) {
+      LabelMarker.__super__.constructor.call(this, ll);
+      this.label = label;
+    }
 
     return LabelMarker;
 
   })();
 
-  svgmap.LabelMarker = LabelMarker;
+  svgmap.marker.LabelMarker = LabelMarker;
+
+  DotMarker = (function() {
+
+    __extends(DotMarker, LabelMarker);
+
+    function DotMarker(ll, label, rad) {
+      DotMarker.__super__.constructor.call(this, ll, label);
+      this.rad = rad;
+    }
+
+    DotMarker.prototype.render = function(x, y, cont, paper) {
+      var node;
+      node = paper.circle(x, y, this.rad).node;
+      node.setAttribute('class', 'dotMarker');
+      return node.setAttribute('title', this.label);
+    };
+
+    return DotMarker;
+
+  })();
+
+  svgmap.marker.DotMarker = DotMarker;
 
   IconMarker = (function() {
 
@@ -250,7 +297,7 @@
 
   })();
 
-  svgmap.IconMarker = IconMarker;
+  svgmap.marker.IconMarker = IconMarker;
 
   BubbleMarker = (function() {
 
@@ -288,7 +335,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref4 = root.svgmap) != null ? _ref4 : root.svgmap = {};
+  svgmap = (_ref5 = root.svgmap) != null ? _ref5 : root.svgmap = {};
 
   __proj = svgmap.proj = {};
 
@@ -303,10 +350,10 @@
   Proj = (function() {
 
     function Proj(opts) {
-      var me, _ref5, _ref6;
+      var me, _ref6, _ref7;
       me = this;
-      me.lon0 = (_ref5 = opts.lon0) != null ? _ref5 : 0;
-      me.lat0 = (_ref6 = opts.lat0) != null ? _ref6 : 0;
+      me.lon0 = (_ref6 = opts.lon0) != null ? _ref6 : 0;
+      me.lat0 = (_ref7 = opts.lat0) != null ? _ref7 : 0;
       me.PI = Math.PI;
       me.HALFPI = me.PI * .5;
       me.QUARTERPI = me.PI * .25;
@@ -325,15 +372,15 @@
     };
 
     Proj.prototype.plot = function(polygon, truncate) {
-      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref5, _ref6;
+      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref6, _ref7;
       if (truncate == null) truncate = true;
       points = [];
       ignore = true;
       for (_i = 0, _len = polygon.length; _i < _len; _i++) {
-        _ref5 = polygon[_i], lon = _ref5[0], lat = _ref5[1];
+        _ref6 = polygon[_i], lon = _ref6[0], lat = _ref6[1];
         vis = this._visible(lon, lat);
         if (vis) ignore = false;
-        _ref6 = this.project(lon, lat), x = _ref6[0], y = _ref6[1];
+        _ref7 = this.project(lon, lat), x = _ref7[0], y = _ref7[1];
         if (!vis && truncate) {
           points.push(this._truncate(x, y));
         } else {
@@ -355,12 +402,14 @@
     /*
     	reconstructs a projection from xml description
     */
-    var id;
-    console.log(xml);
+    var attr, i, id, opts, _ref6;
     id = xml.getAttribute('id');
-    console.log(id);
-    console.log(svgmap.proj[id]);
-    return "foo";
+    opts = {};
+    for (i = 0, _ref6 = xml.attributes.length - 1; 0 <= _ref6 ? i <= _ref6 : i >= _ref6; 0 <= _ref6 ? i++ : i--) {
+      attr = xml.attributes[i];
+      if (attr.name !== "id") opts[attr.name] = attr.value;
+    }
+    return new svgmap.proj[id](opts);
   };
 
   svgmap.Proj = Proj;
@@ -444,7 +493,7 @@
 
     Equirectangular.prototype.project = function(lon, lat) {
       lon = this.clon(lon);
-      return [(lon + 180) * Math.cos(this.phi0) * 2.777, (lat * -1 + 90) * 2.7777];
+      return [lon * Math.cos(this.phi0) * 1000, lat * -1 * 1000];
     };
 
     return Equirectangular;
@@ -457,8 +506,11 @@
 
     __extends(CEA, Cylindrical);
 
-    function CEA() {
-      CEA.__super__.constructor.apply(this, arguments);
+    function CEA(opts) {
+      var _ref6;
+      CEA.__super__.constructor.call(this, opts);
+      this.lat1 = (_ref6 = opts.lat1) != null ? _ref6 : 0;
+      this.phi1 = this.rad(this.lat1);
     }
 
     /*
@@ -469,8 +521,8 @@
       var lam, phi, x, y;
       lam = this.rad(this.clon(lon));
       phi = this.rad(lat * -1);
-      x = lam * Math.cos(this.phi0);
-      y = Math.sin(phi) / Math.cos(this.phi0);
+      x = lam * Math.cos(this.phi1);
+      y = Math.sin(phi) / Math.cos(this.phi1);
       return [x * 1000, y * 1000];
     };
 
@@ -1064,14 +1116,14 @@
     */
 
     function Satellite(opts) {
-      var lat, lon, xmax, xmin, xy, _ref5, _ref6, _ref7;
+      var lat, lon, xmax, xmin, xy, _ref6, _ref7, _ref8;
       Satellite.__super__.constructor.call(this, {
         lon0: 0,
         lat0: 0
       });
-      this.dist = (_ref5 = opts.dist) != null ? _ref5 : 3;
-      this.up = this.rad((_ref6 = opts.up) != null ? _ref6 : 0);
-      this.tilt = this.rad((_ref7 = opts.tilt) != null ? _ref7 : 0);
+      this.dist = (_ref6 = opts.dist) != null ? _ref6 : 3;
+      this.up = this.rad((_ref7 = opts.up) != null ? _ref7 : 0);
+      this.tilt = this.rad((_ref8 = opts.tilt) != null ? _ref8 : 0);
       this.scale = 1;
       xmin = Number.MAX_VALUE;
       xmax = Number.MAX_VALUE * -1;
@@ -1148,7 +1200,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref5 = root.svgmap) != null ? _ref5 : root.svgmap = {};
+  svgmap = (_ref6 = root.svgmap) != null ? _ref6 : root.svgmap = {};
 
   svgmap.version = "0.1.0";
 
@@ -1174,9 +1226,11 @@
   SVGMap = (function() {
 
     function SVGMap(container) {
-      var me;
+      var cnt, me, vp;
       me = this;
-      me.container = $(container);
+      me.container = cnt = $(container);
+      me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
+      me.paper = Raphael(cnt[0], vp.width, vp.height);
       me.layers = [];
       me.markers = [];
     }
@@ -1193,21 +1247,49 @@
       });
     };
 
-    SVGMap.prototype.addLayer = function(id, new_id) {
-      var layer;
-      if (new_id == null) new_id = id;
+    SVGMap.prototype.addLayer = function(src_id, new_id) {
+      var $layer, $paths, contour_str, layer, me, out_contour, out_contours, out_path, path, path_str, pt_str, svg, x, xy, y, _i, _j, _k, _len, _len2, _len3, _ref7, _ref8, _ref9;
+      me = this;
+      if (new_id == null) new_id = src_id;
+      svg = me.svgSrc;
+      $layer = $('g#' + src_id, svg)[0];
+      $paths = $('path', $layer);
+      for (_i = 0, _len = $paths.length; _i < _len; _i++) {
+        path = $paths[_i];
+        path_str = path.getAttribute('d');
+        out_contours = [];
+        _ref7 = path_str.split('M');
+        for (_j = 0, _len2 = _ref7.length; _j < _len2; _j++) {
+          contour_str = _ref7[_j];
+          out_contour = '';
+          if (contour_str !== "") {
+            _ref8 = contour_str.substr(0, contour_str.length - 1).split('L');
+            for (_k = 0, _len3 = _ref8.length; _k < _len3; _k++) {
+              pt_str = _ref8[_k];
+              _ref9 = pt_str.split(','), x = _ref9[0], y = _ref9[1];
+              xy = me.viewBC.project(x, y);
+              if (out_contour !== "") out_contour += 'L';
+              out_contour += xy[0] + ',' + xy[1];
+            }
+          }
+          out_contours.push(out_contour);
+        }
+        out_path = out_contours.join('M') + 'Z';
+        me.paper.path(out_path).node.setAttribute('class', 'polygon ' + new_id);
+      }
       layer = {
         id: new_id,
-        src: id,
-        paths: p
+        src: src_id
       };
-      return this.layers.push(layer);
+      return me.layers.push(layer);
     };
 
     SVGMap.prototype.addMarker = function(marker) {
-      var me;
+      var me, xy;
       me = this;
-      return me.markers.push(marker);
+      me.markers.push(marker);
+      xy = me.viewBC.project(me.viewAB.project(me.proj.project(marker.lonlat.lon, marker.lonlat.lat)));
+      return marker.render(xy[0], xy[1], me.container, me.paper);
     };
 
     SVGMap.prototype.display = function() {
@@ -1221,13 +1303,59 @@
     	end of public API
     */
 
-    SVGMap.prototype.mapLoaded = function(response) {
+    SVGMap.prototype.mapLoaded = function(xml) {
+      var $view, AB, me, vp;
+      me = this;
+      me.svgSrc = xml;
+      vp = me.viewport;
+      $view = $('view', xml)[0];
+      me.viewAB = AB = svgmap.View.fromXML($view);
+      me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height);
+      console.log(me.viewAB, me.viewBC);
+      me.proj = svgmap.Proj.fromXML($('proj', $view)[0]);
+      return me.mapLoadCallback();
+    };
+
+    SVGMap.prototype.loadCoastline = function() {
       var me;
       me = this;
-      me.svgSrc = response;
-      console.log(response);
-      me.proj = svgmap.Proj.fromXML($('proj', response)[0]);
-      return me.mapLoadCallback();
+      return $.ajax({
+        url: 'coastline.json',
+        success: me.renderCoastline,
+        context: me
+      });
+    };
+
+    SVGMap.prototype.renderCoastline = function(coastlines) {
+      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref7, _results;
+      me = this;
+      P = me.proj;
+      vp = me.viewport;
+      view0 = me.viewAB;
+      view1 = me.viewBC;
+      _results = [];
+      for (_i = 0, _len = coastlines.length; _i < _len; _i++) {
+        line = coastlines[_i];
+        pathstr = '';
+        for (i = 0, _ref7 = line.length - 2; 0 <= _ref7 ? i <= _ref7 : i >= _ref7; 0 <= _ref7 ? i++ : i--) {
+          p0 = line[i];
+          p1 = line[i + 1];
+          d = 0;
+          if (true && P._visible(p0[0], p0[1]) && P._visible(p1[0], p1[1])) {
+            p0 = view1.project(view0.project(P.project(p0[0], p0[1])));
+            p1 = view1.project(view0.project(P.project(p1[0], p1[1])));
+            if (vp.inside(p0[0], p0[1]) || vp.inside(p1[0], p1[1])) {
+              pathstr += 'M' + p0[0] + ',' + p0[1] + 'L' + p1[0] + ',' + p1[1];
+            }
+          }
+        }
+        if (pathstr !== "") {
+          _results.push(me.paper.path(pathstr).attr('opacity', .8));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
     SVGMap.prototype.render = function() {};
@@ -1291,13 +1419,32 @@
       return [x, y];
     };
 
+    View.prototype.asBBox = function() {
+      var me;
+      me = this;
+      return new svgmap.BBox(0, 0, me.width, me.height);
+    };
+
     return View;
 
   })();
 
+  View.fromXML = function(xml) {
+    /*
+    	constructs a view from XML
+    */
+    var bbox, bbox_xml, h, pad, w;
+    w = Number(xml.getAttribute('w'));
+    h = Number(xml.getAttribute('h'));
+    pad = Number(xml.getAttribute('padding'));
+    bbox_xml = xml.getElementsByTagName('bbox')[0];
+    bbox = BBox.fromXML(bbox_xml);
+    return new svgmap.View(bbox, w, h, pad);
+  };
+
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  if ((_ref6 = root.svgmap) == null) root.svgmap = {};
+  if ((_ref7 = root.svgmap) == null) root.svgmap = {};
 
   root.svgmap.View = View;
 

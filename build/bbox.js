@@ -80,6 +80,12 @@
       return bbox.left < s.right && bbox.right > s.left && bbox.top < s.bottom && bbox.bottom > s.top;
     };
 
+    BBox.prototype.inside = function(x, y) {
+      var s;
+      s = this;
+      return x >= s.left && x <= s.right && y >= s.top && y <= s.bottom;
+    };
+
     BBox.prototype.join = function(bbox) {
       var s;
       s = this;
@@ -91,6 +97,15 @@
     return BBox;
 
   })();
+
+  BBox.fromXML = function(xml) {
+    var h, w, x, y;
+    x = Number(xml.getAttribute('x'));
+    y = Number(xml.getAttribute('y'));
+    w = Number(xml.getAttribute('w'));
+    h = Number(xml.getAttribute('h'));
+    return new svgmap.BBox(x, y, w, h);
+  };
 
   svgmap.BBox = BBox;
 

@@ -62,11 +62,24 @@ class BBox
 	intersects: (bbox) ->
 		bbox.left < s.right and bbox.right > s.left and bbox.top < s.bottom and bbox.bottom > s.top
 				
+	inside: (x,y) ->
+		s = @
+		x >= s.left and x <= s.right and y >= s.top and y <= s.bottom
+			
 	join: (bbox) ->
 		s = @
 		s.update(bbox.left, bbox.top)
 		s.update(bbox.right, bbox.bottom)
 		@
+
+
+BBox.fromXML = (xml) ->
+	x = Number(xml.getAttribute('x'))
+	y = Number(xml.getAttribute('y'))
+	w = Number(xml.getAttribute('w'))
+	h = Number(xml.getAttribute('h'))
+	new svgmap.BBox x,y,w,h
+
 		
 svgmap.BBox = BBox
 

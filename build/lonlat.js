@@ -32,8 +32,8 @@
     */
 
     function LonLat(lon, lat) {
-      this.lon = lon;
-      this.lat = lat;
+      this.lon = Number(lon);
+      this.lat = Number(lat);
     }
 
     return LonLat;

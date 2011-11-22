@@ -53,9 +53,28 @@
       return [x, y];
     };
 
+    View.prototype.asBBox = function() {
+      var me;
+      me = this;
+      return new svgmap.BBox(0, 0, me.width, me.height);
+    };
+
     return View;
 
   })();
+
+  View.fromXML = function(xml) {
+    /*
+    	constructs a view from XML
+    */
+    var bbox, bbox_xml, h, pad, w;
+    w = Number(xml.getAttribute('w'));
+    h = Number(xml.getAttribute('h'));
+    pad = Number(xml.getAttribute('padding'));
+    bbox_xml = xml.getElementsByTagName('bbox')[0];
+    bbox = BBox.fromXML(bbox_xml);
+    return new svgmap.View(bbox, w, h, pad);
+  };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 

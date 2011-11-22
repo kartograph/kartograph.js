@@ -66,11 +66,13 @@ Proj.fromXML = (xml) ->
 	###
 	reconstructs a projection from xml description
 	###
-	console.log(xml)
 	id = xml.getAttribute('id')
-	console.log id
-	console.log svgmap.proj[id]
-	"foo"
+	opts = {}
+	for i in [0..xml.attributes.length-1]
+		attr = xml.attributes[i]
+		if attr.name != "id"
+			opts[attr.name] = attr.value
+	new svgmap.proj[id](opts)
 	
 svgmap.Proj = Proj
 	
@@ -121,20 +123,26 @@ class Equirectangular extends Cylindrical
 	###
 	project: (lon, lat) ->
 		lon = @clon(lon)
-		[(lon+180) * Math.cos(@phi0)*2.777, (lat*-1+90)*2.7777]
+		[(lon) * Math.cos(@phi0) * 1000, lat*-1*1000]
 
 __proj['lonlat'] = Equirectangular
 
 
 class CEA extends Cylindrical
+
+	constructor: (opts) ->
+		super opts
+		@lat1 = opts.lat1 ? 0
+		@phi1 = @rad(@lat1)
+		
 	###
 	Cylindrical Equal Area Projection
 	###
 	project: (lon, lat) ->
 		lam = @rad(@clon(lon))
 		phi = @rad(lat*-1)
-		x = (lam) * Math.cos(@phi0)
-		y = Math.sin(phi) / Math.cos(@phi0)
+		x = (lam) * Math.cos(@phi1)
+		y = Math.sin(phi) / Math.cos(@phi1)
 		[x*1000,y*1000]
 
 __proj['cea'] = CEA
