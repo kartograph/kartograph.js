@@ -41,6 +41,17 @@ class View
 		y = (y - bbox.top) * s + (h - bbox.height * s) * .5
 		[x,y]
 		
+	projectPath: (path) ->
+		me = @
+		contours = []
+		for pcont in path.contours
+			cont = []
+			for [x,y] in pcont
+				[x,y] = me.project x,y
+				cont.push([x,y])
+			contours.push(cont)
+		new svgmap.Path contours,path.closed
+		
 	asBBox: ->
 		me = @
 		new svgmap.BBox 0,0,me.width,me.height

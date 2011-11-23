@@ -57,7 +57,6 @@ class SVGMap
 		# load svg map
 		me = @
 		me.mapLoadCallback = callback
-		console.log 'loadMap',mapurl
 		$.ajax 
 			url: mapurl
 			success: me.mapLoaded
@@ -70,25 +69,32 @@ class SVGMap
 		me = @
 		new_id ?= src_id
 
+		me.layerPaths ?= {}
+		me.layerPaths[new_id] = []
+
 		svg = me.svgSrc
 		$layer = $('g#'+src_id, svg)[0]
 		$paths = $('path', $layer)
-		for path in $paths
-			path_str = path.getAttribute('d')
-			out_contours = []
-			for contour_str in path_str.split('M')
-				out_contour = ''
-				if contour_str != ""
-					for pt_str in contour_str.substr(0,contour_str.length-1).split('L')
-						[x,y] = pt_str.split(',')
-						xy = me.viewBC.project(x,y)
-						out_contour += 'L' if out_contour != ""
-						out_contour += xy[0]+','+xy[1]
-				out_contours.push(out_contour)
+
+		for svg_path in $paths	
+			layerPath = {}			
+		
+			# extract and convert path
+			path_str = svg_path.getAttribute('d')
+			path = svgmap.Path.fromSVG(path_str)
+			layerPath.path = path
 			
-			out_path = out_contours.join('M')+'Z'
+			layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG())
+			layerPath.svgPath.node.setAttribute('class', 'polygon '+new_id)
 			
-			me.paper.path(out_path).node.setAttribute('class', 'polygon '+new_id)
+			data = {}
+			for i in [0..svg_path.attributes.length-1]
+				attr = svg_path.attributes[i]
+				if attr.name.substr(0,5) == "data-"
+					data[attr.name.substr(5)] = attr.value
+			layerPath.data = data
+			
+			me.layerPaths[new_id].push(layerPath)			
 
 		layer = 
 			id: new_id
@@ -97,14 +103,43 @@ class SVGMap
 			
 		me.layers.push layer
 	
-	
 	addMarker: (marker) ->
 		me = @
 		me.markers.push(marker)
 		xy = me.viewBC.project me.viewAB.project me.proj.project marker.lonlat.lon, marker.lonlat.lat
 		marker.render(xy[0],xy[1],me.container, me.paper)
 		
+	
+	choropleth: (layer_id, data, id_col, data_col) ->
+		me = @
+		min = Number.MAX_VALUE
+		max = Number.MAX_VALUE*-1
+		pathData = {}
+		for d in data
+			pathData[d[id_col]] = d[data_col]
+			if isNaN(d[data_col]) then continue
+			min = Math.min(min, d[data_col])
+			max = Math.max(max, d[data_col])
+			
+		paths = me.layerPaths[layer_id]
+		for path in paths
+			id = path.data[id_col]
+			if pathData[id]?
+				v = pathData[id]
+				col = 'HSL(60,50%,'+(10+Math.round((1-v/max)*10)*(90/10))+'%)'
+				path.svgPath.node.setAttribute('style', 'fill:'+col)
+			else
+				path.svgPath.node.setAttribute('style', 'fill:#ccc')
+	
+	
+	#addGraticule: (step=15) ->
+		# foo
 		
+	#addLayerPath: (layer_id, out_class, pathQuery) ->
+	#	paths = me.layerPaths[layer_id]
+	#	for path in paths
+	#		# foo
+	
 	display: () ->
 		###
 		finally displays the svgmap, needs to be called after
@@ -113,8 +148,8 @@ class SVGMap
 		@render()
 	
 	### 
-	end of public API
-	### 
+	    end of public API
+	###
 	
 	mapLoaded: (xml) ->
 		me = @
@@ -123,12 +158,7 @@ class SVGMap
 		$view = $('view', xml)[0] # use first view
 		me.viewAB = AB = svgmap.View.fromXML $view
 		me.viewBC = new svgmap.View AB.asBBox(),vp.width,vp.height
-		console.log  me.viewAB, me.viewBC
 		me.proj = svgmap.Proj.fromXML $('proj', $view)[0]		
-		#me.loadCoastline()
-		# read layers
-		
-		
 		me.mapLoadCallback()
 	
 	loadCoastline: ->
@@ -144,8 +174,7 @@ class SVGMap
 		vp = me.viewport
 		view0 = me.viewAB
 		view1 = me.viewBC
-		
-		
+
 		for line in coastlines
 			pathstr = ''
 			for i in [0..line.length-2]
@@ -163,6 +192,8 @@ class SVGMap
 		
 		# for debugging purposes
 	
+	
+	
 	render: ->
 		# render all layer
 		
@@ -171,3 +202,5 @@ class SVGMap
 		
 
 svgmap.SVGMap = SVGMap
+
+

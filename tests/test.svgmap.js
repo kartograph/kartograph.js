@@ -7,6 +7,7 @@ var svgmap = exports.svgmap = require('../svgmap.js').svgmap,
 	
 try {
 //	var map = new svgmap.SVGMap('cont');
+
 	
 } catch (er) {
 	console.log('[svgmap.SVGMap] test failed: '+er);

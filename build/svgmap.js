@@ -61,7 +61,6 @@
       var me;
       me = this;
       me.mapLoadCallback = callback;
-      console.log('loadMap', mapurl);
       $.ajax({
         url: mapurl,
         success: me.mapLoaded,
@@ -70,34 +69,31 @@
     };
 
     SVGMap.prototype.addLayer = function(src_id, new_id) {
-      var $layer, $paths, contour_str, layer, me, out_contour, out_contours, out_path, path, path_str, pt_str, svg, x, xy, y, _i, _j, _k, _len, _len2, _len3, _ref2, _ref3, _ref4;
+      var $layer, $paths, attr, data, i, layer, layerPath, me, path, path_str, svg, svg_path, _i, _len, _ref2, _ref3;
       me = this;
       if (new_id == null) new_id = src_id;
+      if ((_ref2 = me.layerPaths) == null) me.layerPaths = {};
+      me.layerPaths[new_id] = [];
       svg = me.svgSrc;
       $layer = $('g#' + src_id, svg)[0];
       $paths = $('path', $layer);
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
-        path = $paths[_i];
-        path_str = path.getAttribute('d');
-        out_contours = [];
-        _ref2 = path_str.split('M');
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          contour_str = _ref2[_j];
-          out_contour = '';
-          if (contour_str !== "") {
-            _ref3 = contour_str.substr(0, contour_str.length - 1).split('L');
-            for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-              pt_str = _ref3[_k];
-              _ref4 = pt_str.split(','), x = _ref4[0], y = _ref4[1];
-              xy = me.viewBC.project(x, y);
-              if (out_contour !== "") out_contour += 'L';
-              out_contour += xy[0] + ',' + xy[1];
-            }
+        svg_path = $paths[_i];
+        layerPath = {};
+        path_str = svg_path.getAttribute('d');
+        path = svgmap.Path.fromSVG(path_str);
+        layerPath.path = path;
+        layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG());
+        layerPath.svgPath.node.setAttribute('class', 'polygon ' + new_id);
+        data = {};
+        for (i = 0, _ref3 = svg_path.attributes.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
+          attr = svg_path.attributes[i];
+          if (attr.name.substr(0, 5) === "data-") {
+            data[attr.name.substr(5)] = attr.value;
           }
-          out_contours.push(out_contour);
         }
-        out_path = out_contours.join('M') + 'Z';
-        me.paper.path(out_path).node.setAttribute('class', 'polygon ' + new_id);
+        layerPath.data = data;
+        me.layerPaths[new_id].push(layerPath);
       }
       layer = {
         id: new_id,
@@ -114,6 +110,35 @@
       return marker.render(xy[0], xy[1], me.container, me.paper);
     };
 
+    SVGMap.prototype.choropleth = function(layer_id, data, id_col, data_col) {
+      var col, d, id, max, me, min, path, pathData, paths, v, _i, _j, _len, _len2, _results;
+      me = this;
+      min = Number.MAX_VALUE;
+      max = Number.MAX_VALUE * -1;
+      pathData = {};
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        d = data[_i];
+        pathData[d[id_col]] = d[data_col];
+        if (isNaN(d[data_col])) continue;
+        min = Math.min(min, d[data_col]);
+        max = Math.max(max, d[data_col]);
+      }
+      paths = me.layerPaths[layer_id];
+      _results = [];
+      for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
+        path = paths[_j];
+        id = path.data[id_col];
+        if (pathData[id] != null) {
+          v = pathData[id];
+          col = 'HSL(60,50%,' + (10 + Math.round((1 - v / max) * 10) * (90 / 10)) + '%)';
+          _results.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
+        } else {
+          _results.push(path.svgPath.node.setAttribute('style', 'fill:#ccc'));
+        }
+      }
+      return _results;
+    };
+
     SVGMap.prototype.display = function() {
       /*
       		finally displays the svgmap, needs to be called after
@@ -122,7 +147,7 @@
     };
 
     /* 
-    	end of public API
+    	    end of public API
     */
 
     SVGMap.prototype.mapLoaded = function(xml) {
@@ -133,7 +158,6 @@
       $view = $('view', xml)[0];
       me.viewAB = AB = svgmap.View.fromXML($view);
       me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height);
-      console.log(me.viewAB, me.viewBC);
       me.proj = svgmap.Proj.fromXML($('proj', $view)[0]);
       return me.mapLoadCallback();
     };

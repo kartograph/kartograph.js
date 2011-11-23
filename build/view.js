@@ -53,6 +53,24 @@
       return [x, y];
     };
 
+    View.prototype.projectPath = function(path) {
+      var cont, contours, me, pcont, x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3;
+      me = this;
+      contours = [];
+      _ref = path.contours;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        pcont = _ref[_i];
+        cont = [];
+        for (_j = 0, _len2 = pcont.length; _j < _len2; _j++) {
+          _ref2 = pcont[_j], x = _ref2[0], y = _ref2[1];
+          _ref3 = me.project(x, y), x = _ref3[0], y = _ref3[1];
+          cont.push([x, y]);
+        }
+        contours.push(cont);
+      }
+      return new svgmap.Path(contours, path.closed);
+    };
+
     View.prototype.asBBox = function() {
       var me;
       me = this;
