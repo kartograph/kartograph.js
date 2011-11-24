@@ -68,23 +68,27 @@
       });
     };
 
-    SVGMap.prototype.addLayer = function(src_id, new_id) {
-      var $layer, $paths, attr, data, i, layer, layerPath, me, path, path_str, svg, svg_path, _i, _len, _ref2, _ref3;
+    SVGMap.prototype.addLayer = function(src_id, layer_id) {
+      var $layer, $paths, attr, data, i, layerPath, me, path, path_str, svg, svg_path, _i, _len, _ref2, _ref3, _results;
       me = this;
-      if (new_id == null) new_id = src_id;
+      if (layer_id == null) layer_id = src_id;
       if ((_ref2 = me.layerPaths) == null) me.layerPaths = {};
-      me.layerPaths[new_id] = [];
+      me.layerPaths[layer_id] = [];
       svg = me.svgSrc;
       $layer = $('g#' + src_id, svg)[0];
       $paths = $('path', $layer);
+      _results = [];
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
         svg_path = $paths[_i];
-        layerPath = {};
+        layerPath = {
+          layer: layer_id
+        };
         path_str = svg_path.getAttribute('d');
         path = svgmap.Path.fromSVG(path_str);
         layerPath.path = path;
         layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG());
-        layerPath.svgPath.node.setAttribute('class', 'polygon ' + new_id);
+        layerPath.svgPath.node.setAttribute('class', 'polygon ' + layer_id);
+        layerPath.svgPath.node.path = layerPath;
         data = {};
         for (i = 0, _ref3 = svg_path.attributes.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
           attr = svg_path.attributes[i];
@@ -93,13 +97,26 @@
           }
         }
         layerPath.data = data;
-        me.layerPaths[new_id].push(layerPath);
+        _results.push(me.layerPaths[layer_id].push(layerPath));
       }
-      layer = {
-        id: new_id,
-        src: src_id
-      };
-      return me.layers.push(layer);
+      return _results;
+    };
+
+    SVGMap.prototype.addLayerEvent = function(layer_id, event, callback) {
+      var me, path, paths, _i, _len, _results;
+      me = this;
+      /*
+      		me.layerEventCallbacks ?= {}
+      		me.layerEventCallbacks[layer_id] ?= {}
+      		me.layerEventCallbacks[layer_id][event] = callback
+      */
+      paths = me.layerPaths[layer_id];
+      _results = [];
+      for (_i = 0, _len = paths.length; _i < _len; _i++) {
+        path = paths[_i];
+        _results.push($(path.svgPath.node).bind(event, callback));
+      }
+      return _results;
     };
 
     SVGMap.prototype.addMarker = function(marker) {
@@ -110,18 +127,14 @@
       return marker.render(xy[0], xy[1], me.container, me.paper);
     };
 
-    SVGMap.prototype.choropleth = function(layer_id, data, id_col, data_col) {
-      var col, d, id, max, me, min, path, pathData, paths, v, _i, _j, _len, _len2, _results;
+    SVGMap.prototype.choropleth = function(layer_id, data, id_col, data_col, colorscale) {
+      var col, d, id, me, path, pathData, paths, v, _i, _j, _len, _len2, _results;
       me = this;
-      min = Number.MAX_VALUE;
-      max = Number.MAX_VALUE * -1;
+      colorscale.parseData(data, data_col);
       pathData = {};
       for (_i = 0, _len = data.length; _i < _len; _i++) {
         d = data[_i];
         pathData[d[id_col]] = d[data_col];
-        if (isNaN(d[data_col])) continue;
-        min = Math.min(min, d[data_col]);
-        max = Math.max(max, d[data_col]);
       }
       paths = me.layerPaths[layer_id];
       _results = [];
@@ -130,7 +143,7 @@
         id = path.data[id_col];
         if (pathData[id] != null) {
           v = pathData[id];
-          col = 'HSL(60,50%,' + (10 + Math.round((1 - v / max) * 10) * (90 / 10)) + '%)';
+          col = colorscale.getColor(v);
           _results.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
         } else {
           _results.push(path.svgPath.node.setAttribute('style', 'fill:#ccc'));
@@ -204,9 +217,16 @@
       return _results;
     };
 
-    SVGMap.prototype.render = function() {};
-
-    SVGMap.prototype.project = function(lon, lat) {};
+    SVGMap.prototype.onPathEvent = function(evt) {
+      /*
+      		forwards path events to their callbacks, but attaches the path to
+      		the event object
+      */
+      var me, path;
+      me = this;
+      path = evt.target.path;
+      return me.layerEventCallbacks[path.layer][evt.type](path);
+    };
 
     return SVGMap;
 

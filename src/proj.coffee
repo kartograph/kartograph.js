@@ -40,6 +40,8 @@ class Proj
 		me.DEG = 180 / me.PI
 		me.lam0 = me.rad(@lon0)
 		me.phi0 = me.rad(@lat0)
+		me.minLat = -90
+		me.maxLat = 90
 		
 	rad: (a) ->
 		a * @RAD
@@ -60,6 +62,27 @@ class Proj
 			else
 				points.push [x,y]
 		if ignore then null else [points]
+
+	sea: ->
+		s = @
+		p = s.project.bind @
+		o = []
+		l0 = s.lon0
+		s.lon0 = 0
+		o.push(p(lon, s.maxLat)) for lon in [-180..180] 
+		o.push(p(180,lat)) for lat in [s.maxLat..s.minLat] 
+		o.push(p(lon, s.minLat)) for lon in [180..-180] 
+		o.push(p(-180,lat)) for lat in [s.minLat..s.maxLat]
+		s.lon0 = l0
+		o
+		
+	world_bbox: ->
+		p = @project.bind @
+		sea = @sea()
+		bbox = new svgmap.BBox()
+		for s in sea
+			bbox.update(s[0],s[1])
+		bbox
 
 	
 Proj.fromXML = (xml) ->
@@ -86,27 +109,6 @@ class Cylindrical extends Proj
 	###
 	_visible: (lon, lat) ->
 		true
-		
-	sea: ->
-		s = @
-		p = s.project.bind @
-		o = []
-		l0 = s.lon0
-		s.lon0 = 0
-		o.push(p(lon,90)) for lon in [-180..180] 
-		o.push(p(180,lat)) for lat in [90..-90] 
-		o.push(p(lon,-90)) for lon in [180..-180] 
-		o.push(p(-180,lat)) for lat in [-90..90]
-		s.lon0 = l0
-		o
-		
-	world_bbox: ->
-		p = @project.bind @
-		sea = @sea()
-		bbox = new svgmap.BBox()
-		for s in sea
-			bbox.update(s[0],s[1])
-		bbox
 		
 	clon: (lon) ->
 		lon -= @lon0
@@ -439,9 +441,11 @@ class Loximuthal extends PseudoCylindrical
 
 __proj['loximuthal'] = Loximuthal
 
+
 # -------------------------------
 # Family of Azimuthal Projecitons
 # -------------------------------
+
 
 class Azimuthal extends Proj
 	###
@@ -649,4 +653,81 @@ class Satellite extends Azimuthal
 		cosc >= (1.0/@dist)
 
 __proj['satellite'] = Satellite
+
+
+# -------------------------------
+# Family of Conic Projecitons
+# -------------------------------
+
+
+class Conic extends Proj
+	
+	constructor: (opts) ->
+		self = @
+		super opts
+		self.lat1 = opts.lat1 ? 30
+		self.phi1 = self.rad(self.lat1)
+		self.lat2 = opts.lat2 ? 50
+		self.phi2 = self.rad(self.lat2)
+					
+	_visible: (lon, lat) ->
+		true
+		
+	_truncate: (x,y) ->
+		[x,y]
+		
+	clon: (lon) ->
+		lon -= @lon0
+		if lon < -180
+			lon += 360
+		else if lon > 180
+			lon -= 360
+		lon
+				
+
+class LCC extends Conic
+	"""
+	Lambert Conformal Conic Projection (spherical)
+	"""
+	constructor: (opts) ->
+		self = @
+		super opts
+		m = Math
+		[sin,cos,abs,log,tan,pow] = [m.sin,m.cos,m.abs,m.log,m.tan,m.pow]
+		self.n = n = sinphi = sin(self.phi1)
+		cosphi = cos(self.phi1)
+		secant = abs(self.phi1 - self.phi2) >= 1e-10
+		
+		if secant
+			n = log(cosphi / cos(self.phi2)) / log(tan(self.QUARTERPI + 0.5 * self.phi2) / tan(self.QUARTERPI + 0.5 * self.phi1))
+		self.c = c = cosphi * pow(tan(self.QUARTERPI + .5 * self.phi1), n) / n
+		if abs(abs(self.phi0) - self.HALFPI) < 1e-10
+			self.rho0 = 0
+		else
+			self.rho0 = c * pow(tan(self.QUARTERPI + .5 * self.phi0), -n)
+			
+		self.minLat = -60
+		self.maxLat = 85
+		
+
+	project: (lon, lat) ->
+		self = @
+		phi = self.rad(lat)
+		lam = self.rad(self.clon(lon))
+		m = Math
+		[sin,cos,abs,log,tan,pow] = [m.sin,m.cos,m.abs,m.log,m.tan,m.pow]
+		
+		n = self.n		
+		if abs(abs(phi) - self.HALFPI) < 1e-10
+			rho = 0.0
+		else
+			rho = self.c * pow(tan(self.QUARTERPI + 0.5 * phi), -n)
+		lam_ = (lam) * n
+		x = 1000 * rho * sin(lam_)
+		y = 1000 * self.rho0 - rho * cos(lam_)
+		
+		[x,y*-1]
+		
+__proj['lcc'] = LCC
+
 

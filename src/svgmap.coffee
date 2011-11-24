@@ -64,20 +64,20 @@ class SVGMap
 		return
 	
 	
-	addLayer: (src_id, new_id) ->
+	addLayer: (src_id, layer_id) ->
 		# add new layer
 		me = @
-		new_id ?= src_id
+		layer_id ?= src_id
 
 		me.layerPaths ?= {}
-		me.layerPaths[new_id] = []
+		me.layerPaths[layer_id] = []
 
 		svg = me.svgSrc
 		$layer = $('g#'+src_id, svg)[0]
 		$paths = $('path', $layer)
 
 		for svg_path in $paths	
-			layerPath = {}			
+			layerPath = { layer: layer_id }			
 		
 			# extract and convert path
 			path_str = svg_path.getAttribute('d')
@@ -85,7 +85,8 @@ class SVGMap
 			layerPath.path = path
 			
 			layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG())
-			layerPath.svgPath.node.setAttribute('class', 'polygon '+new_id)
+			layerPath.svgPath.node.setAttribute('class', 'polygon '+layer_id)
+			layerPath.svgPath.node.path = layerPath
 			
 			data = {}
 			for i in [0..svg_path.attributes.length-1]
@@ -94,14 +95,23 @@ class SVGMap
 					data[attr.name.substr(5)] = attr.value
 			layerPath.data = data
 			
-			me.layerPaths[new_id].push(layerPath)			
+			me.layerPaths[layer_id].push(layerPath)			
 
-		layer = 
-			id: new_id
-			src: src_id
-			#paths: p
+		
+		
+	addLayerEvent: (layer_id, event, callback) ->
+		me = @
+		
+		###
+		me.layerEventCallbacks ?= {}
+		me.layerEventCallbacks[layer_id] ?= {}
+		me.layerEventCallbacks[layer_id][event] = callback
+		###
+		
+		paths = me.layerPaths[layer_id]
+		for path in paths
+			$(path.svgPath.node).bind(event, callback)
 			
-		me.layers.push layer
 	
 	addMarker: (marker) ->
 		me = @
@@ -110,27 +120,25 @@ class SVGMap
 		marker.render(xy[0],xy[1],me.container, me.paper)
 		
 	
-	choropleth: (layer_id, data, id_col, data_col) ->
-		me = @
-		min = Number.MAX_VALUE
-		max = Number.MAX_VALUE*-1
+	choropleth: (layer_id, data, id_col, data_col, colorscale) ->
+		me = @	
+		colorscale.parseData(data, data_col)
 		pathData = {}
 		for d in data
 			pathData[d[id_col]] = d[data_col]
-			if isNaN(d[data_col]) then continue
-			min = Math.min(min, d[data_col])
-			max = Math.max(max, d[data_col])
 			
 		paths = me.layerPaths[layer_id]
 		for path in paths
 			id = path.data[id_col]
 			if pathData[id]?
 				v = pathData[id]
-				col = 'HSL(60,50%,'+(10+Math.round((1-v/max)*10)*(90/10))+'%)'
+				col = colorscale.getColor(v)
 				path.svgPath.node.setAttribute('style', 'fill:'+col)
+				#path.svgPath.node.setAttribute('style', '')
+				#path.svgPath.animate({fill: col }, 1000)
 			else
 				path.svgPath.node.setAttribute('style', 'fill:#ccc')
-	
+				#path.svgPath.animate({fill: '#ccc' }, 1000)
 	
 	#addGraticule: (step=15) ->
 		# foo
@@ -193,14 +201,17 @@ class SVGMap
 		# for debugging purposes
 	
 	
+	onPathEvent: (evt) ->
+		###
+		forwards path events to their callbacks, but attaches the path to
+		the event object
+		###
+		me = @
+		path = evt.target.path
+		me.layerEventCallbacks[path.layer][evt.type](path)
 	
-	render: ->
-		# render all layer
-		
-	project: (lon, lat) ->
-		# 
+	
 		
 
 svgmap.SVGMap = SVGMap
-
 

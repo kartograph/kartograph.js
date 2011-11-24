@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, Loximuthal, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -49,6 +49,8 @@
       me.DEG = 180 / me.PI;
       me.lam0 = me.rad(this.lon0);
       me.phi0 = me.rad(this.lat0);
+      me.minLat = -90;
+      me.maxLat = 90;
     }
 
     Proj.prototype.rad = function(a) {
@@ -80,6 +82,41 @@
       } else {
         return [points];
       }
+    };
+
+    Proj.prototype.sea = function() {
+      var l0, lat, lon, o, p, s, _ref2, _ref3, _ref4, _ref5;
+      s = this;
+      p = s.project.bind(this);
+      o = [];
+      l0 = s.lon0;
+      s.lon0 = 0;
+      for (lon = -180; lon <= 180; lon++) {
+        o.push(p(lon, s.maxLat));
+      }
+      for (lat = _ref2 = s.maxLat, _ref3 = s.minLat; _ref2 <= _ref3 ? lat <= _ref3 : lat >= _ref3; _ref2 <= _ref3 ? lat++ : lat--) {
+        o.push(p(180, lat));
+      }
+      for (lon = 180; lon >= -180; lon--) {
+        o.push(p(lon, s.minLat));
+      }
+      for (lat = _ref4 = s.minLat, _ref5 = s.maxLat; _ref4 <= _ref5 ? lat <= _ref5 : lat >= _ref5; _ref4 <= _ref5 ? lat++ : lat--) {
+        o.push(p(-180, lat));
+      }
+      s.lon0 = l0;
+      return o;
+    };
+
+    Proj.prototype.world_bbox = function() {
+      var bbox, p, s, sea, _i, _len;
+      p = this.project.bind(this);
+      sea = this.sea();
+      bbox = new svgmap.BBox();
+      for (_i = 0, _len = sea.length; _i < _len; _i++) {
+        s = sea[_i];
+        bbox.update(s[0], s[1]);
+      }
+      return bbox;
     };
 
     return Proj;
@@ -116,41 +153,6 @@
 
     Cylindrical.prototype._visible = function(lon, lat) {
       return true;
-    };
-
-    Cylindrical.prototype.sea = function() {
-      var l0, lat, lon, o, p, s;
-      s = this;
-      p = s.project.bind(this);
-      o = [];
-      l0 = s.lon0;
-      s.lon0 = 0;
-      for (lon = -180; lon <= 180; lon++) {
-        o.push(p(lon, 90));
-      }
-      for (lat = 90; lat >= -90; lat--) {
-        o.push(p(180, lat));
-      }
-      for (lon = 180; lon >= -180; lon--) {
-        o.push(p(lon, -90));
-      }
-      for (lat = -90; lat <= 90; lat++) {
-        o.push(p(-180, lat));
-      }
-      s.lon0 = l0;
-      return o;
-    };
-
-    Cylindrical.prototype.world_bbox = function() {
-      var bbox, p, s, sea, _i, _len;
-      p = this.project.bind(this);
-      sea = this.sea();
-      bbox = new svgmap.BBox();
-      for (_i = 0, _len = sea.length; _i < _len; _i++) {
-        s = sea[_i];
-        bbox.update(s[0], s[1]);
-      }
-      return bbox;
     };
 
     Cylindrical.prototype.clon = function(lon) {
@@ -892,5 +894,94 @@
   })();
 
   __proj['satellite'] = Satellite;
+
+  Conic = (function() {
+
+    __extends(Conic, Proj);
+
+    function Conic(opts) {
+      var self, _ref2, _ref3;
+      self = this;
+      Conic.__super__.constructor.call(this, opts);
+      self.lat1 = (_ref2 = opts.lat1) != null ? _ref2 : 30;
+      self.phi1 = self.rad(self.lat1);
+      self.lat2 = (_ref3 = opts.lat2) != null ? _ref3 : 50;
+      self.phi2 = self.rad(self.lat2);
+    }
+
+    Conic.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    Conic.prototype._truncate = function(x, y) {
+      return [x, y];
+    };
+
+    Conic.prototype.clon = function(lon) {
+      lon -= this.lon0;
+      if (lon < -180) {
+        lon += 360;
+      } else if (lon > 180) {
+        lon -= 360;
+      }
+      return lon;
+    };
+
+    return Conic;
+
+  })();
+
+  LCC = (function() {
+
+    __extends(LCC, Conic);
+
+    "Lambert Conformal Conic Projection (spherical)";
+
+    function LCC(opts) {
+      var abs, c, cos, cosphi, log, m, n, pow, secant, self, sin, sinphi, tan, _ref2;
+      self = this;
+      LCC.__super__.constructor.call(this, opts);
+      m = Math;
+      _ref2 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref2[0], cos = _ref2[1], abs = _ref2[2], log = _ref2[3], tan = _ref2[4], pow = _ref2[5];
+      self.n = n = sinphi = sin(self.phi1);
+      cosphi = cos(self.phi1);
+      secant = abs(self.phi1 - self.phi2) >= 1e-10;
+      if (secant) {
+        n = log(cosphi / cos(self.phi2)) / log(tan(self.QUARTERPI + 0.5 * self.phi2) / tan(self.QUARTERPI + 0.5 * self.phi1));
+      }
+      self.c = c = cosphi * pow(tan(self.QUARTERPI + .5 * self.phi1), n) / n;
+      if (abs(abs(self.phi0) - self.HALFPI) < 1e-10) {
+        self.rho0 = 0;
+      } else {
+        self.rho0 = c * pow(tan(self.QUARTERPI + .5 * self.phi0), -n);
+      }
+      self.minLat = -60;
+      self.maxLat = 85;
+    }
+
+    LCC.prototype.project = function(lon, lat) {
+      var abs, cos, lam, lam_, log, m, n, phi, pow, rho, self, sin, tan, x, y, _ref2;
+      self = this;
+      phi = self.rad(lat);
+      lam = self.rad(self.clon(lon));
+      m = Math;
+      _ref2 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref2[0], cos = _ref2[1], abs = _ref2[2], log = _ref2[3], tan = _ref2[4], pow = _ref2[5];
+      n = self.n;
+      if (abs(abs(phi) - self.HALFPI) < 1e-10) {
+        rho = 0.0;
+      } else {
+        rho = self.c * pow(tan(self.QUARTERPI + 0.5 * phi), -n);
+      }
+      lam_ = lam * n;
+      x = 1000 * rho * sin(lam_);
+      y = 1000 * self.rho0 - rho * cos(lam_);
+      return [x, y * -1];
+    };
+
+    return LCC;
+
+  })();
+
+  __proj['lcc'] = LCC;
 
 }).call(this);
