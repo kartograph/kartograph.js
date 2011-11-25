@@ -81,7 +81,7 @@ class SVGMap
 		
 			# extract and convert path
 			path_str = svg_path.getAttribute('d')
-			path = svgmap.Path.fromSVG(path_str)
+			path = svgmap.geom.Path.fromSVG(path_str)
 			layerPath.path = path
 			
 			layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG())
@@ -140,9 +140,51 @@ class SVGMap
 				path.svgPath.node.setAttribute('style', 'fill:#ccc')
 				#path.svgPath.animate({fill: '#ccc' }, 1000)
 	
-	#addGraticule: (step=15) ->
-		# foo
+	###
+		for some reasons, this runs horribly slow in Firefox
+		will use pre-calculated graticules instead
+
+	addGraticule: (lon_step=15, lat_step) ->
 		
+		self = @
+		lat_step ?= lon_step
+		globe = self.proj
+		v0 = self.viewAB
+		v1 = self.viewBC
+		viewbox = v1.asBBox()
+		
+		grat_lines = []
+		
+		for lat in [0..90] by lat_step
+			lats = if lat == 0 then [0] else [lat, -lat]
+			for lat_ in lats
+				if lat_ < globe.minLat or lat_ > globe.maxLat
+					continue
+				pts = []
+				lines = []
+				for lon in [-180..180]
+					console.log lat_,lon
+					if globe._visible(lon, lat_)
+						xy = v1.project(v0.project(globe.project(lon, lat_)))
+						pts.push xy
+					else
+						if pts.length > 1
+							line = new svgmap.geom.Line(pts)
+							pts = []
+							lines = lines.concat(line.clipToBBox(viewbox))
+				
+				if pts.length > 1
+					line = new svgmap.geom.Line(pts)
+					pts = []
+					lines = lines.concat(line.clipToBBox(viewbox))
+					
+				for line in lines
+					path = self.paper.path(line.toSVG())
+					path.setAttribute('class', 'graticule latitude lat_'+Math.abs(lat_)+(if lat_ < 0 then 'W' else 'E'))
+					grat_lines.push(path)		
+					
+	###
+	
 	#addLayerPath: (layer_id, out_class, pathQuery) ->
 	#	paths = me.layerPaths[layer_id]
 	#	for path in paths

@@ -24,6 +24,26 @@ try {
 	assert(rgb[0]==0 && rgb[1]==0 && rgb[2]==0, "hsl2rgb failure "+rgb);
 	
 	
+	// now test color classes
+	var s = new svgmap.color.Ramp();
+	s.setClasses();
+	s.parseData([1000,8000,1200,1002,1004,1006,1400,1800,2500,2223])
+	s.classifyValue(1110);
+	console.log(s.classLimits);
+	console.log('1000 > ',s.classifyValue(1000));
+	console.log('1100 > ',s.classifyValue(1110));
+	console.log('3500 > ',s.classifyValue(3500));
+	console.log('8000 > ',s.classifyValue(8000));
+	
+	s = new svgmap.color.Ramp();
+	s.setClasses(5, 'quantiles');
+	s.parseData([1000,8000,1200,1002,1004,1006,1400,1800,2500,2223])
+	console.log(s.classLimits);
+	console.log('1000 > ',s.classifyValue(1000));
+	console.log('1100 > ',s.classifyValue(1110));
+	console.log('3500 > ',s.classifyValue(3500));
+	console.log('8000 > ',s.classifyValue(8000));
+	
 } catch (er) {
 	console.log('[svgmap.color] test failed: '+er);
 	console.log(er.stack);

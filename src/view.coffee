@@ -50,7 +50,7 @@ class View
 				[x,y] = me.project x,y
 				cont.push([x,y])
 			contours.push(cont)
-		new svgmap.Path contours,path.closed
+		new svgmap.geom.Path contours,path.closed
 		
 	asBBox: ->
 		me = @

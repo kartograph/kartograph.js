@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -297,6 +297,37 @@
 
   __proj['balthasart'] = Balthasart;
 
+  Mercator = (function() {
+
+    __extends(Mercator, Cylindrical);
+
+    /*
+    	# you're not really into maps..
+    */
+
+    function Mercator(opts) {
+      Mercator.__super__.constructor.call(this, opts);
+      this.minLat = -85;
+      this.maxLat = 85;
+    }
+
+    Mercator.prototype.project = function(lon, lat) {
+      var lam, math, phi, s, x, y;
+      s = this;
+      math = Math;
+      lam = s.rad(s.clon(lon));
+      phi = s.rad(lat * -1);
+      x = lam * 1000;
+      y = math.log((1 + math.sin(phi)) / math.cos(phi)) * 1000;
+      return [x, y];
+    };
+
+    return Mercator;
+
+  })();
+
+  __proj['mercator'] = Mercator;
+
   PseudoCylindrical = (function() {
 
     __extends(PseudoCylindrical, Cylindrical);
@@ -551,8 +582,8 @@
       } else {
         phi *= 0.5;
       }
-      x = me.cx * lam * math.cos(phi);
-      y = me.cy * math.sin(phi);
+      x = 1000 * me.cx * lam * math.cos(phi);
+      y = 1000 * me.cy * math.sin(phi);
       return [x, y * -1];
     };
 
@@ -622,7 +653,8 @@
       } else {
         x = lam * (phi - me.phi0) / (math.log(math.tan(me.QUARTERPI + phi * 0.5)) - math.log(math.tan(me.QUARTERPI + me.phi0 * 0.5)));
       }
-      y = phi - me.phi0;
+      x *= 1000;
+      y = 1000 * (phi - me.phi0);
       return [x, y * -1];
     };
 

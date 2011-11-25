@@ -187,9 +187,20 @@ class ColorScale
 	###
 	getColor: (value) ->
 		'#eee'
-		
+	
+	setClasses: (numClasses = 5, method='equalinterval', limits = []) ->
+		###
+		# use this if you want to display a limited number of data classes
+		# possible methods are "equalinterval", "quantiles", "custom"
+		###
+		self = @
+		self.classMethod = method
+		self.numClasses = numClasses
+		self.classLimits = limits
+		return	
+			
 	parseData: (data, data_col) ->
-		me = @
+		self = @
 		min = Number.MAX_VALUE
 		max = Number.MAX_VALUE*-1
 		sum = 0
@@ -204,14 +215,50 @@ class ColorScale
 			sum += val
 		values = values.sort()
 		if values.length % 2 == 1
-			me.median = values[Math.floor(values.length*0.5)]
+			self.median = values[Math.floor(values.length*0.5)]
 		else
 			h = values.length*0.5
-			me.median = values[h-1]*0.5 + values[h]*0.5
-		me.mean = sum/values.length
-		me.min = min
-		me.max = max
+			self.median = values[h-1]*0.5 + values[h]*0.5
+		self.values = values
+		self.mean = sum/values.length
+		self.min = min
+		self.max = max
 		
+		method = self.classMethod
+		num = self.numClasses
+		limits = self.classLimits
+		if method?
+			if method == "equalinterval"
+				for i in [1..num-1]
+					limits.push min+(i/num)*(max-min) 
+			else if method == "quantiles"
+				for i in [1..num-1] 
+					p = values.length * i/num
+					pb = Math.floor(p)
+					if pb == p
+						limits.push values[pb] 
+					else # p > pb 
+						pr = p - pb
+						limits.push values[pb]*pr + values[pb+1]*(1-pr)
+			limits.unshift(min)
+			limits.push(max)
+		return
+						
+	classifyValue: (value) ->
+		self = @ 
+		limits = self.classLimits
+		if limits?
+			n = limits.length-1
+			i = 0
+			while i < n and value >= limits[i]
+				i++
+			value = limits[i-1] + (limits[i] - limits[i-1]) * 0.5
+			
+			minc = limits[0] + (limits[1]-limits[0])*0.3
+			maxc = limits[n-1] + (limits[n]-limits[n-1])*0.7
+			value = self.min + ((value - minc) / (maxc-minc)) * (self.max - self.min)
+		value
+
 
 class Ramp extends ColorScale
 	
@@ -227,7 +274,7 @@ class Ramp extends ColorScale
 		if isNaN(value)
 			console.log('NaN..')
 			return new Color('#dddddd')
-			
+		value = me.classifyValue value	
 		f = (value - me.min) / (me.max - me.min) 
 		me.c0.interpolate(f, me.c1)
 
@@ -237,7 +284,7 @@ svgmap.color.Ramp = Ramp
 
 class Diverging extends ColorScale
 	
-	constructor: (col0='#d73027', col1='#ffffbf', col2='#1E6189', center='median',mode='hsl') ->
+	constructor: (col0='#d73027', col1='#ffffbf', col2='#1E6189', center='median', mode='hsl') ->
 		col0 = new Color(col0) if typeof(col0) == "string"
 		col1 = new Color(col1) if typeof(col1) == "string"
 		col2 = new Color(col2) if typeof(col2) == "string"
@@ -252,6 +299,8 @@ class Diverging extends ColorScale
 		me = @
 		if isNaN(value)
 			return new Color('#dddddd')
+		
+		value = me.classifyValue value
 		
 		c = me.center
 		if c == 'median'

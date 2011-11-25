@@ -68,7 +68,7 @@
         }
         contours.push(cont);
       }
-      return new svgmap.Path(contours, path.closed);
+      return new svgmap.geom.Path(contours, path.closed);
     };
 
     View.prototype.asBBox = function() {

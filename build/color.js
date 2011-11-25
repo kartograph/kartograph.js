@@ -210,9 +210,24 @@
       return '#eee';
     };
 
+    ColorScale.prototype.setClasses = function(numClasses, method, limits) {
+      var self;
+      if (numClasses == null) numClasses = 5;
+      if (method == null) method = 'equalinterval';
+      if (limits == null) limits = [];
+      /*
+      		# use this if you want to display a limited number of data classes
+      		# possible methods are "equalinterval", "quantiles", "custom"
+      */
+      self = this;
+      self.classMethod = method;
+      self.numClasses = numClasses;
+      self.classLimits = limits;
+    };
+
     ColorScale.prototype.parseData = function(data, data_col) {
-      var d, h, max, me, min, sum, val, values, _i, _len;
-      me = this;
+      var d, h, i, limits, max, method, min, num, p, pb, pr, self, sum, val, values, _i, _len, _ref3, _ref4;
+      self = this;
       min = Number.MAX_VALUE;
       max = Number.MAX_VALUE * -1;
       sum = 0;
@@ -228,14 +243,56 @@
       }
       values = values.sort();
       if (values.length % 2 === 1) {
-        me.median = values[Math.floor(values.length * 0.5)];
+        self.median = values[Math.floor(values.length * 0.5)];
       } else {
         h = values.length * 0.5;
-        me.median = values[h - 1] * 0.5 + values[h] * 0.5;
+        self.median = values[h - 1] * 0.5 + values[h] * 0.5;
       }
-      me.mean = sum / values.length;
-      me.min = min;
-      return me.max = max;
+      self.values = values;
+      self.mean = sum / values.length;
+      self.min = min;
+      self.max = max;
+      method = self.classMethod;
+      num = self.numClasses;
+      limits = self.classLimits;
+      if (method != null) {
+        if (method === "equalinterval") {
+          for (i = 1, _ref3 = num - 1; 1 <= _ref3 ? i <= _ref3 : i >= _ref3; 1 <= _ref3 ? i++ : i--) {
+            limits.push(min + (i / num) * (max - min));
+          }
+        } else if (method === "quantiles") {
+          for (i = 1, _ref4 = num - 1; 1 <= _ref4 ? i <= _ref4 : i >= _ref4; 1 <= _ref4 ? i++ : i--) {
+            p = values.length * i / num;
+            pb = Math.floor(p);
+            if (pb === p) {
+              limits.push(values[pb]);
+            } else {
+              pr = p - pb;
+              limits.push(values[pb] * pr + values[pb + 1] * (1 - pr));
+            }
+          }
+        }
+        limits.unshift(min);
+        limits.push(max);
+      }
+    };
+
+    ColorScale.prototype.classifyValue = function(value) {
+      var i, limits, maxc, minc, n, self;
+      self = this;
+      limits = self.classLimits;
+      if (limits != null) {
+        n = limits.length - 1;
+        i = 0;
+        while (i < n && value >= limits[i]) {
+          i++;
+        }
+        value = limits[i - 1] + (limits[i] - limits[i - 1]) * 0.5;
+        minc = limits[0] + (limits[1] - limits[0]) * 0.3;
+        maxc = limits[n - 1] + (limits[n] - limits[n - 1]) * 0.7;
+        value = self.min + ((value - minc) / (maxc - minc)) * (self.max - self.min);
+      }
+      return value;
     };
 
     return ColorScale;
@@ -264,6 +321,7 @@
         console.log('NaN..');
         return new Color('#dddddd');
       }
+      value = me.classifyValue(value);
       f = (value - me.min) / (me.max - me.min);
       return me.c0.interpolate(f, me.c1);
     };
@@ -300,6 +358,7 @@
       var c, col, f, me;
       me = this;
       if (isNaN(value)) return new Color('#dddddd');
+      value = me.classifyValue(value);
       c = me.center;
       if (c === 'median') {
         c = me.median;

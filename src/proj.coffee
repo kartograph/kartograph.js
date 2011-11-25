@@ -193,6 +193,27 @@ class Balthasart extends CEA
 __proj['balthasart'] = Balthasart
 
 
+class Mercator extends Cylindrical
+	###
+	# you're not really into maps..
+	###
+	constructor: (opts) ->
+		super opts
+		@minLat = -85
+		@maxLat = 85
+	
+	project: (lon, lat) ->
+		s = @
+		math = Math
+		lam = s.rad(s.clon(lon))
+		phi = s.rad(lat*-1)
+		x = lam * 1000
+		y = math.log((1+math.sin(phi)) / math.cos(phi)) * 1000
+		[x,y]
+		
+__proj['mercator'] = Mercator
+
+
 # ----------------------------------------
 # Family of Pseudo-Cylindrical Projecitons
 # ----------------------------------------
@@ -392,8 +413,8 @@ class Mollweide extends PseudoCylindrical
 		else
 			phi *= 0.5
 			
-		x = me.cx * lam * math.cos(phi)
-		y = me.cy * math.sin(phi)
+		x = 1000 * me.cx * lam * math.cos(phi)
+		y = 1000 * me.cy * math.sin(phi)
 		[x,y*-1]
 
 __proj['mollweide'] = Mollweide
@@ -436,7 +457,8 @@ class Loximuthal extends PseudoCylindrical
 			x = lam * math.cos(me.phi0)
 		else
 			x = lam * (phi - me.phi0) / (math.log(math.tan(me.QUARTERPI + phi*0.5)) - math.log(math.tan(me.QUARTERPI + me.phi0*0.5)))
-		y = phi - me.phi0
+		x *= 1000
+		y = 1000 * (phi - me.phi0)
 		[x,y*-1]
 
 __proj['loximuthal'] = Loximuthal

@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, BBox, Balthasart, Behrmann, BubbleMarker, CEA, Color, ColorScale, Conic, Cylindrical, Diverging, DotMarker, EckertIV, Equirectangular, GallPeters, HoboDyer, IconMarker, LAEA, LCC, LabelMarker, LatLon, LonLat, Loximuthal, MapMarker, Mollweide, NaturalEarth, Orthographic, Path, Proj, PseudoCylindrical, Ramp, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, root, svgmap, __proj, _ref, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Azimuthal, BBox, Balthasart, Behrmann, BubbleMarker, CEA, CohenSutherland, Color, ColorScale, Conic, Cylindrical, Diverging, DotMarker, EckertIV, Equirectangular, GallPeters, HoboDyer, IconMarker, LAEA, LCC, LabelMarker, LatLon, Line, LonLat, Loximuthal, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, Path, Proj, PseudoCylindrical, Ramp, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, root, svgmap, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -132,6 +132,99 @@
 
   svgmap.BBox = BBox;
 
+  "svgmap - a simple toolset that helps creating interactive thematic maps\nCopyright (C) 2011  Gregor Aisch\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.";
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  svgmap = (_ref2 = root.svgmap) != null ? _ref2 : root.svgmap = {};
+
+  if ((_ref3 = svgmap.geom) == null) svgmap.geom = {};
+
+  if ((_ref4 = (_base = svgmap.geom).clipping) == null) _base.clipping = {};
+
+  CohenSutherland = (function() {
+    var BOTTOM, INSIDE, LEFT, RIGHT, TOP;
+
+    function CohenSutherland() {}
+
+    INSIDE = 0;
+
+    LEFT = 1;
+
+    RIGHT = 2;
+
+    BOTTOM = 4;
+
+    TOP = 8;
+
+    CohenSutherland.prototype.compute_out_code = function(bbox, x, y) {
+      var code, self;
+      self = this;
+      code = self.INSIDE;
+      if (x < bbox.left) {
+        code |= self.LEFT;
+      } else if (x > bbox.right) {
+        code |= self.RIGHT;
+      }
+      if (y < bbox.top) {
+        code |= self.TOP;
+      } else if (y > bbox.bottom) {
+        code |= self.BOTTOM;
+      }
+      return code;
+    };
+
+    CohenSutherland.prototype.clip = function(bbox, x0, y0, x1, y1) {
+      var accept, code0, code1, cout, self, x, y;
+      self = this;
+      code0 = self.compute_out_code(bbox, x0, y0);
+      code1 = self.compute_out_code(bbox, x1, y1);
+      accept = False;
+      while (True) {
+        if (!(code0 | code1)) {
+          accept = True;
+          break;
+        } else if (code0 & code1) {
+          break;
+        } else {
+          cout = code === 0 ? code1 : code0;
+          if (cout & self.TOP) {
+            x = x0 + (x1 - x0) * (bbox.top - y0) / (y1 - y0);
+            y = bbox.top;
+          } else if (cout & self.BOTTOM) {
+            x = x0 + (x1 - x0) * (bbox.bottom - y0) / (y1 - y0);
+            y = bbox.bottom;
+          } else if (cout & self.RIGHT) {
+            y = y0 + (y1 - y0) * (bbox.right - x0) / (x1 - x0);
+            x = bbox.right;
+          } else if (cout & self.LEFT) {
+            y = y0 + (y1 - y0) * (bbox.left - x0) / (x1 - x0);
+            x = bbox.left;
+          }
+          if (cout === code0) {
+            x0 = x;
+            y0 = y;
+            code0 = self.compute_out_code(bbox, x0, y0);
+          } else {
+            x1 = x;
+            y1 = y;
+            code1 = self.compute_out_code(bbox, x1, y1);
+          }
+        }
+      }
+      if (accept) {
+        return [x0, y0, x1, y1];
+      } else {
+        return null;
+      }
+    };
+
+    return CohenSutherland;
+
+  })();
+
+  svgmap.geom.clipping.CohenSutherland = CohenSutherland;
+
   /*
       svgmap - a simple toolset that helps creating interactive thematic maps
       Copyright (C) 2011  Gregor Aisch
@@ -152,9 +245,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref2 = root.svgmap) != null ? _ref2 : root.svgmap = {};
+  svgmap = (_ref5 = root.svgmap) != null ? _ref5 : root.svgmap = {};
 
-  if ((_ref3 = svgmap.color) == null) svgmap.color = {};
+  if ((_ref6 = svgmap.color) == null) svgmap.color = {};
 
   Color = (function() {
 
@@ -170,12 +263,12 @@
     */
 
     function Color(x, y, z, m) {
-      var me, _ref4;
+      var me, _ref7;
       me = this;
       if (x == null) x = [255, 255, 255];
       if (x.length === 3) {
         m = y;
-        _ref4 = x, x = _ref4[0], y = _ref4[1], z = _ref4[2];
+        _ref7 = x, x = _ref7[0], y = _ref7[1], z = _ref7[2];
       }
       if (x.length === 7) {
         m = 'hex';
@@ -259,16 +352,16 @@
   };
 
   Color.rgb2hex = function(r, g, b) {
-    var str, u, _ref4;
-    if (r.length === 3) _ref4 = r, r = _ref4[0], g = _ref4[1], b = _ref4[2];
+    var str, u, _ref7;
+    if (r.length === 3) _ref7 = r, r = _ref7[0], g = _ref7[1], b = _ref7[2];
     u = r << 16 | g << 8 | b;
     str = "000000" + u.toString(16).toUpperCase();
     return "#" + str.substr(str.length - 6);
   };
 
   Color.hsl2rgb = function(h, s, l) {
-    var b, c, g, i, r, t1, t2, t3, _ref4, _ref5;
-    if (h.length === 3) _ref4 = h, h = _ref4[0], s = _ref4[1], l = _ref4[2];
+    var b, c, g, i, r, t1, t2, t3, _ref7, _ref8;
+    if (h.length === 3) _ref7 = h, h = _ref7[0], s = _ref7[1], l = _ref7[2];
     if (s === 0) {
       r = g = b = l * 255;
     } else {
@@ -293,14 +386,14 @@
           c[i] = t1;
         }
       }
-      _ref5 = [Math.round(c[0] * 255), Math.round(c[1] * 255), Math.round(c[2] * 255)], r = _ref5[0], g = _ref5[1], b = _ref5[2];
+      _ref8 = [Math.round(c[0] * 255), Math.round(c[1] * 255), Math.round(c[2] * 255)], r = _ref8[0], g = _ref8[1], b = _ref8[2];
     }
     return [r, g, b];
   };
 
   Color.rgb2hsl = function(r, g, b) {
-    var h, l, max, min, s, _ref4;
-    if (r.length === 3) _ref4 = r, r = _ref4[0], g = _ref4[1], b = _ref4[2];
+    var h, l, max, min, s, _ref7;
+    if (r.length === 3) _ref7 = r, r = _ref7[0], g = _ref7[1], b = _ref7[2];
     r /= 255;
     g /= 255;
     b /= 255;
@@ -339,9 +432,24 @@
       return '#eee';
     };
 
+    ColorScale.prototype.setClasses = function(numClasses, method, limits) {
+      var self;
+      if (numClasses == null) numClasses = 5;
+      if (method == null) method = 'equalinterval';
+      if (limits == null) limits = [];
+      /*
+      		# use this if you want to display a limited number of data classes
+      		# possible methods are "equalinterval", "quantiles", "custom"
+      */
+      self = this;
+      self.classMethod = method;
+      self.numClasses = numClasses;
+      self.classLimits = limits;
+    };
+
     ColorScale.prototype.parseData = function(data, data_col) {
-      var d, h, max, me, min, sum, val, values, _i, _len;
-      me = this;
+      var d, h, i, limits, max, method, min, num, p, pb, pr, self, sum, val, values, _i, _len, _ref7, _ref8;
+      self = this;
       min = Number.MAX_VALUE;
       max = Number.MAX_VALUE * -1;
       sum = 0;
@@ -357,14 +465,56 @@
       }
       values = values.sort();
       if (values.length % 2 === 1) {
-        me.median = values[Math.floor(values.length * 0.5)];
+        self.median = values[Math.floor(values.length * 0.5)];
       } else {
         h = values.length * 0.5;
-        me.median = values[h - 1] * 0.5 + values[h] * 0.5;
+        self.median = values[h - 1] * 0.5 + values[h] * 0.5;
       }
-      me.mean = sum / values.length;
-      me.min = min;
-      return me.max = max;
+      self.values = values;
+      self.mean = sum / values.length;
+      self.min = min;
+      self.max = max;
+      method = self.classMethod;
+      num = self.numClasses;
+      limits = self.classLimits;
+      if (method != null) {
+        if (method === "equalinterval") {
+          for (i = 1, _ref7 = num - 1; 1 <= _ref7 ? i <= _ref7 : i >= _ref7; 1 <= _ref7 ? i++ : i--) {
+            limits.push(min + (i / num) * (max - min));
+          }
+        } else if (method === "quantiles") {
+          for (i = 1, _ref8 = num - 1; 1 <= _ref8 ? i <= _ref8 : i >= _ref8; 1 <= _ref8 ? i++ : i--) {
+            p = values.length * i / num;
+            pb = Math.floor(p);
+            if (pb === p) {
+              limits.push(values[pb]);
+            } else {
+              pr = p - pb;
+              limits.push(values[pb] * pr + values[pb + 1] * (1 - pr));
+            }
+          }
+        }
+        limits.unshift(min);
+        limits.push(max);
+      }
+    };
+
+    ColorScale.prototype.classifyValue = function(value) {
+      var i, limits, maxc, minc, n, self;
+      self = this;
+      limits = self.classLimits;
+      if (limits != null) {
+        n = limits.length - 1;
+        i = 0;
+        while (i < n && value >= limits[i]) {
+          i++;
+        }
+        value = limits[i - 1] + (limits[i] - limits[i - 1]) * 0.5;
+        minc = limits[0] + (limits[1] - limits[0]) * 0.3;
+        maxc = limits[n - 1] + (limits[n] - limits[n - 1]) * 0.7;
+        value = self.min + ((value - minc) / (maxc - minc)) * (self.max - self.min);
+      }
+      return value;
     };
 
     return ColorScale;
@@ -393,6 +543,7 @@
         console.log('NaN..');
         return new Color('#dddddd');
       }
+      value = me.classifyValue(value);
       f = (value - me.min) / (me.max - me.min);
       return me.c0.interpolate(f, me.c1);
     };
@@ -429,6 +580,7 @@
       var c, col, f, me;
       me = this;
       if (isNaN(value)) return new Color('#dddddd');
+      value = me.classifyValue(value);
       c = me.center;
       if (c === 'median') {
         c = me.median;
@@ -473,7 +625,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref4 = root.svgmap) != null ? _ref4 : root.svgmap = {};
+  svgmap = (_ref7 = root.svgmap) != null ? _ref7 : root.svgmap = {};
 
   LonLat = (function() {
 
@@ -526,9 +678,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref5 = root.svgmap) != null ? _ref5 : root.svgmap = {};
+  svgmap = (_ref8 = root.svgmap) != null ? _ref8 : root.svgmap = {};
 
-  if ((_ref6 = svgmap.marker) == null) svgmap.marker = {};
+  if ((_ref9 = svgmap.marker) == null) svgmap.marker = {};
 
   /*
   Marker concept:
@@ -656,30 +808,40 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref7 = root.svgmap) != null ? _ref7 : root.svgmap = {};
+  svgmap = (_ref10 = root.svgmap) != null ? _ref10 : root.svgmap = {};
+
+  if ((_ref11 = svgmap.geom) == null) svgmap.geom = {};
 
   Path = (function() {
+
+    /*
+    	represents complex polygons (aka multi-polygons)
+    */
 
     function Path(contours, closed) {
       this.contours = contours;
       this.closed = closed != null ? closed : true;
     }
 
+    Path.prototype.clipToBBox = function(bbox) {
+      throw "path clipping is not implemented yet";
+    };
+
     Path.prototype.toSVG = function() {
       /*
       		translates this path to a SVG path string
       */
-      var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref8, _ref9;
+      var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref12, _ref13;
       me = this;
       str = "";
       glue = me.closed ? "Z M" : "M";
-      _ref8 = me.contours;
-      for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
-        contour = _ref8[_i];
+      _ref12 = me.contours;
+      for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+        contour = _ref12[_i];
         fst = true;
         str += str === "" ? "M" : glue;
         for (_j = 0, _len2 = contour.length; _j < _len2; _j++) {
-          _ref9 = contour[_j], x = _ref9[0], y = _ref9[1];
+          _ref13 = contour[_j], x = _ref13[0], y = _ref13[1];
           if (!fst) str += "L";
           str += x + ',' + y;
           fst = false;
@@ -697,30 +859,87 @@
     /*
     	loads a path from a SVG path string
     */
-    var closed, contour, contour_str, contours, pt_str, sep, x, y, _i, _j, _len, _len2, _ref10, _ref8, _ref9;
+    var closed, contour, contour_str, contours, pt_str, sep, x, y, _i, _j, _len, _len2, _ref12, _ref13, _ref14;
     contours = [];
     path_str = path_str.trim();
     closed = path_str[path_str.length - 1] === "Z";
     sep = closed ? "Z M" : "M";
     path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
-    _ref8 = path_str.split(sep);
-    for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
-      contour_str = _ref8[_i];
+    _ref12 = path_str.split(sep);
+    for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+      contour_str = _ref12[_i];
       contour = [];
       if (contour_str !== "") {
-        _ref9 = contour_str.split('L');
-        for (_j = 0, _len2 = _ref9.length; _j < _len2; _j++) {
-          pt_str = _ref9[_j];
-          _ref10 = pt_str.split(','), x = _ref10[0], y = _ref10[1];
+        _ref13 = contour_str.split('L');
+        for (_j = 0, _len2 = _ref13.length; _j < _len2; _j++) {
+          pt_str = _ref13[_j];
+          _ref14 = pt_str.split(','), x = _ref14[0], y = _ref14[1];
           contour.push([Number(x), Number(y)]);
         }
         contours.push(contour);
       }
     }
-    return new svgmap.Path(contours, closed);
+    return new svgmap.geom.Path(contours, closed);
   };
 
-  svgmap.Path = Path;
+  svgmap.geom.Path = Path;
+
+  Line = (function() {
+
+    /*
+    	represents simple lines
+    */
+
+    function Line(points) {
+      this.points = points;
+    }
+
+    Line.prototype.clipToBBox = function(bbox) {
+      var clip, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _ref12, _ref13, _ref14, _ref15;
+      self = this;
+      clip = new svgmap.geom.clipping.CohenSutherland().clip;
+      pts = [];
+      lines = [];
+      last_in = false;
+      for (i = 0, _ref12 = self.points.length - 2; 0 <= _ref12 ? i <= _ref12 : i >= _ref12; 0 <= _ref12 ? i++ : i--) {
+        _ref13 = self.points[i], p0x = _ref13[0], p0y = _ref13[1];
+        _ref14 = self.points[i + 1], p1x = _ref14[0], p1y = _ref14[1];
+        try {
+          _ref15 = clip(bbox, p0x, p0y, p1x, p1y), x0 = _ref15[0], y0 = _ref15[1], x1 = _ref15[2], y1 = _ref15[3];
+          last_in = true;
+          pts.push([x0, y0]);
+          if (p1x !== x1 || p1y !== y0 || i === len(self.points) - 2) {
+            pts.push([x1, y1]);
+          }
+        } catch (err) {
+          if (last_in && pts.length > 1) {
+            lines.push(new Line(pts));
+            pts = [];
+          }
+          last_in = false;
+        }
+      }
+      if (pts.length > 1) lines.push(new Line(pts));
+      return lines;
+    };
+
+    Line.prototype.toSVG = function() {
+      var pts, self, x, y, _i, _len, _ref12, _ref13;
+      self = this;
+      pts = [];
+      _ref12 = self.points;
+      for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+        _ref13 = _ref12[_i], x = _ref13[0], y = _ref13[1];
+        pts.push(x + ',' + y);
+      }
+      return 'M' + pts.join('L');
+    };
+
+    return Line;
+
+  })();
+
+  svgmap.geom.Line = Line;
 
   /*
       svgmap - a simple toolset that helps creating interactive thematic maps
@@ -742,7 +961,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref8 = root.svgmap) != null ? _ref8 : root.svgmap = {};
+  svgmap = (_ref12 = root.svgmap) != null ? _ref12 : root.svgmap = {};
 
   __proj = svgmap.proj = {};
 
@@ -757,10 +976,10 @@
   Proj = (function() {
 
     function Proj(opts) {
-      var me, _ref10, _ref9;
+      var me, _ref13, _ref14;
       me = this;
-      me.lon0 = (_ref9 = opts.lon0) != null ? _ref9 : 0;
-      me.lat0 = (_ref10 = opts.lat0) != null ? _ref10 : 0;
+      me.lon0 = (_ref13 = opts.lon0) != null ? _ref13 : 0;
+      me.lat0 = (_ref14 = opts.lat0) != null ? _ref14 : 0;
       me.PI = Math.PI;
       me.HALFPI = me.PI * .5;
       me.QUARTERPI = me.PI * .25;
@@ -781,15 +1000,15 @@
     };
 
     Proj.prototype.plot = function(polygon, truncate) {
-      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref10, _ref9;
+      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref13, _ref14;
       if (truncate == null) truncate = true;
       points = [];
       ignore = true;
       for (_i = 0, _len = polygon.length; _i < _len; _i++) {
-        _ref9 = polygon[_i], lon = _ref9[0], lat = _ref9[1];
+        _ref13 = polygon[_i], lon = _ref13[0], lat = _ref13[1];
         vis = this._visible(lon, lat);
         if (vis) ignore = false;
-        _ref10 = this.project(lon, lat), x = _ref10[0], y = _ref10[1];
+        _ref14 = this.project(lon, lat), x = _ref14[0], y = _ref14[1];
         if (!vis && truncate) {
           points.push(this._truncate(x, y));
         } else {
@@ -804,7 +1023,7 @@
     };
 
     Proj.prototype.sea = function() {
-      var l0, lat, lon, o, p, s, _ref10, _ref11, _ref12, _ref9;
+      var l0, lat, lon, o, p, s, _ref13, _ref14, _ref15, _ref16;
       s = this;
       p = s.project.bind(this);
       o = [];
@@ -813,13 +1032,13 @@
       for (lon = -180; lon <= 180; lon++) {
         o.push(p(lon, s.maxLat));
       }
-      for (lat = _ref9 = s.maxLat, _ref10 = s.minLat; _ref9 <= _ref10 ? lat <= _ref10 : lat >= _ref10; _ref9 <= _ref10 ? lat++ : lat--) {
+      for (lat = _ref13 = s.maxLat, _ref14 = s.minLat; _ref13 <= _ref14 ? lat <= _ref14 : lat >= _ref14; _ref13 <= _ref14 ? lat++ : lat--) {
         o.push(p(180, lat));
       }
       for (lon = 180; lon >= -180; lon--) {
         o.push(p(lon, s.minLat));
       }
-      for (lat = _ref11 = s.minLat, _ref12 = s.maxLat; _ref11 <= _ref12 ? lat <= _ref12 : lat >= _ref12; _ref11 <= _ref12 ? lat++ : lat--) {
+      for (lat = _ref15 = s.minLat, _ref16 = s.maxLat; _ref15 <= _ref16 ? lat <= _ref16 : lat >= _ref16; _ref15 <= _ref16 ? lat++ : lat--) {
         o.push(p(-180, lat));
       }
       s.lon0 = l0;
@@ -846,10 +1065,10 @@
     /*
     	reconstructs a projection from xml description
     */
-    var attr, i, id, opts, _ref9;
+    var attr, i, id, opts, _ref13;
     id = xml.getAttribute('id');
     opts = {};
-    for (i = 0, _ref9 = xml.attributes.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
+    for (i = 0, _ref13 = xml.attributes.length - 1; 0 <= _ref13 ? i <= _ref13 : i >= _ref13; 0 <= _ref13 ? i++ : i--) {
       attr = xml.attributes[i];
       if (attr.name !== "id") opts[attr.name] = attr.value;
     }
@@ -916,9 +1135,9 @@
     __extends(CEA, Cylindrical);
 
     function CEA(opts) {
-      var _ref9;
+      var _ref13;
       CEA.__super__.constructor.call(this, opts);
-      this.lat1 = (_ref9 = opts.lat1) != null ? _ref9 : 0;
+      this.lat1 = (_ref13 = opts.lat1) != null ? _ref13 : 0;
       this.phi1 = this.rad(this.lat1);
     }
 
@@ -1015,6 +1234,37 @@
   })();
 
   __proj['balthasart'] = Balthasart;
+
+  Mercator = (function() {
+
+    __extends(Mercator, Cylindrical);
+
+    /*
+    	# you're not really into maps..
+    */
+
+    function Mercator(opts) {
+      Mercator.__super__.constructor.call(this, opts);
+      this.minLat = -85;
+      this.maxLat = 85;
+    }
+
+    Mercator.prototype.project = function(lon, lat) {
+      var lam, math, phi, s, x, y;
+      s = this;
+      math = Math;
+      lam = s.rad(s.clon(lon));
+      phi = s.rad(lat * -1);
+      x = lam * 1000;
+      y = math.log((1 + math.sin(phi)) / math.cos(phi)) * 1000;
+      return [x, y];
+    };
+
+    return Mercator;
+
+  })();
+
+  __proj['mercator'] = Mercator;
 
   PseudoCylindrical = (function() {
 
@@ -1270,8 +1520,8 @@
       } else {
         phi *= 0.5;
       }
-      x = me.cx * lam * math.cos(phi);
-      y = me.cy * math.sin(phi);
+      x = 1000 * me.cx * lam * math.cos(phi);
+      y = 1000 * me.cy * math.sin(phi);
       return [x, y * -1];
     };
 
@@ -1341,7 +1591,8 @@
       } else {
         x = lam * (phi - me.phi0) / (math.log(math.tan(me.QUARTERPI + phi * 0.5)) - math.log(math.tan(me.QUARTERPI + me.phi0 * 0.5)));
       }
-      y = phi - me.phi0;
+      x *= 1000;
+      y = 1000 * (phi - me.phi0);
       return [x, y * -1];
     };
 
@@ -1550,14 +1801,14 @@
     */
 
     function Satellite(opts) {
-      var lat, lon, xmax, xmin, xy, _ref10, _ref11, _ref9;
+      var lat, lon, xmax, xmin, xy, _ref13, _ref14, _ref15;
       Satellite.__super__.constructor.call(this, {
         lon0: 0,
         lat0: 0
       });
-      this.dist = (_ref9 = opts.dist) != null ? _ref9 : 3;
-      this.up = this.rad((_ref10 = opts.up) != null ? _ref10 : 0);
-      this.tilt = this.rad((_ref11 = opts.tilt) != null ? _ref11 : 0);
+      this.dist = (_ref13 = opts.dist) != null ? _ref13 : 3;
+      this.up = this.rad((_ref14 = opts.up) != null ? _ref14 : 0);
+      this.tilt = this.rad((_ref15 = opts.tilt) != null ? _ref15 : 0);
       this.scale = 1;
       xmin = Number.MAX_VALUE;
       xmax = Number.MAX_VALUE * -1;
@@ -1619,12 +1870,12 @@
     __extends(Conic, Proj);
 
     function Conic(opts) {
-      var self, _ref10, _ref9;
+      var self, _ref13, _ref14;
       self = this;
       Conic.__super__.constructor.call(this, opts);
-      self.lat1 = (_ref9 = opts.lat1) != null ? _ref9 : 30;
+      self.lat1 = (_ref13 = opts.lat1) != null ? _ref13 : 30;
       self.phi1 = self.rad(self.lat1);
-      self.lat2 = (_ref10 = opts.lat2) != null ? _ref10 : 50;
+      self.lat2 = (_ref14 = opts.lat2) != null ? _ref14 : 50;
       self.phi2 = self.rad(self.lat2);
     }
 
@@ -1657,11 +1908,11 @@
     "Lambert Conformal Conic Projection (spherical)";
 
     function LCC(opts) {
-      var abs, c, cos, cosphi, log, m, n, pow, secant, self, sin, sinphi, tan, _ref9;
+      var abs, c, cos, cosphi, log, m, n, pow, secant, self, sin, sinphi, tan, _ref13;
       self = this;
       LCC.__super__.constructor.call(this, opts);
       m = Math;
-      _ref9 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref9[0], cos = _ref9[1], abs = _ref9[2], log = _ref9[3], tan = _ref9[4], pow = _ref9[5];
+      _ref13 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref13[0], cos = _ref13[1], abs = _ref13[2], log = _ref13[3], tan = _ref13[4], pow = _ref13[5];
       self.n = n = sinphi = sin(self.phi1);
       cosphi = cos(self.phi1);
       secant = abs(self.phi1 - self.phi2) >= 1e-10;
@@ -1679,12 +1930,12 @@
     }
 
     LCC.prototype.project = function(lon, lat) {
-      var abs, cos, lam, lam_, log, m, n, phi, pow, rho, self, sin, tan, x, y, _ref9;
+      var abs, cos, lam, lam_, log, m, n, phi, pow, rho, self, sin, tan, x, y, _ref13;
       self = this;
       phi = self.rad(lat);
       lam = self.rad(self.clon(lon));
       m = Math;
-      _ref9 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref9[0], cos = _ref9[1], abs = _ref9[2], log = _ref9[3], tan = _ref9[4], pow = _ref9[5];
+      _ref13 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref13[0], cos = _ref13[1], abs = _ref13[2], log = _ref13[3], tan = _ref13[4], pow = _ref13[5];
       n = self.n;
       if (abs(abs(phi) - self.HALFPI) < 1e-10) {
         rho = 0.0;
@@ -1723,7 +1974,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref9 = root.svgmap) != null ? _ref9 : root.svgmap = {};
+  svgmap = (_ref13 = root.svgmap) != null ? _ref13 : root.svgmap = {};
 
   svgmap.version = "0.1.0";
 
@@ -1770,10 +2021,10 @@
     };
 
     SVGMap.prototype.addLayer = function(src_id, layer_id) {
-      var $layer, $paths, attr, data, i, layerPath, me, path, path_str, svg, svg_path, _i, _len, _ref10, _ref11, _results;
+      var $layer, $paths, attr, data, i, layerPath, me, path, path_str, svg, svg_path, _i, _len, _ref14, _ref15, _results;
       me = this;
       if (layer_id == null) layer_id = src_id;
-      if ((_ref10 = me.layerPaths) == null) me.layerPaths = {};
+      if ((_ref14 = me.layerPaths) == null) me.layerPaths = {};
       me.layerPaths[layer_id] = [];
       svg = me.svgSrc;
       $layer = $('g#' + src_id, svg)[0];
@@ -1785,13 +2036,13 @@
           layer: layer_id
         };
         path_str = svg_path.getAttribute('d');
-        path = svgmap.Path.fromSVG(path_str);
+        path = svgmap.geom.Path.fromSVG(path_str);
         layerPath.path = path;
         layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG());
         layerPath.svgPath.node.setAttribute('class', 'polygon ' + layer_id);
         layerPath.svgPath.node.path = layerPath;
         data = {};
-        for (i = 0, _ref11 = svg_path.attributes.length - 1; 0 <= _ref11 ? i <= _ref11 : i >= _ref11; 0 <= _ref11 ? i++ : i--) {
+        for (i = 0, _ref15 = svg_path.attributes.length - 1; 0 <= _ref15 ? i <= _ref15 : i >= _ref15; 0 <= _ref15 ? i++ : i--) {
           attr = svg_path.attributes[i];
           if (attr.name.substr(0, 5) === "data-") {
             data[attr.name.substr(5)] = attr.value;
@@ -1853,6 +2104,50 @@
       return _results;
     };
 
+    /*
+    		for some reasons, this runs horribly slow in Firefox
+    		will use pre-calculated graticules instead
+    
+    	addGraticule: (lon_step=15, lat_step) ->
+    		
+    		self = @
+    		lat_step ?= lon_step
+    		globe = self.proj
+    		v0 = self.viewAB
+    		v1 = self.viewBC
+    		viewbox = v1.asBBox()
+    		
+    		grat_lines = []
+    		
+    		for lat in [0..90] by lat_step
+    			lats = if lat == 0 then [0] else [lat, -lat]
+    			for lat_ in lats
+    				if lat_ < globe.minLat or lat_ > globe.maxLat
+    					continue
+    				pts = []
+    				lines = []
+    				for lon in [-180..180]
+    					console.log lat_,lon
+    					if globe._visible(lon, lat_)
+    						xy = v1.project(v0.project(globe.project(lon, lat_)))
+    						pts.push xy
+    					else
+    						if pts.length > 1
+    							line = new svgmap.geom.Line(pts)
+    							pts = []
+    							lines = lines.concat(line.clipToBBox(viewbox))
+    				
+    				if pts.length > 1
+    					line = new svgmap.geom.Line(pts)
+    					pts = []
+    					lines = lines.concat(line.clipToBBox(viewbox))
+    					
+    				for line in lines
+    					path = self.paper.path(line.toSVG())
+    					path.setAttribute('class', 'graticule latitude lat_'+Math.abs(lat_)+(if lat_ < 0 then 'W' else 'E'))
+    					grat_lines.push(path)
+    */
+
     SVGMap.prototype.display = function() {
       /*
       		finally displays the svgmap, needs to be called after
@@ -1887,7 +2182,7 @@
     };
 
     SVGMap.prototype.renderCoastline = function(coastlines) {
-      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref10, _results;
+      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref14, _results;
       me = this;
       P = me.proj;
       vp = me.viewport;
@@ -1897,7 +2192,7 @@
       for (_i = 0, _len = coastlines.length; _i < _len; _i++) {
         line = coastlines[_i];
         pathstr = '';
-        for (i = 0, _ref10 = line.length - 2; 0 <= _ref10 ? i <= _ref10 : i >= _ref10; 0 <= _ref10 ? i++ : i--) {
+        for (i = 0, _ref14 = line.length - 2; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
           p0 = line[i];
           p1 = line[i + 1];
           d = 0;
@@ -1987,21 +2282,21 @@
     };
 
     View.prototype.projectPath = function(path) {
-      var cont, contours, me, pcont, x, y, _i, _j, _len, _len2, _ref10, _ref11, _ref12;
+      var cont, contours, me, pcont, x, y, _i, _j, _len, _len2, _ref14, _ref15, _ref16;
       me = this;
       contours = [];
-      _ref10 = path.contours;
-      for (_i = 0, _len = _ref10.length; _i < _len; _i++) {
-        pcont = _ref10[_i];
+      _ref14 = path.contours;
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        pcont = _ref14[_i];
         cont = [];
         for (_j = 0, _len2 = pcont.length; _j < _len2; _j++) {
-          _ref11 = pcont[_j], x = _ref11[0], y = _ref11[1];
-          _ref12 = me.project(x, y), x = _ref12[0], y = _ref12[1];
+          _ref15 = pcont[_j], x = _ref15[0], y = _ref15[1];
+          _ref16 = me.project(x, y), x = _ref16[0], y = _ref16[1];
           cont.push([x, y]);
         }
         contours.push(cont);
       }
-      return new svgmap.Path(contours, path.closed);
+      return new svgmap.geom.Path(contours, path.closed);
     };
 
     View.prototype.asBBox = function() {
@@ -2029,7 +2324,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  if ((_ref10 = root.svgmap) == null) root.svgmap = {};
+  if ((_ref14 = root.svgmap) == null) root.svgmap = {};
 
   root.svgmap.View = View;
 

@@ -18,11 +18,18 @@
 
 root = (exports ? this)	
 svgmap = root.svgmap ?= {}
-
+svgmap.geom ?= {} 
 
 class Path
+	###
+	represents complex polygons (aka multi-polygons)
+	###
 	constructor: (@contours, @closed=true) ->
-		
+	
+	clipToBBox: (bbox) ->
+		# still needs to be implemented
+		throw "path clipping is not implemented yet"
+	
 	toSVG: ->
 		###
 		translates this path to a SVG path string
@@ -57,8 +64,50 @@ Path.fromSVG = (path_str) ->
 				[x,y] = pt_str.split(',')
 				contour.push([Number(x), Number(y)])
 			contours.push(contour)		
-	new svgmap.Path(contours, closed)
+	new svgmap.geom.Path(contours, closed)
 
 
-svgmap.Path = Path
+svgmap.geom.Path = Path
+
+
+class Line
+	###
+	represents simple lines
+	###
+	constructor: (@points) ->
+		
+	clipToBBox: (bbox) ->
+		self = @
+		# line clipping here
+		clip = new svgmap.geom.clipping.CohenSutherland().clip
+		pts = []
+		lines = []
+		last_in = false
+		for i in [0..self.points.length-2]
+			[p0x, p0y] = self.points[i]
+			[p1x, p1y] = self.points[i+1]
+			try
+				[x0,y0,x1,y1] = clip(bbox, p0x, p0y, p1x, p1y)
+				last_in = true
+				pts.push([x0, y0])
+				if p1x != x1 or p1y != y0 or i == len(self.points)-2
+					pts.push([x1, y1])
+			catch err
+				if last_in and pts.length > 1 
+					lines.push(new Line(pts))
+					pts = []
+				last_in = false
+
+		if pts.length > 1
+			lines.push(new Line(pts))
+		lines
+		
+	toSVG: ->
+		self = @
+		pts = []
+		for [x,y] in self.points
+			pts.push x+','+y 
+		'M' + pts.join 'L'
+		
+svgmap.geom.Line = Line
 
