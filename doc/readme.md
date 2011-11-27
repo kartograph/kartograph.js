@@ -45,17 +45,14 @@ Example:
 	* _layer_ - the id of the layer the choropleth shall be applied to. defaults to the last added layer
 	* _data_ - the data dictionary, with path ids as keys and numbers or dictionaries of numbers as values
 	* _key_ - if the data dictionaries contains dictionaries of numbers, you need to specify the key. 
-
-Example:
-
-	map.choroplet({
-		data: { 
-			'USA': { 'population': 311484627, 'GDP': 14256 },
-			'CAN': { 'population': 34278406, 'GDP': 1303 } 
-		},
-		key: 'GDP'
-	});
- 
+	Example:
+		map.choroplet({
+			data: { 
+				'USA': { 'population': 311484627, 'GDP': 14256 },
+				'CAN': { 'population': 34278406, 'GDP': 1303 } 
+			},
+			key: 'GDP'
+		});
 	* _colorscale_ - the colorscale, defaults to svgmap.color.scale.COOL
 
 Example:
