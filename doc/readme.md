@@ -47,13 +47,13 @@ Example:
 	* _key_ - if the data dictionaries contains dictionaries of numbers, you need to specify the key. 
 	Example:
 
-		map.choroplet({
-			data: { 
-				'USA': { 'population': 311484627, 'GDP': 14256 },
-				'CAN': { 'population': 34278406, 'GDP': 1303 } 
-			},
-			key: 'GDP'
-		});
+			map.choroplet({
+				data: { 
+					'USA': { 'population': 311484627, 'GDP': 14256 },
+					'CAN': { 'population': 34278406, 'GDP': 1303 } 
+				},
+				key: 'GDP'
+			});
 	* _colorscale_ - the colorscale, defaults to svgmap.color.scale.COOL
 
 Example:
