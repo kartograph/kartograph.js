@@ -7,6 +7,8 @@ Loads a SVG map file created with svgmap.py.
 * _svgurl_ - SVG map url, must be on same server
 * _callback_ - will be called after the svg is loaded
 
+Example:
+
 	var map = new svgmap.SVGMap("#map");
 	map.loadMap('world.svg', function(map) {
 		// this is where you would do something with your map
@@ -21,7 +23,7 @@ SVG maps may contain several layers, but sometimes you don't need to display the
 * _layerId_ - this is how you want the layer to be named in the map application. every path in this layer will get this as a CSS class name
 * _pathId_ - if you want to add interactivity to the paths of this layer, you need to specify how to identify them. For instance, if your paths store attributes <path data-iso3="USA".. />, you want pathId to be "iso3".
 
-Example:
+Examples:
 	
 	map.addLayer('countries','background')	
 	map.addLayer('graticule')
@@ -31,22 +33,27 @@ Example:
 * _event_ - any valid jQuery event type, like "click" or "mouseover"
 * _callback_ - the function that will be called when the event occurs
 * _layerId_, the id of the layer the events shall be added to. defaults to the last added layer
-
-Example: 
-		
-	var onCountryClick = function(event) {
-		var path = event.target;
-		console.log(path.data['iso3']);		
-	};
-	map.addLayerEvent('click', onCountryClick, 'countries');
+	
+			var onCountryClick = function(event) {
+				var path = event.target;
+				console.log(path.data['iso3']);		
+			};
+			map.addLayerEvent('click', onCountryClick, 'countries');
 
 ### choroplet(opts)
 * _opts_ - a dictionary of options, which are:
 	* _layer_ - the id of the layer the choropleth shall be applied to. defaults to the last added layer
-	* _data_ - the data dictionary, with path ids as keys and numbers or dictionaries of numbers as values
-	* _key_ - if the data dictionaries contains dictionaries of numbers, you need to specify the key. 
-	Example:
+	* _data_ - the data dictionary, with path ids as keys and numbers or dictionaries of numbers as values. In the latter case, you need to provide a key, see next parameter.
+			
+			map.choroplet({
+				data: { 
+					'USA': 311484627, 
+					'CAN': 34278406 
+				}
+			});
 
+	* _key_ - if the data dictionaries contains dictionaries of numbers, you need to specify the key. 
+		
 			map.choroplet({
 				data: { 
 					'USA': { 'population': 311484627, 'GDP': 14256 },
@@ -54,13 +61,12 @@ Example:
 				},
 				key: 'GDP'
 			});
+
 	* _colorscale_ - the colorscale, defaults to svgmap.color.scale.COOL
 
-Example:
-
-	map.choroplet({
-		colorscale: new svgmap.color.scale.Ramp('#ffffff', '#883333')
-	});
+			map.choroplet({
+				colorscale: new svgmap.color.scale.Ramp('#ffffff', '#883333')
+			});
 
 	* _noDataColor_ - the color that should be used for paths that have no entry or NaN in the data dictionary. Defaults to '#cccccc'
 
