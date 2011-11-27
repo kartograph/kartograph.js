@@ -49,7 +49,6 @@ class SVGMap
 		me.container = cnt = $(container)
 		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
 		me.paper = Raphael(cnt[0], vp.width, vp.height)
-		me.layers = []
 		me.markers = []
 	
 	
@@ -64,51 +63,27 @@ class SVGMap
 		return
 	
 	
-	addLayer: (src_id, layer_id) ->
+	addLayer: (src_id, layer_id, path_id) ->
 		# add new layer
 		me = @
 		layer_id ?= src_id
 
-		me.layerPaths ?= {}
-		me.layerPaths[layer_id] = []
-
-		svg = me.svgSrc
-		$layer = $('g#'+src_id, svg)[0]
-		$paths = $('path', $layer)
-
-		for svg_path in $paths	
-			layerPath = { layer: layer_id }			
+		me.layerIds ?= []
+		me.layerIds.push(layer_id)
 		
-			# extract and convert path
-			path_str = svg_path.getAttribute('d')
-			path = svgmap.geom.Path.fromSVG(path_str)
-			layerPath.path = path
-			
-			layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG())
-			layerPath.svgPath.node.setAttribute('class', 'polygon '+layer_id)
-			layerPath.svgPath.node.path = layerPath
-			
-			data = {}
-			for i in [0..svg_path.attributes.length-1]
-				attr = svg_path.attributes[i]
-				if attr.name.substr(0,5) == "data-"
-					data[attr.name.substr(5)] = attr.value
-			layerPath.data = data
-			
-			me.layerPaths[layer_id].push(layerPath)			
+		layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC)
+		me.layers ?= {}
+		me.layers[layer_id] = layer
+		
+		$paths = $('path', $('g#'+src_id, me.svgSrc)[0])		
+		for svg_path in $paths				
+			layer.addPath(svg_path)
 
 		
 		
 	addLayerEvent: (layer_id, event, callback) ->
 		me = @
-		
-		###
-		me.layerEventCallbacks ?= {}
-		me.layerEventCallbacks[layer_id] ?= {}
-		me.layerEventCallbacks[layer_id][event] = callback
-		###
-		
-		paths = me.layerPaths[layer_id]
+		paths = me.layers[layer_id].paths
 		for path in paths
 			$(path.svgPath.node).bind(event, callback)
 			
@@ -120,26 +95,63 @@ class SVGMap
 		marker.render(xy[0],xy[1],me.container, me.paper)
 		
 	
-	choropleth: (layer_id, data, id_col, data_col, colorscale) ->
+	choropleth: (opts) ->
 		me = @	
+		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
+		data = opts.data
+		data_col = opts.prop
+		no_data_color = opts.nodata ? '#ccc'
+		colorscale = opts.colorscale ? svgmap.color.scale.COOL
+		
 		colorscale.parseData(data, data_col)
 		pathData = {}
-		for d in data
-			pathData[d[id_col]] = d[data_col]
+		for id, row of data
+			pathData[id] = row[data_col]
 			
-		paths = me.layerPaths[layer_id]
-		for path in paths
-			id = path.data[id_col]
-			if pathData[id]?
-				v = pathData[id]
-				col = colorscale.getColor(v)
-				path.svgPath.node.setAttribute('style', 'fill:'+col)
-				#path.svgPath.node.setAttribute('style', '')
-				#path.svgPath.animate({fill: col }, 1000)
-			else
-				path.svgPath.node.setAttribute('style', 'fill:#ccc')
-				#path.svgPath.animate({fill: '#ccc' }, 1000)
+		for id, paths of me.layers[layer_id].pathsById
+			for path in paths
+				if pathData[id]?
+					v = pathData[id]
+					col = colorscale.getColor(v)
+					path.svgPath.node.setAttribute('style', 'fill:'+col)
+				else
+					path.svgPath.node.setAttribute('style', 'fill:'+no_data_color)
+
 	
+	tooltips: (opts) ->
+		me = @
+		tooltips = opts.content
+		id_col = opts.id
+		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
+		
+		for id, paths of me.layers[layer_id].pathsById
+			for path in paths			
+				if $.isFunction tooltips
+					tt = tooltips(id, path)
+				else
+					tt = tooltips[id]
+					
+				if tt?
+					cfg = {
+						position: { 
+							target: 'mouse', 
+							viewport: $(window), 
+							adjust: { x:7, y:7}
+						},
+						show: { 
+							delay: 20 
+						},
+						content: {}
+					};
+					
+					if typeof(tt) == "string"
+						cfg.content.text = tt
+					else if $.isArray tt
+						cfg.content.title = tt[0]
+						cfg.content.text = tt[1]
+					
+					$(path.svgPath.node).qtip(cfg);
+		
 	###
 		for some reasons, this runs horribly slow in Firefox
 		will use pre-calculated graticules instead
@@ -254,6 +266,46 @@ class SVGMap
 	
 	
 		
-
 svgmap.SVGMap = SVGMap
 
+
+class MapLayer
+	
+	constructor: (layer_id, path_id, paper, view)->
+		me = @
+		me.id = layer_id
+		me.path_id = path_id
+		me.paper = paper
+		me.view = view
+		
+	addPath: (svg_path) ->
+		me = @
+		me.paths ?= []
+		
+		layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view)
+		
+		me.paths.push(layerPath)
+		
+		if me.path_id?
+			me.pathsById ?= {}
+			me.pathsById[layerPath.data[me.path_id]] ?= []
+			me.pathsById[layerPath.data[me.path_id]].push(layerPath)
+	
+	
+class MapLayerPath
+
+	constructor: (svg_path, layer_id, paper, view) ->
+		me = @
+		path_str = svg_path.getAttribute('d')
+		me.path = path = svgmap.geom.Path.fromSVG(path_str)
+		
+		me.svgPath = paper.path(view.projectPath(path).toSVG())
+		me.svgPath.node.setAttribute('class', 'polygon '+layer_id)
+		me.svgPath.node.path = me # store reference to this path
+		
+		data = {}
+		for i in [0..svg_path.attributes.length-1]
+			attr = svg_path.attributes[i]
+			if attr.name.substr(0,5) == "data-"
+				data[attr.name.substr(5)] = attr.value
+		me.data = data

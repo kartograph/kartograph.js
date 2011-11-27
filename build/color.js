@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Color, ColorScale, Diverging, Ramp, root, svgmap, _ref, _ref2;
+  var Color, ColorScale, Diverging, Ramp, root, svgmap, _base, _ref, _ref2, _ref3;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -34,9 +34,9 @@
     	
     	eg.
     	new Color() // white
-    	new Color(255,0,0) // defaults to rgb color
-    	new Color([255,0,0]) // this also works
-    	new Color(0,1,.5,'hsl') // same color using HSL
+    	new Color(120,.8,.5) // defaults to hsl color
+    	new Color([120,.8,.5]) // this also works
+    	new Color(255,100,50,'rgb') //  color using RGB
     	new Color('#ff0000') // or hex value
     */
 
@@ -51,7 +51,7 @@
       if (x.length === 7) {
         m = 'hex';
       } else {
-        if (m == null) m = 'rgb';
+        if (m == null) m = 'hsl';
       }
       if (m === 'rgb') {
         me.rgb = [x, y, z];
@@ -196,18 +196,63 @@
     return [h, s, l];
   };
 
+  Color.hsl = function(h, s, l) {
+    return new Color(h, s, l, 'hsl');
+  };
+
+  Color.rgb = function(r, g, b) {
+    return new Color(r, g, b, 'rgb');
+  };
+
+  Color.hex = function(x) {
+    return new Color(x);
+  };
+
   svgmap.color.Color = Color;
 
   ColorScale = (function() {
-
-    function ColorScale() {}
 
     /*
     	base class for color scales
     */
 
+    function ColorScale(colors, positions, mode, nacol) {
+      var c, me, _ref3;
+      if (nacol == null) nacol = '#cccccc';
+      me = this;
+      for (c = 0, _ref3 = colors.length - 1; 0 <= _ref3 ? c <= _ref3 : c >= _ref3; 0 <= _ref3 ? c++ : c--) {
+        if (typeof colors[c] === "string") colors[c] = new Color(colors[c]);
+      }
+      me.colors = colors;
+      me.pos = positions;
+      me.mode = mode;
+      me.nacol = nacol;
+    }
+
     ColorScale.prototype.getColor = function(value) {
-      return '#eee';
+      var col, f, f0, i, me, p, _ref3;
+      me = this;
+      if (isNaN(value)) return me.nacol;
+      value = me.classifyValue(value);
+      f = f0 = (value - me.min) / (me.max - me.min);
+      f = Math.min(1, Math.max(0, f));
+      for (i = 0, _ref3 = me.pos.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
+        p = me.pos[i];
+        if (f <= p) {
+          col = me.colors[i];
+          break;
+        }
+        if (f >= p && i === me.pos.length - 1) {
+          col = me.colors[i];
+          break;
+        }
+        if (f > p && f < me.pos[i + 1]) {
+          f = (f - p) / (me.pos[i + 1] - p);
+          col = me.colors[i].interpolate(f, me.colors[i + 1], me.mode);
+          break;
+        }
+      }
+      return col;
     };
 
     ColorScale.prototype.setClasses = function(numClasses, method, limits) {
@@ -226,15 +271,15 @@
     };
 
     ColorScale.prototype.parseData = function(data, data_col) {
-      var d, h, i, limits, max, method, min, num, p, pb, pr, self, sum, val, values, _i, _len, _ref3, _ref4;
+      var h, i, id, limits, max, method, min, num, p, pb, pr, row, self, sum, val, values, _ref3, _ref4;
       self = this;
       min = Number.MAX_VALUE;
       max = Number.MAX_VALUE * -1;
       sum = 0;
       values = [];
-      for (_i = 0, _len = data.length; _i < _len; _i++) {
-        d = data[_i];
-        val = data_col != null ? d[data_col] : d;
+      for (id in data) {
+        row = data[id];
+        val = data_col != null ? row[data_col] : row;
         if (isNaN(val)) continue;
         min = Math.min(min, val);
         max = Math.max(max, val);
@@ -299,38 +344,24 @@
 
   })();
 
+  if ((_ref3 = (_base = svgmap.color).scale) == null) _base.scale = {};
+
   Ramp = (function() {
 
     __extends(Ramp, ColorScale);
 
-    function Ramp(col0, col1) {
-      var me;
+    function Ramp(col0, col1, mode) {
       if (col0 == null) col0 = '#fe0000';
       if (col1 == null) col1 = '#feeeee';
-      if (typeof col0 === "string") col0 = new Color(col0);
-      if (typeof col1 === "string") col1 = new Color(col1);
-      me = this;
-      me.c0 = col0;
-      me.c1 = col1;
+      if (mode == null) mode = 'hsl';
+      Ramp.__super__.constructor.call(this, [col0, col1], [0, 1], mode);
     }
-
-    Ramp.prototype.getColor = function(value) {
-      var f, me;
-      me = this;
-      if (isNaN(value)) {
-        console.log('NaN..');
-        return new Color('#dddddd');
-      }
-      value = me.classifyValue(value);
-      f = (value - me.min) / (me.max - me.min);
-      return me.c0.interpolate(f, me.c1);
-    };
 
     return Ramp;
 
   })();
 
-  svgmap.color.Ramp = Ramp;
+  svgmap.color.scale.Ramp = Ramp;
 
   Diverging = (function() {
 
@@ -341,46 +372,39 @@
       if (col0 == null) col0 = '#d73027';
       if (col1 == null) col1 = '#ffffbf';
       if (col2 == null) col2 = '#1E6189';
-      if (center == null) center = 'median';
+      if (center == null) center = 'mean';
       if (mode == null) mode = 'hsl';
-      if (typeof col0 === "string") col0 = new Color(col0);
-      if (typeof col1 === "string") col1 = new Color(col1);
-      if (typeof col2 === "string") col2 = new Color(col2);
       me = this;
-      me.c0 = col0;
-      me.c1 = col1;
-      me.c2 = col2;
       me.mode = mode;
       me.center = center;
+      Diverging.__super__.constructor.call(this, [col0, col1, col2], [0, .5, 1], mode);
     }
 
-    Diverging.prototype.getColor = function(value) {
-      var c, col, f, me;
+    Diverging.prototype.parseData = function(data, data_col) {
+      var c, me;
+      Diverging.__super__.parseData.call(this, data, data_col);
       me = this;
-      if (isNaN(value)) return new Color('#dddddd');
-      value = me.classifyValue(value);
       c = me.center;
       if (c === 'median') {
         c = me.median;
       } else if (c === 'mean') {
         c = me.mean;
       }
-      if (value < c) {
-        f = (value - me.min) / (c - me.min);
-        col = me.c0.interpolate(f, me.c1, me.mode);
-      } else if (value > c) {
-        f = (value - c) / (me.max - c);
-        col = me.c1.interpolate(f, me.c2, me.mode);
-      } else {
-        col = me.c1;
-      }
-      return col;
+      return me.pos[1] = (c - me.min) / (me.max - me.min);
     };
 
     return Diverging;
 
   })();
 
-  svgmap.color.Diverging = Diverging;
+  svgmap.color.scale.Diverging = Diverging;
+
+  svgmap.color.scale.COOL = new Ramp(Color.hsl(180, 1, .9), Color.hsl(250, .7, .4));
+
+  svgmap.color.scale.HOT = new ColorScale(['#000000', '#ff0000', '#ffff00', '#ffffff'], [0, .25, .75, 1], 'rgb');
+
+  svgmap.color.scale.BWO = new Diverging(Color.hsl(30, 1, .6), '#ffffff', new Color(220, 1, .6));
+
+  svgmap.color.scale.GWP = new Diverging(Color.hsl(120, .8, .4), '#ffffff', new Color(280, .8, .4));
 
 }).call(this);

@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var SVGMap, root, svgmap, _ref;
+  var MapLayer, MapLayerPath, SVGMap, root, svgmap, _ref;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -53,7 +53,6 @@
       me.container = cnt = $(container);
       me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
       me.paper = Raphael(cnt[0], vp.width, vp.height);
-      me.layers = [];
       me.markers = [];
     }
 
@@ -68,36 +67,20 @@
       });
     };
 
-    SVGMap.prototype.addLayer = function(src_id, layer_id) {
-      var $layer, $paths, attr, data, i, layerPath, me, path, path_str, svg, svg_path, _i, _len, _ref2, _ref3, _results;
+    SVGMap.prototype.addLayer = function(src_id, layer_id, path_id) {
+      var $paths, layer, me, svg_path, _i, _len, _ref2, _ref3, _results;
       me = this;
       if (layer_id == null) layer_id = src_id;
-      if ((_ref2 = me.layerPaths) == null) me.layerPaths = {};
-      me.layerPaths[layer_id] = [];
-      svg = me.svgSrc;
-      $layer = $('g#' + src_id, svg)[0];
-      $paths = $('path', $layer);
+      if ((_ref2 = me.layerIds) == null) me.layerIds = [];
+      me.layerIds.push(layer_id);
+      layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC);
+      if ((_ref3 = me.layers) == null) me.layers = {};
+      me.layers[layer_id] = layer;
+      $paths = $('path', $('g#' + src_id, me.svgSrc)[0]);
       _results = [];
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
         svg_path = $paths[_i];
-        layerPath = {
-          layer: layer_id
-        };
-        path_str = svg_path.getAttribute('d');
-        path = svgmap.geom.Path.fromSVG(path_str);
-        layerPath.path = path;
-        layerPath.svgPath = me.paper.path(me.viewBC.projectPath(path).toSVG());
-        layerPath.svgPath.node.setAttribute('class', 'polygon ' + layer_id);
-        layerPath.svgPath.node.path = layerPath;
-        data = {};
-        for (i = 0, _ref3 = svg_path.attributes.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
-          attr = svg_path.attributes[i];
-          if (attr.name.substr(0, 5) === "data-") {
-            data[attr.name.substr(5)] = attr.value;
-          }
-        }
-        layerPath.data = data;
-        _results.push(me.layerPaths[layer_id].push(layerPath));
+        _results.push(layer.addPath(svg_path));
       }
       return _results;
     };
@@ -105,12 +88,7 @@
     SVGMap.prototype.addLayerEvent = function(layer_id, event, callback) {
       var me, path, paths, _i, _len, _results;
       me = this;
-      /*
-      		me.layerEventCallbacks ?= {}
-      		me.layerEventCallbacks[layer_id] ?= {}
-      		me.layerEventCallbacks[layer_id][event] = callback
-      */
-      paths = me.layerPaths[layer_id];
+      paths = me.layers[layer_id].paths;
       _results = [];
       for (_i = 0, _len = paths.length; _i < _len; _i++) {
         path = paths[_i];
@@ -127,27 +105,91 @@
       return marker.render(xy[0], xy[1], me.container, me.paper);
     };
 
-    SVGMap.prototype.choropleth = function(layer_id, data, id_col, data_col, colorscale) {
-      var col, d, id, me, path, pathData, paths, v, _i, _j, _len, _len2, _results;
+    SVGMap.prototype.choropleth = function(opts) {
+      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _ref2, _ref3, _ref4, _ref5, _results;
       me = this;
+      layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      data = opts.data;
+      data_col = opts.prop;
+      no_data_color = (_ref3 = opts.nodata) != null ? _ref3 : '#ccc';
+      colorscale = (_ref4 = opts.colorscale) != null ? _ref4 : svgmap.color.scale.COOL;
       colorscale.parseData(data, data_col);
       pathData = {};
-      for (_i = 0, _len = data.length; _i < _len; _i++) {
-        d = data[_i];
-        pathData[d[id_col]] = d[data_col];
+      for (id in data) {
+        row = data[id];
+        pathData[id] = row[data_col];
       }
-      paths = me.layerPaths[layer_id];
+      _ref5 = me.layers[layer_id].pathsById;
       _results = [];
-      for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
-        path = paths[_j];
-        id = path.data[id_col];
-        if (pathData[id] != null) {
-          v = pathData[id];
-          col = colorscale.getColor(v);
-          _results.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
-        } else {
-          _results.push(path.svgPath.node.setAttribute('style', 'fill:#ccc'));
-        }
+      for (id in _ref5) {
+        paths = _ref5[id];
+        _results.push((function() {
+          var _i, _len, _results2;
+          _results2 = [];
+          for (_i = 0, _len = paths.length; _i < _len; _i++) {
+            path = paths[_i];
+            if (pathData[id] != null) {
+              v = pathData[id];
+              col = colorscale.getColor(v);
+              _results2.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
+            } else {
+              _results2.push(path.svgPath.node.setAttribute('style', 'fill:' + no_data_color));
+            }
+          }
+          return _results2;
+        })());
+      }
+      return _results;
+    };
+
+    SVGMap.prototype.tooltips = function(opts) {
+      var cfg, id, id_col, layer_id, me, path, paths, tooltips, tt, _ref2, _ref3, _results;
+      me = this;
+      tooltips = opts.content;
+      id_col = opts.id;
+      layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      _ref3 = me.layers[layer_id].pathsById;
+      _results = [];
+      for (id in _ref3) {
+        paths = _ref3[id];
+        _results.push((function() {
+          var _i, _len, _results2;
+          _results2 = [];
+          for (_i = 0, _len = paths.length; _i < _len; _i++) {
+            path = paths[_i];
+            if ($.isFunction(tooltips)) {
+              tt = tooltips(id, path);
+            } else {
+              tt = tooltips[id];
+            }
+            if (tt != null) {
+              cfg = {
+                position: {
+                  target: 'mouse',
+                  viewport: $(window),
+                  adjust: {
+                    x: 7,
+                    y: 7
+                  }
+                },
+                show: {
+                  delay: 20
+                },
+                content: {}
+              };
+              if (typeof tt === "string") {
+                cfg.content.text = tt;
+              } else if ($.isArray(tt)) {
+                cfg.content.title = tt[0];
+                cfg.content.text = tt[1];
+              }
+              _results2.push($(path.svgPath.node).qtip(cfg));
+            } else {
+              _results2.push(void 0);
+            }
+          }
+          return _results2;
+        })());
       }
       return _results;
     };
@@ -277,5 +319,59 @@
   })();
 
   svgmap.SVGMap = SVGMap;
+
+  MapLayer = (function() {
+
+    function MapLayer(layer_id, path_id, paper, view) {
+      var me;
+      me = this;
+      me.id = layer_id;
+      me.path_id = path_id;
+      me.paper = paper;
+      me.view = view;
+    }
+
+    MapLayer.prototype.addPath = function(svg_path) {
+      var layerPath, me, _base, _name, _ref2, _ref3, _ref4;
+      me = this;
+      if ((_ref2 = me.paths) == null) me.paths = [];
+      layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view);
+      me.paths.push(layerPath);
+      if (me.path_id != null) {
+        if ((_ref3 = me.pathsById) == null) me.pathsById = {};
+        if ((_ref4 = (_base = me.pathsById)[_name = layerPath.data[me.path_id]]) == null) {
+          _base[_name] = [];
+        }
+        return me.pathsById[layerPath.data[me.path_id]].push(layerPath);
+      }
+    };
+
+    return MapLayer;
+
+  })();
+
+  MapLayerPath = (function() {
+
+    function MapLayerPath(svg_path, layer_id, paper, view) {
+      var attr, data, i, me, path, path_str, _ref2;
+      me = this;
+      path_str = svg_path.getAttribute('d');
+      me.path = path = svgmap.geom.Path.fromSVG(path_str);
+      me.svgPath = paper.path(view.projectPath(path).toSVG());
+      me.svgPath.node.setAttribute('class', 'polygon ' + layer_id);
+      me.svgPath.node.path = me;
+      data = {};
+      for (i = 0, _ref2 = svg_path.attributes.length - 1; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+        attr = svg_path.attributes[i];
+        if (attr.name.substr(0, 5) === "data-") {
+          data[attr.name.substr(5)] = attr.value;
+        }
+      }
+      me.data = data;
+    }
+
+    return MapLayerPath;
+
+  })();
 
 }).call(this);

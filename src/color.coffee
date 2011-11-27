@@ -27,9 +27,9 @@ class Color
 	
 	eg.
 	new Color() // white
-	new Color(255,0,0) // defaults to rgb color
-	new Color([255,0,0]) // this also works
-	new Color(0,1,.5,'hsl') // same color using HSL
+	new Color(120,.8,.5) // defaults to hsl color
+	new Color([120,.8,.5]) // this also works
+	new Color(255,100,50,'rgb') //  color using RGB
 	new Color('#ff0000') // or hex value
 	
 	###
@@ -43,7 +43,7 @@ class Color
 		if x.length == 7
 			m = 'hex'
 		else 
-			m ?= 'rgb'
+			m ?= 'hsl'
 
 		if m == 'rgb'
 			me.rgb = [x,y,z]
@@ -151,7 +151,6 @@ Color.hsl2rgb = (h,s,l) ->
 	[r,g,b]	
 
 
-
 Color.rgb2hsl = (r,g,b) ->
 	if r.length == 3
 		[r,g,b] = r
@@ -178,6 +177,16 @@ Color.rgb2hsl = (r,g,b) ->
 	[h,s,l]
 	
 
+Color.hsl = (h,s,l) ->
+	new Color(h,s,l,'hsl')
+
+Color.rgb = (r,g,b) ->
+	new Color(r,g,b,'rgb')
+
+Color.hex = (x) ->
+	new Color(x)
+	
+
 svgmap.color.Color = Color	
 	
 
@@ -185,8 +194,35 @@ class ColorScale
 	###
 	base class for color scales
 	###
+	constructor: (colors, positions, mode, nacol='#cccccc') ->
+		me = @
+		for c in [0..colors.length-1]
+			colors[c] = new Color(colors[c]) if typeof(colors[c]) == "string"
+		me.colors = colors
+		me.pos = positions
+		me.mode = mode
+		me.nacol = nacol
+		
+	
 	getColor: (value) ->
-		'#eee'
+		me = @
+		if isNaN(value) then return me.nacol
+		value = me.classifyValue value	
+		f = f0 = (value - me.min) / (me.max - me.min)
+		f = Math.min(1, Math.max(0, f))
+		for i in [0..me.pos.length-1]
+			p = me.pos[i]
+			if f <= p
+				col = me.colors[i]
+				break			
+			if f >= p and i == me.pos.length-1
+				col = me.colors[i]
+				break
+			if f > p and f < me.pos[i+1]
+				f = (f-p)/(me.pos[i+1]-p)
+				col = me.colors[i].interpolate(f, me.colors[i+1], me.mode)
+				break
+		col
 	
 	setClasses: (numClasses = 5, method='equalinterval', limits = []) ->
 		###
@@ -205,8 +241,8 @@ class ColorScale
 		max = Number.MAX_VALUE*-1
 		sum = 0
 		values = []
-		for d in data
-			val = if data_col? then d[data_col] else d
+		for id,row of data
+			val = if data_col? then row[data_col] else row
 			if isNaN(val) 
 				continue
 			min = Math.min(min, val)
@@ -244,6 +280,7 @@ class ColorScale
 			limits.push(max)
 		return
 						
+						
 	classifyValue: (value) ->
 		self = @ 
 		limits = self.classLimits
@@ -259,64 +296,46 @@ class ColorScale
 			value = self.min + ((value - minc) / (maxc-minc)) * (self.max - self.min)
 		value
 
+svgmap.color.scale ?= {}
+
 
 class Ramp extends ColorScale
 	
-	constructor: (col0='#fe0000', col1='#feeeee') ->
-		col0 = new Color(col0) if typeof(col0) == "string"
-		col1 = new Color(col1) if typeof(col1) == "string"
-		me=@
-		me.c0 = col0
-		me.c1 = col1
-		
-	getColor: (value) ->
-		me = @
-		if isNaN(value)
-			console.log('NaN..')
-			return new Color('#dddddd')
-		value = me.classifyValue value	
-		f = (value - me.min) / (me.max - me.min) 
-		me.c0.interpolate(f, me.c1)
+	constructor: (col0='#fe0000', col1='#feeeee', mode='hsl') ->
+		super [col0,col1], [0,1], mode
 
-
-svgmap.color.Ramp = Ramp
+svgmap.color.scale.Ramp = Ramp
 
 
 class Diverging extends ColorScale
 	
-	constructor: (col0='#d73027', col1='#ffffbf', col2='#1E6189', center='median', mode='hsl') ->
-		col0 = new Color(col0) if typeof(col0) == "string"
-		col1 = new Color(col1) if typeof(col1) == "string"
-		col2 = new Color(col2) if typeof(col2) == "string"
+	constructor: (col0='#d73027', col1='#ffffbf', col2='#1E6189', center='mean', mode='hsl') ->
 		me=@
-		me.c0 = col0
-		me.c1 = col1
-		me.c2 = col2
 		me.mode = mode
 		me.center = center
-		
-	getColor: (value) ->
+		super [col0,col1,col2], [0,.5,1], mode
+	
+	parseData: (data, data_col) ->
+		super data, data_col
 		me = @
-		if isNaN(value)
-			return new Color('#dddddd')
-		
-		value = me.classifyValue value
-		
 		c = me.center
 		if c == 'median'
 			c = me.median
 		else if c == 'mean'
-			c = me.mean
-		
-		if value < c
-			f = (value - me.min) / (c - me.min)
-			col = me.c0.interpolate(f, me.c1, me.mode)
-		else if value > c
-			f = (value - c) / (me.max - c)
-			col = me.c1.interpolate(f, me.c2, me.mode)
-		else
-			col = me.c1
-		col
+			c = me.mean	
+		me.pos[1] = (c-me.min)/(me.max-me.min)
+	
 
-svgmap.color.Diverging = Diverging
+svgmap.color.scale.Diverging = Diverging
+
+
+		
+	
+# some pre-defined color scales:
+
+# Generates a color palette that uses a "cool", blue-heavy color scheme.
+svgmap.color.scale.COOL = new Ramp(Color.hsl(180,1,.9), Color.hsl(250,.7,.4))
+svgmap.color.scale.HOT = new ColorScale(['#000000','#ff0000','#ffff00','#ffffff'],[0,.25,.75,1],'rgb')
+svgmap.color.scale.BWO = new Diverging(Color.hsl(30,1,.6),'#ffffff', new Color(220,1,.6))
+svgmap.color.scale.GWP = new Diverging(Color.hsl(120,.8,.4),'#ffffff', new Color(280,.8,.4))
 
