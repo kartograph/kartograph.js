@@ -46,6 +46,7 @@ Example:
 	* _data_ - the data dictionary, with path ids as keys and numbers or dictionaries of numbers as values
 	* _key_ - if the data dictionaries contains dictionaries of numbers, you need to specify the key. 
 	Example:
+
 		map.choroplet({
 			data: { 
 				'USA': { 'population': 311484627, 'GDP': 14256 },
