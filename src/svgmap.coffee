@@ -81,9 +81,10 @@ class SVGMap
 
 		
 		
-	addLayerEvent: (layer_id, event, callback) ->
+	addLayerEvent: (event, callback, layerId) ->
 		me = @
-		paths = me.layers[layer_id].paths
+		layerId = opts.layer ? me.layerIds[me.layerIds.length-1]
+		paths = me.layers[layerId].paths
 		for path in paths
 			$(path.svgPath.node).bind(event, callback)
 			
@@ -99,8 +100,8 @@ class SVGMap
 		me = @	
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
 		data = opts.data
-		data_col = opts.prop
-		no_data_color = opts.nodata ? '#ccc'
+		data_col = opts.key
+		no_data_color = opts.noDataColor ? '#ccc'
 		colorscale = opts.colorscale ? svgmap.color.scale.COOL
 		
 		colorscale.parseData(data, data_col)
@@ -110,7 +111,7 @@ class SVGMap
 			
 		for id, paths of me.layers[layer_id].pathsById
 			for path in paths
-				if pathData[id]?
+				if pathData[id]? and !isNaN(pathData[id])
 					v = pathData[id]
 					col = colorscale.getColor(v)
 					path.svgPath.node.setAttribute('style', 'fill:'+col)
@@ -121,7 +122,6 @@ class SVGMap
 	tooltips: (opts) ->
 		me = @
 		tooltips = opts.content
-		id_col = opts.id
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
 		
 		for id, paths of me.layers[layer_id].pathsById
@@ -221,7 +221,7 @@ class SVGMap
 		me.viewAB = AB = svgmap.View.fromXML $view
 		me.viewBC = new svgmap.View AB.asBBox(),vp.width,vp.height
 		me.proj = svgmap.Proj.fromXML $('proj', $view)[0]		
-		me.mapLoadCallback()
+		me.mapLoadCallback(me)
 	
 	loadCoastline: ->
 		me = @

@@ -2061,10 +2061,11 @@
       return _results;
     };
 
-    SVGMap.prototype.addLayerEvent = function(layer_id, event, callback) {
-      var me, path, paths, _i, _len, _results;
+    SVGMap.prototype.addLayerEvent = function(event, callback, layerId) {
+      var me, path, paths, _i, _len, _ref15, _results;
       me = this;
-      paths = me.layers[layer_id].paths;
+      layerId = (_ref15 = opts.layer) != null ? _ref15 : me.layerIds[me.layerIds.length - 1];
+      paths = me.layers[layerId].paths;
       _results = [];
       for (_i = 0, _len = paths.length; _i < _len; _i++) {
         path = paths[_i];
@@ -2086,8 +2087,8 @@
       me = this;
       layer_id = (_ref15 = opts.layer) != null ? _ref15 : me.layerIds[me.layerIds.length - 1];
       data = opts.data;
-      data_col = opts.prop;
-      no_data_color = (_ref16 = opts.nodata) != null ? _ref16 : '#ccc';
+      data_col = opts.key;
+      no_data_color = (_ref16 = opts.noDataColor) != null ? _ref16 : '#ccc';
       colorscale = (_ref17 = opts.colorscale) != null ? _ref17 : svgmap.color.scale.COOL;
       colorscale.parseData(data, data_col);
       pathData = {};
@@ -2104,7 +2105,7 @@
           _results2 = [];
           for (_i = 0, _len = paths.length; _i < _len; _i++) {
             path = paths[_i];
-            if (pathData[id] != null) {
+            if ((pathData[id] != null) && !isNaN(pathData[id])) {
               v = pathData[id];
               col = colorscale.getColor(v);
               _results2.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
@@ -2119,10 +2120,9 @@
     };
 
     SVGMap.prototype.tooltips = function(opts) {
-      var cfg, id, id_col, layer_id, me, path, paths, tooltips, tt, _ref15, _ref16, _results;
+      var cfg, id, layer_id, me, path, paths, tooltips, tt, _ref15, _ref16, _results;
       me = this;
       tooltips = opts.content;
-      id_col = opts.id;
       layer_id = (_ref15 = opts.layer) != null ? _ref15 : me.layerIds[me.layerIds.length - 1];
       _ref16 = me.layers[layer_id].pathsById;
       _results = [];
@@ -2234,7 +2234,7 @@
       me.viewAB = AB = svgmap.View.fromXML($view);
       me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height);
       me.proj = svgmap.Proj.fromXML($('proj', $view)[0]);
-      return me.mapLoadCallback();
+      return me.mapLoadCallback(me);
     };
 
     SVGMap.prototype.loadCoastline = function() {
