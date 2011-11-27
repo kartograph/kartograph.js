@@ -64,7 +64,7 @@ Example:
 		colorscale: new svgmap.color.scale.Ramp('#ffffff', '#883333')
 	});
 
-* * _noDataColor_ - the color that should be used for paths that have no entry or NaN in the data dictionary. Defaults to '#cccccc'
+	* _noDataColor_ - the color that should be used for paths that have no entry or NaN in the data dictionary. Defaults to '#cccccc'
 
 ### tooltips(opts)
 Activate tooltips for a layer. The tooltips will be managed using the [http://craigsworks.com/projects/qtip2/docs/](jQuery.qtip plugin). If you want to add tooltips to your maps, you also need to include the tooltip.css to your HTML page.
