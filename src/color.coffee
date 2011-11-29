@@ -35,12 +35,14 @@ class Color
 	###
 	constructor: (x,y,z,m) ->
 		me = @
-		x ?= [255,255,255]
-		if x.length == 3
+		if not x? and not y? and not z? and not m?
+			x = [0,1,1]
+			
+		if typeof(x) == "object" and x.length == 3
 			m = y
 			[x,y,z] = x
 		
-		if x.length == 7
+		if  typeof(x) == "string" and x.length == 7
 			m = 'hex'
 		else 
 			m ?= 'hsl'
@@ -74,7 +76,7 @@ class Color
 		
 			[hue0, sat0, lbv0] = xyz0
 			[hue1, sat1, lbv1] = xyz1
-					
+								
 			if not isNaN(hue0) and not isNaN(hue1)
 				if hue1 > hue0 and hue1 - hue0 > 180
 					dh = hue1-(hue0+360)
@@ -91,9 +93,9 @@ class Color
 				sat = sat1 if lbv0 == 1 or lbv0 == 0
 			else
 				hue = undefined
-				
+								
 			sat ?= sat0 + f*(sat1 - sat0)
-			
+
 			lbv = lbv0 + f*(lbv1-lbv0)
 		
 			new Color(hue, sat, lbv, m)
@@ -101,7 +103,7 @@ class Color
 		else if m == 'rgb'
 			xyz0 = me.rgb
 			xyz1 = col.rgb
-			new Color(xyz0[0]+f*f*(xyz1[0]-xyz0[0]), xyz0[1] + f*(xyz1[1]-xyz0[1]), xyz0[2] + f*(xyz1[2]-xyz0[2]), m)
+			new Color(xyz0[0]+f*(xyz1[0]-xyz0[0]), xyz0[1] + f*(xyz1[1]-xyz0[1]), xyz0[2] + f*(xyz1[2]-xyz0[2]), m)
 			
 		else
 			throw "color mode "+m+" is not supported"
@@ -115,7 +117,7 @@ Color.hex2rgb = (hex) ->
 	
 
 Color.rgb2hex = (r,g,b) ->
-	if r.length == 3
+	if r != undefined and r.length == 3
 		[r,g,b] = r
 	u = r << 16 | g << 8 | b
 	str = "000000" + u.toString(16).toUpperCase()
@@ -123,7 +125,7 @@ Color.rgb2hex = (r,g,b) ->
 
 
 Color.hsl2rgb = (h,s,l) ->
-	if h.length == 3
+	if h != undefined and h.length == 3
 		[h,s,l] = h
 	if s == 0
 		r = g = b = l*255
@@ -152,7 +154,7 @@ Color.hsl2rgb = (h,s,l) ->
 
 
 Color.rgb2hsl = (r,g,b) ->
-	if r.length == 3
+	if r != undefined and r.length == 3
 		[r,g,b] = r
 	r /= 255
 	g /= 255
@@ -243,7 +245,7 @@ class ColorScale
 		values = []
 		for id,row of data
 			val = if data_col? then row[data_col] else row
-			if isNaN(val) 
+			if not self.validValue(val) 
 				continue
 			min = Math.min(min, val)
 			max = Math.max(max, val)
@@ -295,6 +297,9 @@ class ColorScale
 			maxc = limits[n-1] + (limits[n]-limits[n-1])*0.7
 			value = self.min + ((value - minc) / (maxc-minc)) * (self.max - self.min)
 		value
+		
+	validValue: (value) ->
+		not isNaN(value)
 
 svgmap.color.scale ?= {}
 
@@ -329,7 +334,27 @@ class Diverging extends ColorScale
 svgmap.color.scale.Diverging = Diverging
 
 
+class Categories extends ColorScale
+
+	constructor: (colors) ->
+		# colors: dictionary of id: colors
+		me = @
+		me.colors = colors
 		
+	parseData: (data, data_col) ->
+		# nothing to do here..
+		
+	getColor: (value) ->
+		me = @
+		if me.colors.hasOwnProperty value
+			return me.colors[value]
+		else
+			return '#cccccc'
+	
+	validValue: (value) ->
+		@colors.hasOwnProperty value
+		
+svgmap.color.scale.Categories = Categories
 	
 # some pre-defined color scales:
 

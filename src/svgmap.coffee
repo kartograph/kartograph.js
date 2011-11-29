@@ -21,25 +21,14 @@ svgmap = root.svgmap ?= {}
 
 svgmap.version = "0.1.0"
 
-###
-Usage:
 
-svgmap = new SVGMap(container);
+warn = (s) ->
+	console.warn('svgmap ('+svgmap.version+'): '+s)
 
-// load a new map, will reset everything, so you need to setup the layers again
+log = (s) ->
+	console.log('svgmap ('+svgmap.version+'): '+s)
 
-svgmap.loadMap('map.svg', function(layers) {
-	svgmap.addLayer('sea');
-	svgmap.addLayer('countries','country_bg');
-	svgmap.addLayer('graticule');
-	svgmap.addLayer('countries');
-});
 
-// setup layers
-
-// load data
-
-###
 
 class SVGMap
 
@@ -49,12 +38,15 @@ class SVGMap
 		me.container = cnt = $(container)
 		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
 		me.paper = Raphael(cnt[0], vp.width, vp.height)
+		about = $('desc', cnt).text()
+		$('desc', cnt).text(about.replace('with ', 'with svgmap '+svgmap.version+' and '))
 		me.markers = []
-	
-	
-	loadMap: (mapurl, callback) ->
+		
+		
+	loadMap: (mapurl, callback, opts) ->
 		# load svg map
 		me = @
+		me.opts = opts ? {}
 		me.mapLoadCallback = callback
 		$.ajax 
 			url: mapurl
@@ -64,26 +56,36 @@ class SVGMap
 	
 	
 	addLayer: (src_id, layer_id, path_id) ->
-		# add new layer
-		me = @
-		layer_id ?= src_id
-
+		###
+		add new layer
+		###
+		me = @		
 		me.layerIds ?= []
-		me.layerIds.push(layer_id)
-		
-		layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC)
 		me.layers ?= {}
-		me.layers[layer_id] = layer
 		
-		$paths = $('path', $('g#'+src_id, me.svgSrc)[0])		
+		layer_id ?= src_id
+		svgLayer = $('g#'+src_id, me.svgSrc)
+		
+		if svgLayer.length == 0
+			warn 'didn\'t find any paths for layer "'+layer_id+'"'
+			return
+		layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC)
+		
+		$paths = $('*', svgLayer[0])		
 		for svg_path in $paths				
 			layer.addPath(svg_path)
-
 		
+		if layer.paths.length > 0
+			me.layers[layer_id] = layer
+			me.layerIds.push layer_id
+		else
+			warn 'didn\'t find any paths for layer '+layer_id
+		
+		return
 		
 	addLayerEvent: (event, callback, layerId) ->
 		me = @
-		layerId = opts.layer ? me.layerIds[me.layerIds.length-1]
+		layerId ?= me.layerIds[me.layerIds.length-1]
 		paths = me.layers[layerId].paths
 		for path in paths
 			$(path.svgPath.node).bind(event, callback)
@@ -99,19 +101,25 @@ class SVGMap
 	choropleth: (opts) ->
 		me = @	
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
+		if not me.layers.hasOwnProperty layer_id
+			warn 'choropleth error: layer "'+layer_id+'" not found'
+			return
+
 		data = opts.data
 		data_col = opts.key
 		no_data_color = opts.noDataColor ? '#ccc'
 		colorscale = opts.colorscale ? svgmap.color.scale.COOL
 		
 		colorscale.parseData(data, data_col)
+		
 		pathData = {}
+		
 		for id, row of data
 			pathData[id] = row[data_col]
 			
 		for id, paths of me.layers[layer_id].pathsById
 			for path in paths
-				if pathData[id]? and !isNaN(pathData[id])
+				if pathData[id]? and colorscale.validValue(pathData[id])
 					v = pathData[id]
 					col = colorscale.getColor(v)
 					path.svgPath.node.setAttribute('style', 'fill:'+col)
@@ -123,8 +131,13 @@ class SVGMap
 		me = @
 		tooltips = opts.content
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
-		
+		if not me.layers.hasOwnProperty layer_id
+			warn 'tooltips error: layer "'+layer_id+'" not found'
+			return
+			
+		console.log tooltips
 		for id, paths of me.layers[layer_id].pathsById
+			
 			for path in paths			
 				if $.isFunction tooltips
 					tt = tooltips(id, path)
@@ -156,8 +169,7 @@ class SVGMap
 		for some reasons, this runs horribly slow in Firefox
 		will use pre-calculated graticules instead
 
-	addGraticule: (lon_step=15, lat_step) ->
-		
+	addGraticule: (lon_step=15, lat_step) ->	
 		self = @
 		lat_step ?= lon_step
 		globe = self.proj
@@ -175,7 +187,6 @@ class SVGMap
 				pts = []
 				lines = []
 				for lon in [-180..180]
-					console.log lat_,lon
 					if globe._visible(lon, lat_)
 						xy = v1.project(v0.project(globe.project(lon, lat_)))
 						pts.push xy
@@ -216,10 +227,13 @@ class SVGMap
 	mapLoaded: (xml) ->
 		me = @
 		me.svgSrc = xml
-		vp = me.viewport
+		vp = me.viewport		
 		$view = $('view', xml)[0] # use first view
 		me.viewAB = AB = svgmap.View.fromXML $view
-		me.viewBC = new svgmap.View AB.asBBox(),vp.width,vp.height
+		padding = me.opts.padding ? 0
+		halign = me.opts.halign ? 'center'
+		valign = me.opts.valign ? 'center'
+		me.viewBC = new svgmap.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
 		me.proj = svgmap.Proj.fromXML $('proj', $view)[0]		
 		me.mapLoadCallback(me)
 	
@@ -243,7 +257,6 @@ class SVGMap
 				p0 = line[i]
 				p1 = line[i+1]
 				d = 0
-				# console.log(P._visible(-2.77, 42.1))
 				if true and P._visible(p0[0],p0[1]) and P._visible(p1[0],p1[1])					
 					p0 = view1.project(view0.project(P.project(p0[0],p0[1])))
 					p1 = view1.project(view0.project(P.project(p1[0],p1[1])))
@@ -264,6 +277,20 @@ class SVGMap
 		path = evt.target.path
 		me.layerEventCallbacks[path.layer][evt.type](path)
 	
+	resize: () ->
+		me = @
+		
+		cnt = me.container
+		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
+		me.paper.setSize vp.width, vp.height
+		vp = me.viewport		
+		padding = me.opts.padding ? 0
+		halign = me.opts.halign ? 'center'
+		valign = me.opts.valign ? 'center'
+		me.viewBC = new svgmap.View me.viewAB.asBBox(),vp.width,vp.height, padding,halign,valign
+		for id,layer of me.layers
+			layer.setView(me.viewBC)
+		
 	
 		
 svgmap.SVGMap = SVGMap
@@ -277,11 +304,11 @@ class MapLayer
 		me.path_id = path_id
 		me.paper = paper
 		me.view = view
-		
+				
 	addPath: (svg_path) ->
 		me = @
 		me.paths ?= []
-		
+				
 		layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view)
 		
 		me.paths.push(layerPath)
@@ -290,16 +317,23 @@ class MapLayer
 			me.pathsById ?= {}
 			me.pathsById[layerPath.data[me.path_id]] ?= []
 			me.pathsById[layerPath.data[me.path_id]].push(layerPath)
-	
-	
+
+	setView: (view) ->
+		###
+		# after resizing of the map, each layer gets a new view
+		###
+		me = @
+		for path in me.paths
+			path.setView(view)
+			
+		
 class MapLayerPath
 
 	constructor: (svg_path, layer_id, paper, view) ->
 		me = @
-		path_str = svg_path.getAttribute('d')
-		me.path = path = svgmap.geom.Path.fromSVG(path_str)
 		
-		me.svgPath = paper.path(view.projectPath(path).toSVG())
+		me.path = path = svgmap.geom.Path.fromSVG(svg_path)	
+		me.svgPath = view.projectPath(path).toSVG(paper)
 		me.svgPath.node.setAttribute('class', 'polygon '+layer_id)
 		me.svgPath.node.path = me # store reference to this path
 		
@@ -309,3 +343,14 @@ class MapLayerPath
 			if attr.name.substr(0,5) == "data-"
 				data[attr.name.substr(5)] = attr.value
 		me.data = data
+		
+	setView: (view) ->
+		me = @
+		path = view.projectPath(me.path)
+		if me.path.type == "path"
+			path_str = path.svgString()
+			me.svgPath.attr({ path: path_str }) 
+		else if me.path.type == "circle"
+			me.svgPath.attr({ cx: path.x, cy: path.y, r: path.r })
+			
+			

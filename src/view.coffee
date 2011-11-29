@@ -20,11 +20,13 @@ class View
 	###
 	2D coordinate transfomation
 	###
-	constructor: (bbox, width, height, padding=0) ->
+	constructor: (bbox, width, height, padding, halign, valign) ->
 		me = @
 		me.bbox = bbox
 		me.width = width
-		me.padding = padding
+		me.padding = padding ? 0
+		me.halign = halign ? 'center'
+		me.valign = valign ? 'center'
 		me.height = height
 		me.scale = Math.min (width-padding*2) / bbox.width, (height-padding*2) / bbox.height
 		
@@ -37,20 +39,43 @@ class View
 		bbox = me.bbox
 		h = me.height
 		w = me.width
-		x = (x - bbox.left) * s + (w - bbox.width * s) * .5
-		y = (y - bbox.top) * s + (h - bbox.height * s) * .5
+		xf = 
+			if me.halign == "center"  
+				(w - bbox.width * s) * 0.5 
+			else if me.halign == "left" 
+				me.padding * s
+			else
+				# todo: align right needs a fix
+				w - (bbox.width - me.padding) * s
+		
+		yf = 
+			if me.valign == "center"
+				(h - bbox.height * s) * 0.5 
+			else if me.valign == "top"
+				me.padding * s
+			else 
+				# todo: align bottom needs a fix
+				0
+		
+		x = (x - bbox.left) * s + xf 
+		y = (y - bbox.top) * s + yf
 		[x,y]
 		
 	projectPath: (path) ->
 		me = @
-		contours = []
-		for pcont in path.contours
-			cont = []
-			for [x,y] in pcont
-				[x,y] = me.project x,y
-				cont.push([x,y])
-			contours.push(cont)
-		new svgmap.geom.Path contours,path.closed
+		if path.type == "path"
+			contours = []
+			for pcont in path.contours
+				cont = []
+				for [x,y] in pcont
+					[x,y] = me.project x,y
+					cont.push([x,y])
+				contours.push(cont)
+			new svgmap.geom.Path path.type,contours,path.closed
+		else if path.type == "circle"
+			[x,y] = me.project path.x,path.y
+			r = path.r * me.scale
+			new svgmap.geom.Circle x,y,r
 		
 	asBBox: ->
 		me = @

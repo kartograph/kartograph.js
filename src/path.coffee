@@ -24,16 +24,24 @@ class Path
 	###
 	represents complex polygons (aka multi-polygons)
 	###
-	constructor: (@contours, @closed=true) ->
+	constructor: (type, contours, closed=true) ->
+		self = @
+		self.type = type
+		self.contours = contours
+		self.closed = closed
 	
 	clipToBBox: (bbox) ->
 		# still needs to be implemented
 		throw "path clipping is not implemented yet"
 	
-	toSVG: ->
+	toSVG: (paper) ->
 		###
 		translates this path to a SVG path string
 		###
+		str = @svgString()
+		paper.path(str)
+		
+	svgString: ->
 		me = @
 		str = ""
 		glue = if me.closed then "Z M" else "M"
@@ -46,28 +54,56 @@ class Path
 				fst = false
 		str += "Z" if me.closed
 		str
+		
 
+svgmap.geom.Path = Path
 
-Path.fromSVG = (path_str) ->
+class Circle extends Path
+
+	constructor: (@x,@y,@r) ->
+		super 'circle',null,true
+		
+	toSVG: (paper) ->
+		me = @
+		paper.circle(me.x, me.y, me.r)
+
+svgmap.geom.Circle = Circle
+
+Path.fromSVG = (path) ->
 	###
 	loads a path from a SVG path string
 	###
 	contours = []
-	path_str = path_str.trim()
-	closed = path_str[path_str.length-1] == "Z"
-	sep = if closed then "Z M" else "M"
-	path_str = path_str.substring(1, path_str.length-(if closed then 1 else 0)) 
-	for contour_str in path_str.split(sep)
-		contour = []
-		if contour_str != ""
-			for pt_str in contour_str.split('L')
-				[x,y] = pt_str.split(',')
-				contour.push([Number(x), Number(y)])
-			contours.push(contour)		
-	new svgmap.geom.Path(contours, closed)
+	type = path.nodeName
 
-
-svgmap.geom.Path = Path
+	res = null
+	if type == "path"
+	
+		path_str = path.getAttribute('d').trim()
+		closed = path_str[path_str.length-1] == "Z"
+		sep = if closed then "Z M" else "M"
+		path_str = path_str.substring(1, path_str.length-(if closed then 1 else 0)) 
+		
+		for contour_str in path_str.split(sep)
+			contour = []
+			if contour_str != ""
+				for pt_str in contour_str.split('L')
+					[x,y] = pt_str.split(',')
+					contour.push([Number(x), Number(y)])
+				contours.push(contour)	
+		
+		res = new svgmap.geom.Path(type, contours, closed)	
+		
+	else if type == "circle"
+		
+		cx = path.getAttribute "cx"
+		cy = path.getAttribute "cy"
+		r = path.getAttribute "r"
+		
+		res = new svgmap.geom.Circle(cx,cy,r)
+		
+	res
+		
 
 
 class Line

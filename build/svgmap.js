@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var MapLayer, MapLayerPath, SVGMap, root, svgmap, _ref;
+  var MapLayer, MapLayerPath, SVGMap, log, root, svgmap, warn, _ref;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -26,39 +26,31 @@
 
   svgmap.version = "0.1.0";
 
-  /*
-  Usage:
-  
-  svgmap = new SVGMap(container);
-  
-  // load a new map, will reset everything, so you need to setup the layers again
-  
-  svgmap.loadMap('map.svg', function(layers) {
-  	svgmap.addLayer('sea');
-  	svgmap.addLayer('countries','country_bg');
-  	svgmap.addLayer('graticule');
-  	svgmap.addLayer('countries');
-  });
-  
-  // setup layers
-  
-  // load data
-  */
+  warn = function(s) {
+    return console.warn('svgmap (' + svgmap.version + '): ' + s);
+  };
+
+  log = function(s) {
+    return console.log('svgmap (' + svgmap.version + '): ' + s);
+  };
 
   SVGMap = (function() {
 
     function SVGMap(container) {
-      var cnt, me, vp;
+      var about, cnt, me, vp;
       me = this;
       me.container = cnt = $(container);
       me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
       me.paper = Raphael(cnt[0], vp.width, vp.height);
+      about = $('desc', cnt).text();
+      $('desc', cnt).text(about.replace('with ', 'with svgmap ' + svgmap.version + ' and '));
       me.markers = [];
     }
 
-    SVGMap.prototype.loadMap = function(mapurl, callback) {
+    SVGMap.prototype.loadMap = function(mapurl, callback, opts) {
       var me;
       me = this;
+      me.opts = opts != null ? opts : {};
       me.mapLoadCallback = callback;
       $.ajax({
         url: mapurl,
@@ -68,27 +60,37 @@
     };
 
     SVGMap.prototype.addLayer = function(src_id, layer_id, path_id) {
-      var $paths, layer, me, svg_path, _i, _len, _ref2, _ref3, _results;
+      /*
+      		add new layer
+      */
+      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref2, _ref3;
       me = this;
-      if (layer_id == null) layer_id = src_id;
       if ((_ref2 = me.layerIds) == null) me.layerIds = [];
-      me.layerIds.push(layer_id);
-      layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC);
       if ((_ref3 = me.layers) == null) me.layers = {};
-      me.layers[layer_id] = layer;
-      $paths = $('path', $('g#' + src_id, me.svgSrc)[0]);
-      _results = [];
+      if (layer_id == null) layer_id = src_id;
+      svgLayer = $('g#' + src_id, me.svgSrc);
+      if (svgLayer.length === 0) {
+        warn('didn\'t find any paths for layer "' + layer_id + '"');
+        return;
+      }
+      layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC);
+      $paths = $('*', svgLayer[0]);
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
         svg_path = $paths[_i];
-        _results.push(layer.addPath(svg_path));
+        layer.addPath(svg_path);
       }
-      return _results;
+      if (layer.paths.length > 0) {
+        me.layers[layer_id] = layer;
+        me.layerIds.push(layer_id);
+      } else {
+        warn('didn\'t find any paths for layer ' + layer_id);
+      }
     };
 
     SVGMap.prototype.addLayerEvent = function(event, callback, layerId) {
-      var me, path, paths, _i, _len, _ref2, _results;
+      var me, path, paths, _i, _len, _results;
       me = this;
-      layerId = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      if (layerId == null) layerId = me.layerIds[me.layerIds.length - 1];
       paths = me.layers[layerId].paths;
       _results = [];
       for (_i = 0, _len = paths.length; _i < _len; _i++) {
@@ -110,6 +112,10 @@
       var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _ref2, _ref3, _ref4, _ref5, _results;
       me = this;
       layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      if (!me.layers.hasOwnProperty(layer_id)) {
+        warn('choropleth error: layer "' + layer_id + '" not found');
+        return;
+      }
       data = opts.data;
       data_col = opts.key;
       no_data_color = (_ref3 = opts.noDataColor) != null ? _ref3 : '#ccc';
@@ -129,7 +135,7 @@
           _results2 = [];
           for (_i = 0, _len = paths.length; _i < _len; _i++) {
             path = paths[_i];
-            if ((pathData[id] != null) && !isNaN(pathData[id])) {
+            if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
               v = pathData[id];
               col = colorscale.getColor(v);
               _results2.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
@@ -148,6 +154,11 @@
       me = this;
       tooltips = opts.content;
       layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      if (!me.layers.hasOwnProperty(layer_id)) {
+        warn('tooltips error: layer "' + layer_id + '" not found');
+        return;
+      }
+      console.log(tooltips);
       _ref3 = me.layers[layer_id].pathsById;
       _results = [];
       for (id in _ref3) {
@@ -198,8 +209,7 @@
     		for some reasons, this runs horribly slow in Firefox
     		will use pre-calculated graticules instead
     
-    	addGraticule: (lon_step=15, lat_step) ->
-    		
+    	addGraticule: (lon_step=15, lat_step) ->	
     		self = @
     		lat_step ?= lon_step
     		globe = self.proj
@@ -217,7 +227,6 @@
     				pts = []
     				lines = []
     				for lon in [-180..180]
-    					console.log lat_,lon
     					if globe._visible(lon, lat_)
     						xy = v1.project(v0.project(globe.project(lon, lat_)))
     						pts.push xy
@@ -250,13 +259,16 @@
     */
 
     SVGMap.prototype.mapLoaded = function(xml) {
-      var $view, AB, me, vp;
+      var $view, AB, halign, me, padding, valign, vp, _ref2, _ref3, _ref4;
       me = this;
       me.svgSrc = xml;
       vp = me.viewport;
       $view = $('view', xml)[0];
       me.viewAB = AB = svgmap.View.fromXML($view);
-      me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height);
+      padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
+      halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
+      valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
+      me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
       me.proj = svgmap.Proj.fromXML($('proj', $view)[0]);
       return me.mapLoadCallback(me);
     };
@@ -314,6 +326,26 @@
       return me.layerEventCallbacks[path.layer][evt.type](path);
     };
 
+    SVGMap.prototype.resize = function() {
+      var cnt, halign, id, layer, me, padding, valign, vp, _ref2, _ref3, _ref4, _ref5, _results;
+      me = this;
+      cnt = me.container;
+      me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
+      me.paper.setSize(vp.width, vp.height);
+      vp = me.viewport;
+      padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
+      halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
+      valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
+      me.viewBC = new svgmap.View(me.viewAB.asBBox(), vp.width, vp.height, padding, halign, valign);
+      _ref5 = me.layers;
+      _results = [];
+      for (id in _ref5) {
+        layer = _ref5[id];
+        _results.push(layer.setView(me.viewBC));
+      }
+      return _results;
+    };
+
     return SVGMap;
 
   })();
@@ -346,6 +378,21 @@
       }
     };
 
+    MapLayer.prototype.setView = function(view) {
+      /*
+      		# after resizing of the map, each layer gets a new view
+      */
+      var me, path, _i, _len, _ref2, _results;
+      me = this;
+      _ref2 = me.paths;
+      _results = [];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        path = _ref2[_i];
+        _results.push(path.setView(view));
+      }
+      return _results;
+    };
+
     return MapLayer;
 
   })();
@@ -353,11 +400,10 @@
   MapLayerPath = (function() {
 
     function MapLayerPath(svg_path, layer_id, paper, view) {
-      var attr, data, i, me, path, path_str, _ref2;
+      var attr, data, i, me, path, _ref2;
       me = this;
-      path_str = svg_path.getAttribute('d');
-      me.path = path = svgmap.geom.Path.fromSVG(path_str);
-      me.svgPath = paper.path(view.projectPath(path).toSVG());
+      me.path = path = svgmap.geom.Path.fromSVG(svg_path);
+      me.svgPath = view.projectPath(path).toSVG(paper);
       me.svgPath.node.setAttribute('class', 'polygon ' + layer_id);
       me.svgPath.node.path = me;
       data = {};
@@ -369,6 +415,24 @@
       }
       me.data = data;
     }
+
+    MapLayerPath.prototype.setView = function(view) {
+      var me, path, path_str;
+      me = this;
+      path = view.projectPath(me.path);
+      if (me.path.type === "path") {
+        path_str = path.svgString();
+        return me.svgPath.attr({
+          path: path_str
+        });
+      } else if (me.path.type === "circle") {
+        return me.svgPath.attr({
+          cx: path.x,
+          cy: path.y,
+          r: path.r
+        });
+      }
+    };
 
     return MapLayerPath;
 

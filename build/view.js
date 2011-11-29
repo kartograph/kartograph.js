@@ -26,19 +26,20 @@
     	2D coordinate transfomation
     */
 
-    function View(bbox, width, height, padding) {
+    function View(bbox, width, height, padding, halign, valign) {
       var me;
-      if (padding == null) padding = 0;
       me = this;
       me.bbox = bbox;
       me.width = width;
-      me.padding = padding;
+      me.padding = padding != null ? padding : 0;
+      me.halign = halign != null ? halign : 'center';
+      me.valign = valign != null ? valign : 'center';
       me.height = height;
       me.scale = Math.min((width - padding * 2) / bbox.width, (height - padding * 2) / bbox.height);
     }
 
     View.prototype.project = function(x, y) {
-      var bbox, h, me, s, w;
+      var bbox, h, me, s, w, xf, yf;
       if (!(y != null)) {
         y = x[1];
         x = x[0];
@@ -48,27 +49,35 @@
       bbox = me.bbox;
       h = me.height;
       w = me.width;
-      x = (x - bbox.left) * s + (w - bbox.width * s) * .5;
-      y = (y - bbox.top) * s + (h - bbox.height * s) * .5;
+      xf = me.halign === "center" ? (w - bbox.width * s) * 0.5 : me.halign === "left" ? me.padding * s : w - (bbox.width - me.padding) * s;
+      yf = me.valign === "center" ? (h - bbox.height * s) * 0.5 : me.valign === "top" ? me.padding * s : 0;
+      x = (x - bbox.left) * s + xf;
+      y = (y - bbox.top) * s + yf;
       return [x, y];
     };
 
     View.prototype.projectPath = function(path) {
-      var cont, contours, me, pcont, x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3;
+      var cont, contours, me, pcont, r, x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4;
       me = this;
-      contours = [];
-      _ref = path.contours;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        pcont = _ref[_i];
-        cont = [];
-        for (_j = 0, _len2 = pcont.length; _j < _len2; _j++) {
-          _ref2 = pcont[_j], x = _ref2[0], y = _ref2[1];
-          _ref3 = me.project(x, y), x = _ref3[0], y = _ref3[1];
-          cont.push([x, y]);
+      if (path.type === "path") {
+        contours = [];
+        _ref = path.contours;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          pcont = _ref[_i];
+          cont = [];
+          for (_j = 0, _len2 = pcont.length; _j < _len2; _j++) {
+            _ref2 = pcont[_j], x = _ref2[0], y = _ref2[1];
+            _ref3 = me.project(x, y), x = _ref3[0], y = _ref3[1];
+            cont.push([x, y]);
+          }
+          contours.push(cont);
         }
-        contours.push(cont);
+        return new svgmap.geom.Path(path.type, contours, path.closed);
+      } else if (path.type === "circle") {
+        _ref4 = me.project(path.x, path.y), x = _ref4[0], y = _ref4[1];
+        r = path.r * me.scale;
+        return new svgmap.geom.Circle(x, y, r);
       }
-      return new svgmap.geom.Path(contours, path.closed);
     };
 
     View.prototype.asBBox = function() {

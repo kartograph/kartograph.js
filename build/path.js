@@ -18,7 +18,8 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Line, Path, root, svgmap, _ref, _ref2;
+  var Circle, Line, Path, root, svgmap, _ref, _ref2;
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -32,19 +33,29 @@
     	represents complex polygons (aka multi-polygons)
     */
 
-    function Path(contours, closed) {
-      this.contours = contours;
-      this.closed = closed != null ? closed : true;
+    function Path(type, contours, closed) {
+      var self;
+      if (closed == null) closed = true;
+      self = this;
+      self.type = type;
+      self.contours = contours;
+      self.closed = closed;
     }
 
     Path.prototype.clipToBBox = function(bbox) {
       throw "path clipping is not implemented yet";
     };
 
-    Path.prototype.toSVG = function() {
+    Path.prototype.toSVG = function(paper) {
       /*
       		translates this path to a SVG path string
       */
+      var str;
+      str = this.svgString();
+      return paper.path(str);
+    };
+
+    Path.prototype.svgString = function() {
       var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref3, _ref4;
       me = this;
       str = "";
@@ -69,34 +80,67 @@
 
   })();
 
-  Path.fromSVG = function(path_str) {
+  svgmap.geom.Path = Path;
+
+  Circle = (function() {
+
+    __extends(Circle, Path);
+
+    function Circle(x, y, r) {
+      this.x = x;
+      this.y = y;
+      this.r = r;
+      Circle.__super__.constructor.call(this, 'circle', null, true);
+    }
+
+    Circle.prototype.toSVG = function(paper) {
+      var me;
+      me = this;
+      return paper.circle(me.x, me.y, me.r);
+    };
+
+    return Circle;
+
+  })();
+
+  svgmap.geom.Circle = Circle;
+
+  Path.fromSVG = function(path) {
     /*
     	loads a path from a SVG path string
     */
-    var closed, contour, contour_str, contours, pt_str, sep, x, y, _i, _j, _len, _len2, _ref3, _ref4, _ref5;
+    var closed, contour, contour_str, contours, cx, cy, path_str, pt_str, r, res, sep, type, x, y, _i, _j, _len, _len2, _ref3, _ref4, _ref5;
     contours = [];
-    path_str = path_str.trim();
-    closed = path_str[path_str.length - 1] === "Z";
-    sep = closed ? "Z M" : "M";
-    path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
-    _ref3 = path_str.split(sep);
-    for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-      contour_str = _ref3[_i];
-      contour = [];
-      if (contour_str !== "") {
-        _ref4 = contour_str.split('L');
-        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
-          pt_str = _ref4[_j];
-          _ref5 = pt_str.split(','), x = _ref5[0], y = _ref5[1];
-          contour.push([Number(x), Number(y)]);
+    type = path.nodeName;
+    res = null;
+    if (type === "path") {
+      path_str = path.getAttribute('d').trim();
+      closed = path_str[path_str.length - 1] === "Z";
+      sep = closed ? "Z M" : "M";
+      path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
+      _ref3 = path_str.split(sep);
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        contour_str = _ref3[_i];
+        contour = [];
+        if (contour_str !== "") {
+          _ref4 = contour_str.split('L');
+          for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+            pt_str = _ref4[_j];
+            _ref5 = pt_str.split(','), x = _ref5[0], y = _ref5[1];
+            contour.push([Number(x), Number(y)]);
+          }
+          contours.push(contour);
         }
-        contours.push(contour);
       }
+      res = new svgmap.geom.Path(type, contours, closed);
+    } else if (type === "circle") {
+      cx = path.getAttribute("cx");
+      cy = path.getAttribute("cy");
+      r = path.getAttribute("r");
+      res = new svgmap.geom.Circle(cx, cy, r);
     }
-    return new svgmap.geom.Path(contours, closed);
+    return res;
   };
-
-  svgmap.geom.Path = Path;
 
   Line = (function() {
 
