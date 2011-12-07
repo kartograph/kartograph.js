@@ -37,6 +37,7 @@ class MapMarker
 		offset - x and y offset for the marker
 		###
 		me = @
+		ll = new svgmap.LonLat(ll[0], ll[1]) if ll.length == 2
 		me.lonlat = ll
 		me.visible = true
 		
@@ -48,6 +49,7 @@ class MapMarker
 svgmap.marker.MapMarker = MapMarker
 
 
+
 class LabelMarker extends MapMarker
 	###
 	a simple label
@@ -57,6 +59,7 @@ class LabelMarker extends MapMarker
 		@label = label
 	
 svgmap.marker.LabelMarker = LabelMarker
+
 
 
 class DotMarker extends LabelMarker
@@ -73,6 +76,7 @@ class DotMarker extends LabelMarker
 svgmap.marker.DotMarker = DotMarker
 
 
+
 class IconMarker extends MapMarker
 	###
 	
@@ -80,6 +84,38 @@ class IconMarker extends MapMarker
 	constructor: (ll, icon) ->
 
 svgmap.marker.IconMarker = IconMarker
+
+
+class LabeledIconMarker extends MapMarker
+	
+	constructor: (params) ->
+		me = @
+		super params.ll
+		me.icon_src = params.icon
+		me.label_txt = params.label
+		me.className = params.className ? 'marker'
+		me.dx = params.dx ? 0
+		me.dy = params.dy ? 0
+		
+	render: (x,y,cont,paper) ->
+		me = @
+		if not me.markerDiv
+			me.icon = $('<img src="'+me.icon_src+'" class="icon"/>')
+			me.label = $('<div class="label">'+me.label_txt+'</div>')
+			me.markerDiv = $('<div class="'+me.className+'" />')
+			me.markerDiv.append me.icon
+			me.markerDiv.append me.label
+			
+			cont.append me.markerDiv
+		
+		me.markerDiv.css
+			position: 'absolute'
+			left: (x+me.dx)+'px'
+			top: (y+me.dy)+'px'
+
+svgmap.marker.LabeledIconMarker = LabeledIconMarker
+		
+		
 
 
 class BubbleMarker extends MapMarker

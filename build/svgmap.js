@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var MapLayer, MapLayerPath, SVGMap, log, root, svgmap, warn, _ref;
+  var CanvasLayer, MapLayer, MapLayerPath, SVGMap, log, root, svgmap, warn, _ref;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -87,6 +87,37 @@
       }
     };
 
+    SVGMap.prototype.addCanvasLayer = function(src_id, drawCallback) {
+      var $paths, canvas, layer, me, svgLayer, svg_path, _i, _len;
+      me = this;
+      if (!(me.canvas != null)) {
+        canvas = $('<canvas />');
+        canvas.css({
+          position: 'absolute',
+          top: '0px',
+          left: '0px'
+        });
+        canvas.attr({
+          width: me.viewport.width + 'px',
+          height: me.viewport.height + 'px'
+        });
+        me.container.append(canvas);
+        me.canvas = canvas[0];
+      }
+      svgLayer = $('g#' + src_id, me.svgSrc);
+      if (svgLayer.length === 0) {
+        warn('didn\'t find any paths for layer "' + layer_id + '"');
+        return;
+      }
+      layer = new CanvasLayer(src_id, me.canvas, me.viewBC, drawCallback);
+      $paths = $('*', svgLayer[0]);
+      for (_i = 0, _len = $paths.length; _i < _len; _i++) {
+        svg_path = $paths[_i];
+        layer.addPath(svg_path);
+      }
+      return layer.render();
+    };
+
     SVGMap.prototype.addLayerEvent = function(event, callback, layerId) {
       var me, path, paths, _i, _len, _results;
       me = this;
@@ -109,7 +140,7 @@
     };
 
     SVGMap.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _ref2, _ref3, _ref4, _ref5, _results;
+      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref2, _ref3, _ref4, _ref5;
       me = this;
       layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
@@ -127,26 +158,19 @@
         pathData[id] = row[data_col];
       }
       _ref5 = me.layers[layer_id].pathsById;
-      _results = [];
       for (id in _ref5) {
         paths = _ref5[id];
-        _results.push((function() {
-          var _i, _len, _results2;
-          _results2 = [];
-          for (_i = 0, _len = paths.length; _i < _len; _i++) {
-            path = paths[_i];
-            if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
-              v = pathData[id];
-              col = colorscale.getColor(v);
-              _results2.push(path.svgPath.node.setAttribute('style', 'fill:' + col));
-            } else {
-              _results2.push(path.svgPath.node.setAttribute('style', 'fill:' + no_data_color));
-            }
+        for (_i = 0, _len = paths.length; _i < _len; _i++) {
+          path = paths[_i];
+          if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
+            v = pathData[id];
+            col = colorscale.getColor(v);
+            path.svgPath.node.setAttribute('style', 'fill:' + col);
+          } else {
+            path.svgPath.node.setAttribute('style', 'fill:' + no_data_color);
           }
-          return _results2;
-        })());
+        }
       }
-      return _results;
     };
 
     SVGMap.prototype.tooltips = function(opts) {
@@ -158,7 +182,6 @@
         warn('tooltips error: layer "' + layer_id + '" not found');
         return;
       }
-      console.log(tooltips);
       _ref3 = me.layers[layer_id].pathsById;
       _results = [];
       for (id in _ref3) {
@@ -327,6 +350,9 @@
     };
 
     SVGMap.prototype.resize = function() {
+      /*
+      		forces redraw of every layer
+      */
       var cnt, halign, id, layer, me, padding, valign, vp, _ref2, _ref3, _ref4, _ref5, _results;
       me = this;
       cnt = me.container;
@@ -344,6 +370,27 @@
         _results.push(layer.setView(me.viewBC));
       }
       return _results;
+    };
+
+    SVGMap.prototype.addFilter = function(id, type, params) {
+      var doc, fltr, me;
+      if (params == null) params = {};
+      me = this;
+      doc = window.document;
+      if (svgmap.filter[type] != null) {
+        fltr = new svgmap.filter[type](params).getFilter(id);
+      } else {
+        throw 'unknown filter type ' + type;
+      }
+      return me.paper.defs.appendChild(fltr);
+    };
+
+    SVGMap.prototype.applyFilter = function(layer_id, filter_id) {
+      var me;
+      me = this;
+      return $('.polygon.' + layer_id, me.paper.canvas).attr({
+        filter: 'url(#' + filter_id + ')'
+      });
     };
 
     return SVGMap;
@@ -435,6 +482,77 @@
     };
 
     return MapLayerPath;
+
+  })();
+
+  CanvasLayer = (function() {
+
+    function CanvasLayer(layer_id, canvas, view, renderCallback) {
+      var me;
+      me = this;
+      me.layer_id = layer_id;
+      me.canvas = canvas;
+      me.view = view;
+      me.renderCallback = renderCallback;
+    }
+
+    CanvasLayer.prototype.addPath = function(svg_path) {
+      var me, path, _ref2;
+      me = this;
+      if ((_ref2 = me.paths) == null) me.paths = [];
+      path = svgmap.geom.Path.fromSVG(svg_path);
+      return me.paths.push(path);
+    };
+
+    CanvasLayer.prototype.render = function() {
+      var me, path, paths, _i, _len, _ref2;
+      me = this;
+      paths = [];
+      _ref2 = me.paths;
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        path = _ref2[_i];
+        paths.push(me.view.projectPath(path));
+      }
+      return me.renderCallback(me, paths);
+    };
+
+    CanvasLayer.prototype.drawPaths = function() {
+      var c, contour, me, path, pt, _i, _len, _ref2, _results;
+      me = this;
+      c = me.canvas.getContext('2d');
+      _ref2 = me.paths;
+      _results = [];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        path = _ref2[_i];
+        path = me.view.projectPath(path);
+        _results.push((function() {
+          var _j, _len2, _ref3, _results2;
+          _ref3 = path.contours;
+          _results2 = [];
+          for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
+            contour = _ref3[_j];
+            contour.reverse();
+            _results2.push((function() {
+              var _k, _len3, _results3;
+              _results3 = [];
+              for (_k = 0, _len3 = contour.length; _k < _len3; _k++) {
+                pt = contour[_k];
+                if (pt === contour[0]) {
+                  _results3.push(c.moveTo(pt[0], pt[1]));
+                } else {
+                  _results3.push(c.lineTo(pt[0], pt[1]));
+                }
+              }
+              return _results3;
+            })());
+          }
+          return _results2;
+        })());
+      }
+      return _results;
+    };
+
+    return CanvasLayer;
 
   })();
 

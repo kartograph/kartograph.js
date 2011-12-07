@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Categories, Color, ColorScale, Diverging, Ramp, root, svgmap, _base, _ref, _ref2, _ref3;
+  var Categories, Color, ColorBrewerCategories, ColorBrewerDiverging, ColorBrewerRamp, ColorScale, Diverging, Ramp, cb, root, svgmap, _base, _base2, _ref, _ref2, _ref3, _ref4;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -59,17 +59,27 @@
         me.rgb = [x, y, z];
       } else if (m === 'hsl') {
         me.rgb = Color.hsl2rgb(x, y, z);
+      } else if (m === 'hsv') {
+        me.rgb = Color.hsv2rgb(x, y, z);
       } else if (m === 'hex') {
         me.rgb = Color.hex2rgb(x);
       }
     }
 
-    Color.prototype.toString = function() {
+    Color.prototype.hex = function() {
       return Color.rgb2hex(this.rgb);
+    };
+
+    Color.prototype.toString = function() {
+      return this.hex();
     };
 
     Color.prototype.hsl = function() {
       return Color.rgb2hsl(this.rgb);
+    };
+
+    Color.prototype.hsv = function() {
+      return Color.rgb2hsv(this.rgb);
     };
 
     Color.prototype.interpolate = function(f, col, m) {
@@ -81,10 +91,13 @@
       var dh, hue, hue0, hue1, lbv, lbv0, lbv1, me, sat, sat0, sat1, xyz0, xyz1;
       me = this;
       if (m == null) m = 'hsl';
-      if (m === 'hsl') {
+      if (m === 'hsl' || m === 'hsv') {
         if (m === 'hsl') {
           xyz0 = me.hsl();
           xyz1 = col.hsl();
+        } else if (m === 'hsv') {
+          xyz0 = me.hsv();
+          xyz1 = col.hsv();
         }
         hue0 = xyz0[0], sat0 = xyz0[1], lbv0 = xyz0[2];
         hue1 = xyz1[0], sat1 = xyz1[1], lbv1 = xyz1[2];
@@ -139,6 +152,114 @@
     u = r << 16 | g << 8 | b;
     str = "000000" + u.toString(16).toUpperCase();
     return "#" + str.substr(str.length - 6);
+  };
+
+  Color.hsv2rgb = function(h, s, v) {
+    var b, f, g, i, l, p, q, r, t, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    if (h !== void 0 && h.length === 3) {
+      _ref3 = h, h = _ref3[0], s = _ref3[1], l = _ref3[2];
+    }
+    v *= 255;
+    if (s === 0 && isNaN(h)) {
+      r = g = b = v;
+    } else {
+      if (h === 360) h = 0;
+      h /= 60;
+      i = Math.floor(h);
+      f = h - i;
+      p = v * (1 - s);
+      q = v * (1 - s * f);
+      t = v * (1 - s * (1 - f));
+      switch (i) {
+        case 0:
+          _ref4 = [v, t, p], r = _ref4[0], g = _ref4[1], b = _ref4[2];
+          break;
+        case 1:
+          _ref5 = [q, v, p], r = _ref5[0], g = _ref5[1], b = _ref5[2];
+          break;
+        case 2:
+          _ref6 = [p, v, t], r = _ref6[0], g = _ref6[1], b = _ref6[2];
+          break;
+        case 3:
+          _ref7 = [p, q, v], r = _ref7[0], g = _ref7[1], b = _ref7[2];
+          break;
+        case 4:
+          _ref8 = [t, p, v], r = _ref8[0], g = _ref8[1], b = _ref8[2];
+          break;
+        case 5:
+          _ref9 = [v, p, q], r = _ref9[0], g = _ref9[1], b = _ref9[2];
+      }
+    }
+    return [r, g, b];
+  };
+
+  /*
+  	this.hsv2rgb = function() {
+  		var h = this.h, s = this.s, _rgb = this._rgb, v = this.v*255, i, f, p, q, t;
+  		
+  		if (this.s === 0 && isNaN(h)) {
+  			this.r = this.g = this.b = v;
+  		} else {
+  			if (h == 360) h = 0;
+  			h /= 60;
+  			i = Math.floor(h);
+  			f = h - i;
+  			p = v * (1 - s);
+  			q = v * (1 - s * f);
+  			t = v * (1 - s * (1 - f));
+  			
+  			switch (i) {
+  				case 0: _rgb(v, t, p); break;
+  				case 1: _rgb(q, v, p); break;
+  				case 2: _rgb(p, v, t); break;
+  				case 3: _rgb(p, q, v); break;
+  				case 4: _rgb(t, p, v); break;
+  				case 5: _rgb(v, p, q); 
+  			}
+  		}			
+  	};
+  	
+  this.rgb2hsv = function() {
+  		var min = Math.min(Math.min(this.r, this.g), this.b),
+  			max = Math.max(Math.max(this.r, this.g), this.b),
+  			delta = max - min;
+  		
+  		this.v = max/255;
+  		this.s = delta / max;
+  		if (this.s === 0) {
+  			this.h = undefined;
+  		} else {
+  			if (this.r == max) this.h = (this.g - this.b) / delta;
+  			if (this.g == max) this.h = 2+(this.b - this.r) / delta;
+  			if (this.b == max) this.h = 4+(this.r - this.g) / delta;
+  			this.h *= 60;
+  			if (this.h < 0) this.h += 360;
+  		}
+  	};
+  */
+
+  Color.rgb2hsv = function(r, g, b) {
+    var delta, h, max, min, s, v, _ref3;
+    if (r !== void 0 && r.length === 3) {
+      _ref3 = r, r = _ref3[0], g = _ref3[1], b = _ref3[2];
+    }
+    min = Math.min(r, g, b);
+    max = Math.max(r, g, b);
+    delta = max - min;
+    console.log(r, g, b, min, max, delta);
+    v = max / 255.0;
+    s = delta / max;
+    if (s === 0) {
+      h = void 0;
+      s = 0;
+    } else {
+      if (r === max) h = (g - b) / delta;
+      if (g === max) h = 2 + (b - r) / delta;
+      if (b === max) h = 4 + (r - g) / delta;
+      h *= 60;
+      if (h < 0) h += 360;
+    }
+    return [h, s, v];
   };
 
   Color.hsl2rgb = function(h, s, l) {
@@ -335,17 +456,28 @@
       self = this;
       limits = self.classLimits;
       if (limits != null) {
-        n = limits.length - 1;
-        i = 0;
-        while (i < n && value >= limits[i]) {
-          i++;
-        }
-        value = limits[i - 1] + (limits[i] - limits[i - 1]) * 0.5;
+        n = limits.length(-1);
+        i = self.getClass(value);
+        value = limits[i] + (limits[i + 1] - limits[i]) * 0.5;
         minc = limits[0] + (limits[1] - limits[0]) * 0.3;
         maxc = limits[n - 1] + (limits[n] - limits[n - 1]) * 0.7;
         value = self.min + ((value - minc) / (maxc - minc)) * (self.max - self.min);
       }
       return value;
+    };
+
+    ColorScale.prototype.getClass = function(value) {
+      var i, limits, n, self;
+      self = this;
+      limits = self.classLimits;
+      if (limits != null) {
+        n = limits.length - 1;
+        i = 0;
+        while (i < n && value >= limits[i]) {
+          i++;
+        }
+        return i - 1;
+      }
     };
 
     ColorScale.prototype.validValue = function(value) {
@@ -447,8 +579,72 @@
 
   svgmap.color.scale.HOT = new ColorScale(['#000000', '#ff0000', '#ffff00', '#ffffff'], [0, .25, .75, 1], 'rgb');
 
-  svgmap.color.scale.BWO = new Diverging(Color.hsl(30, 1, .6), '#ffffff', new Color(220, 1, .6));
+  svgmap.color.scale.BWO = new Diverging(Color.hsl(30, 1, .55), '#ffffff', new Color(220, 1, .55));
 
   svgmap.color.scale.GWP = new Diverging(Color.hsl(120, .8, .4), '#ffffff', new Color(280, .8, .4));
+
+  ColorBrewerRamp = (function() {
+
+    __extends(ColorBrewerRamp, ColorScale);
+
+    function ColorBrewerRamp(name, colors) {
+      var cols, me, _i, _len;
+      me = this;
+      me.name = name;
+      me.cbcc = {};
+      for (_i = 0, _len = colors.length; _i < _len; _i++) {
+        cols = colors[_i];
+        me.cbcc[cols.length] = cols;
+      }
+      me.setClasses(7);
+    }
+
+    ColorBrewerRamp.prototype.setClasses = function(numClasses, method, limits) {
+      var me;
+      if (numClasses == null) numClasses = 5;
+      if (method == null) method = 'equalinterval';
+      if (limits == null) limits = [];
+      me = this;
+      if (me.cbcc.hasOwnProperty(numClasses)) {
+        return ColorBrewerRamp.__super__.setClasses.call(this, numClasses, method, limits);
+      } else {
+        throw 'number of colors is not supported by color scale ' + me.name;
+      }
+    };
+
+    ColorBrewerRamp.prototype.getColor = function(value) {
+      var c, me;
+      me = this;
+      c = me.getClass(value);
+      return me.cbcc[me.numClasses][c];
+    };
+
+    return ColorBrewerRamp;
+
+  })();
+
+  ColorBrewerDiverging = (function() {
+
+    function ColorBrewerDiverging() {}
+
+    return ColorBrewerDiverging;
+
+  })();
+
+  ColorBrewerCategories = (function() {
+
+    function ColorBrewerCategories() {}
+
+    return ColorBrewerCategories;
+
+  })();
+
+  cb = (_ref4 = (_base2 = svgmap.color.scale).colorbrewer) != null ? _ref4 : _base2.colorbrewer = {};
+
+  cb.PuRd = new ColorBrewerRamp("PuRd", [['#e7e1ef', '#c994c7', '#dd1c77'], ['#f1eef6', '#d7b5d8', '#df65b0', '#ce1256'], ['#f1eef6', '#d7b5d8', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#980043', '#67001f']]);
+
+  cb.Blues = new ColorBrewerRamp("Blues", [['#deebf7', '#9ecae1', '#3182bd'], ['#eff3ff', '#bdd7e7', '#6baed6', '#2171b5'], ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b']]);
+
+  cb.PuBuGn = new ColorBrewerRamp("PuBuGn", [['#ece2f0', '#a6bddb', '#1c9099'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#02818a'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016c59', '#014636']]);
 
 }).call(this);

@@ -51,14 +51,22 @@ class Color
 			me.rgb = [x,y,z]
 		else if m == 'hsl'
 			me.rgb = Color.hsl2rgb(x,y,z)
+		else if m == 'hsv'
+			me.rgb = Color.hsv2rgb(x,y,z)
 		else if m == 'hex'
 			me.rgb = Color.hex2rgb(x)
 		
-	toString: ->
+	hex: ->
 		Color.rgb2hex(@rgb)
+		
+	toString: ->
+		@hex()
 		
 	hsl: ->
 		Color.rgb2hsl(@rgb)
+		
+	hsv: ->
+		Color.rgb2hsv(@rgb)
 		
 	interpolate: (f, col, m) ->
 		###
@@ -69,10 +77,13 @@ class Color
 		me = @
 		m ?= 'hsl'
 		
-		if m == 'hsl' # or hsv or hsb...
+		if m == 'hsl' or m == 'hsv' # or hsb...
 			if m == 'hsl'
 				xyz0 = me.hsl()
 				xyz1 = col.hsl()
+			else if m == 'hsv'
+				xyz0 = me.hsv()
+				xyz1 = col.hsv()
 		
 			[hue0, sat0, lbv0] = xyz0
 			[hue1, sat1, lbv1] = xyz1
@@ -104,7 +115,6 @@ class Color
 			xyz0 = me.rgb
 			xyz1 = col.rgb
 			new Color(xyz0[0]+f*(xyz1[0]-xyz0[0]), xyz0[1] + f*(xyz1[1]-xyz0[1]), xyz0[2] + f*(xyz1[2]-xyz0[2]), m)
-			
 		else
 			throw "color mode "+m+" is not supported"
 
@@ -122,6 +132,97 @@ Color.rgb2hex = (r,g,b) ->
 	u = r << 16 | g << 8 | b
 	str = "000000" + u.toString(16).toUpperCase()
 	"#" + str.substr(str.length - 6)
+
+
+Color.hsv2rgb = (h,s,v) ->
+	if h != undefined and h.length == 3
+		[h,s,l] = h
+	v *= 255
+	if s is 0 and isNaN(h)
+		r = g = b = v
+	else
+		h = 0 if h is 360
+		h /= 60
+		i = Math.floor h
+		f = h - i
+		p = v * (1 - s)
+		q = v * (1 - s * f)
+		t = v * (1 - s * (1 - f))
+		switch i
+			when 0 then [r,g,b] = [v, t, p]
+			when 1 then [r,g,b] = [q, v, p]
+			when 2 then [r,g,b] = [p, v, t]
+			when 3 then [r,g,b] = [p, q, v]
+			when 4 then [r,g,b] = [t, p, v]
+			when 5 then [r,g,b] = [v, p, q]	
+	[r, g, b]
+
+###
+	this.hsv2rgb = function() {
+		var h = this.h, s = this.s, _rgb = this._rgb, v = this.v*255, i, f, p, q, t;
+		
+		if (this.s === 0 && isNaN(h)) {
+			this.r = this.g = this.b = v;
+		} else {
+			if (h == 360) h = 0;
+			h /= 60;
+			i = Math.floor(h);
+			f = h - i;
+			p = v * (1 - s);
+			q = v * (1 - s * f);
+			t = v * (1 - s * (1 - f));
+			
+			switch (i) {
+				case 0: _rgb(v, t, p); break;
+				case 1: _rgb(q, v, p); break;
+				case 2: _rgb(p, v, t); break;
+				case 3: _rgb(p, q, v); break;
+				case 4: _rgb(t, p, v); break;
+				case 5: _rgb(v, p, q); 
+			}
+		}			
+	};
+	
+this.rgb2hsv = function() {
+		var min = Math.min(Math.min(this.r, this.g), this.b),
+			max = Math.max(Math.max(this.r, this.g), this.b),
+			delta = max - min;
+		
+		this.v = max/255;
+		this.s = delta / max;
+		if (this.s === 0) {
+			this.h = undefined;
+		} else {
+			if (this.r == max) this.h = (this.g - this.b) / delta;
+			if (this.g == max) this.h = 2+(this.b - this.r) / delta;
+			if (this.b == max) this.h = 4+(this.r - this.g) / delta;
+			this.h *= 60;
+			if (this.h < 0) this.h += 360;
+		}
+	};
+
+
+###
+	
+Color.rgb2hsv = (r,g,b) ->
+	if r != undefined and r.length == 3
+		[r,g,b] = r
+	min = Math.min(r, g, b)
+	max = Math.max(r, g, b)
+	delta = max - min
+	console.log r,g,b,min,max,delta
+	v = max / 255.0
+	s = delta / max
+	if s is 0
+		h = undefined
+		s = 0
+	else
+		if r is max then h = (g - b) / delta
+		if g is max then h = 2+(b - r) / delta
+		if b is max then h = 4+(r - g) / delta
+		h *= 60;
+		if h < 0 then h += 360
+	[h, s, v]
 
 
 Color.hsl2rgb = (h,s,l) ->
@@ -281,9 +382,20 @@ class ColorScale
 			limits.unshift(min)
 			limits.push(max)
 		return
-						
-						
+	
 	classifyValue: (value) ->
+		self = @ 
+		limits = self.classLimits
+		if limits?
+			n = limits.length -1
+			i = self.getClass(value)
+			value = limits[i] + (limits[i+1] - limits[i]) * 0.5			
+			minc = limits[0] + (limits[1]-limits[0])*0.3
+			maxc = limits[n-1] + (limits[n]-limits[n-1])*0.7
+			value = self.min + ((value - minc) / (maxc-minc)) * (self.max - self.min)
+		value
+		
+	getClass: (value) ->
 		self = @ 
 		limits = self.classLimits
 		if limits?
@@ -291,12 +403,9 @@ class ColorScale
 			i = 0
 			while i < n and value >= limits[i]
 				i++
-			value = limits[i-1] + (limits[i] - limits[i-1]) * 0.5
-			
-			minc = limits[0] + (limits[1]-limits[0])*0.3
-			maxc = limits[n-1] + (limits[n]-limits[n-1])*0.7
-			value = self.min + ((value - minc) / (maxc-minc)) * (self.max - self.min)
-		value
+			return i-1
+		return undefined
+		
 		
 	validValue: (value) ->
 		not isNaN(value)
@@ -361,6 +470,46 @@ svgmap.color.scale.Categories = Categories
 # Generates a color palette that uses a "cool", blue-heavy color scheme.
 svgmap.color.scale.COOL = new Ramp(Color.hsl(180,1,.9), Color.hsl(250,.7,.4))
 svgmap.color.scale.HOT = new ColorScale(['#000000','#ff0000','#ffff00','#ffffff'],[0,.25,.75,1],'rgb')
-svgmap.color.scale.BWO = new Diverging(Color.hsl(30,1,.6),'#ffffff', new Color(220,1,.6))
+svgmap.color.scale.BWO = new Diverging(Color.hsl(30,1,.55),'#ffffff', new Color(220,1,.55))
 svgmap.color.scale.GWP = new Diverging(Color.hsl(120,.8,.4),'#ffffff', new Color(280,.8,.4))
+
+
+
+class ColorBrewerRamp extends ColorScale
+
+	constructor: (name, colors) ->
+		me = @
+		me.name = name
+		me.cbcc = {}
+		for cols in colors
+			me.cbcc[cols.length] = cols
+			
+		me.setClasses(7)
+	
+	setClasses: (numClasses = 5, method='equalinterval', limits = []) ->
+		me = @
+		if me.cbcc.hasOwnProperty(numClasses)
+			super numClasses, method, limits
+		else
+			throw 'number of colors is not supported by color scale '+me.name
+	
+	getColor: (value) ->
+		me = @
+		c = me.getClass(value)
+		me.cbcc[me.numClasses][c]
+	
+class ColorBrewerDiverging
+
+class ColorBrewerCategories
+
+
+cb = svgmap.color.scale.colorbrewer ?= {}
+
+cb.PuRd = new ColorBrewerRamp("PuRd", [['#e7e1ef', '#c994c7', '#dd1c77'], ['#f1eef6', '#d7b5d8', '#df65b0', '#ce1256'], ['#f1eef6', '#d7b5d8', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#980043', '#67001f']])
+
+cb.Blues = new ColorBrewerRamp("Blues", [['#deebf7', '#9ecae1', '#3182bd'], ['#eff3ff', '#bdd7e7', '#6baed6', '#2171b5'], ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b']])
+
+cb.PuBuGn = new ColorBrewerRamp("PuBuGn", [['#ece2f0', '#a6bddb', '#1c9099'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#02818a'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016c59', '#014636']])
+
+	
 

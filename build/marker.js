@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var BubbleMarker, DotMarker, IconMarker, LabelMarker, MapMarker, root, svgmap, _ref, _ref2;
+  var BubbleMarker, DotMarker, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, root, svgmap, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -45,6 +45,7 @@
       */
       var me;
       me = this;
+      if (ll.length === 2) ll = new svgmap.LonLat(ll[0], ll[1]);
       me.lonlat = ll;
       me.visible = true;
     }
@@ -116,6 +117,45 @@
   })();
 
   svgmap.marker.IconMarker = IconMarker;
+
+  LabeledIconMarker = (function() {
+
+    __extends(LabeledIconMarker, MapMarker);
+
+    function LabeledIconMarker(params) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      LabeledIconMarker.__super__.constructor.call(this, params.ll);
+      me.icon_src = params.icon;
+      me.label_txt = params.label;
+      me.className = (_ref3 = params.className) != null ? _ref3 : 'marker';
+      me.dx = (_ref4 = params.dx) != null ? _ref4 : 0;
+      me.dy = (_ref5 = params.dy) != null ? _ref5 : 0;
+    }
+
+    LabeledIconMarker.prototype.render = function(x, y, cont, paper) {
+      var me;
+      me = this;
+      if (!me.markerDiv) {
+        me.icon = $('<img src="' + me.icon_src + '" class="icon"/>');
+        me.label = $('<div class="label">' + me.label_txt + '</div>');
+        me.markerDiv = $('<div class="' + me.className + '" />');
+        me.markerDiv.append(me.icon);
+        me.markerDiv.append(me.label);
+        cont.append(me.markerDiv);
+      }
+      return me.markerDiv.css({
+        position: 'absolute',
+        left: (x + me.dx) + 'px',
+        top: (y + me.dy) + 'px'
+      });
+    };
+
+    return LabeledIconMarker;
+
+  })();
+
+  svgmap.marker.LabeledIconMarker = LabeledIconMarker;
 
   BubbleMarker = (function() {
 

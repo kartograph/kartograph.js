@@ -52,6 +52,7 @@ var GlobeOpt = function() {
 	this.lat2 = 50;
 	this.dist = 2;
 	this.up = 0;
+	this.tilt = 0;
 	this.proj = 'ortho';
 };
 
@@ -210,6 +211,7 @@ $(function() {
 	gui.add(globeopt, 'lat2', -90,90).onChange(renderFrame);
 	gui.add(globeopt, 'dist', 1.01, 10).step(0.01).onChange(renderFrame);
 	gui.add(globeopt, 'up', -180,180).onChange(renderFrame);	
+	gui.add(globeopt, 'tilt', -40,0).onChange(renderFrame);	
 	
 // Choose from named values
 

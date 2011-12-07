@@ -82,6 +82,38 @@ class SVGMap
 			warn 'didn\'t find any paths for layer '+layer_id
 		
 		return
+
+
+	
+	addCanvasLayer: (src_id, drawCallback) ->
+		me = @
+		if not me.canvas?
+			canvas = $ '<canvas />'
+			canvas.css
+				position: 'absolute'
+				top: '0px'
+				left: '0px'
+				
+			canvas.attr
+				width: me.viewport.width+'px'
+				height: me.viewport.height+'px'
+				
+			me.container.append canvas
+			me.canvas = canvas[0]
+				
+		svgLayer = $('g#'+src_id, me.svgSrc)
+		if svgLayer.length == 0
+			warn 'didn\'t find any paths for layer "'+layer_id+'"'
+			return
+		
+		layer = new CanvasLayer(src_id, me.canvas, me.viewBC, drawCallback)
+
+		$paths = $('*', svgLayer[0])		
+		for svg_path in $paths				
+			layer.addPath(svg_path)
+			
+		layer.render()
+			
 		
 	addLayerEvent: (event, callback, layerId) ->
 		me = @
@@ -122,10 +154,12 @@ class SVGMap
 				if pathData[id]? and colorscale.validValue(pathData[id])
 					v = pathData[id]
 					col = colorscale.getColor(v)
+					
 					path.svgPath.node.setAttribute('style', 'fill:'+col)
 				else
 					path.svgPath.node.setAttribute('style', 'fill:'+no_data_color)
-
+		return
+		
 	
 	tooltips: (opts) ->
 		me = @
@@ -135,7 +169,6 @@ class SVGMap
 			warn 'tooltips error: layer "'+layer_id+'" not found'
 			return
 			
-		console.log tooltips
 		for id, paths of me.layers[layer_id].pathsById
 			
 			for path in paths			
@@ -208,17 +241,15 @@ class SVGMap
 					
 	###
 	
-	#addLayerPath: (layer_id, out_class, pathQuery) ->
-	#	paths = me.layerPaths[layer_id]
-	#	for path in paths
-	#		# foo
-	
 	display: () ->
 		###
 		finally displays the svgmap, needs to be called after
 		layer and marker setup is finished
 		###
 		@render()
+	
+
+		
 	
 	### 
 	    end of public API
@@ -237,12 +268,14 @@ class SVGMap
 		me.proj = svgmap.Proj.fromXML $('proj', $view)[0]		
 		me.mapLoadCallback(me)
 	
+	
 	loadCoastline: ->
 		me = @
 		$.ajax
 			url: 'coastline.json'
 			success: me.renderCoastline
 			context: me
+	
 	
 	renderCoastline: (coastlines) ->
 		me = @
@@ -277,9 +310,12 @@ class SVGMap
 		path = evt.target.path
 		me.layerEventCallbacks[path.layer][evt.type](path)
 	
+	
 	resize: () ->
+		###
+		forces redraw of every layer
+		###
 		me = @
-		
 		cnt = me.container
 		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
 		me.paper.setSize vp.width, vp.height
@@ -291,7 +327,24 @@ class SVGMap
 		for id,layer of me.layers
 			layer.setView(me.viewBC)
 		
+		
+	addFilter: (id, type, params = {}) ->
+		me = @
+		doc = window.document
+		
+		if svgmap.filter[type]?
+			fltr = new svgmap.filter[type](params).getFilter(id)
+		else
+			throw 'unknown filter type '+type
+		
+		me.paper.defs.appendChild(fltr)
+		
 	
+	applyFilter: (layer_id, filter_id) ->
+		me = @
+		$('.polygon.'+layer_id, me.paper.canvas).attr
+			filter: 'url(#'+filter_id+')'
+		
 		
 svgmap.SVGMap = SVGMap
 
@@ -354,3 +407,46 @@ class MapLayerPath
 			me.svgPath.attr({ cx: path.x, cy: path.y, r: path.r })
 			
 			
+class CanvasLayer
+
+	constructor: (layer_id, canvas, view, renderCallback) ->
+		me = @
+		me.layer_id = layer_id
+		me.canvas = canvas
+		me.view = view
+		me.renderCallback = renderCallback
+		
+		
+	addPath: (svg_path) ->
+		me = @
+		me.paths ?= []
+		path = svgmap.geom.Path.fromSVG(svg_path)	
+		me.paths.push path
+		
+		
+	render: () ->
+		me = @
+		paths = []
+		for path in me.paths
+			paths.push me.view.projectPath path
+		me.renderCallback me, paths
+		
+		
+	drawPaths: () ->
+		me = @
+		c = me.canvas.getContext '2d'
+		
+		for path in me.paths
+			path = me.view.projectPath path
+			#c.fillStyle = '#f00'
+		
+			for contour in path.contours
+				contour.reverse()
+				for pt in contour
+					if pt == contour[0]
+						c.moveTo pt[0],pt[1]
+					else
+						c.lineTo pt[0],pt[1]
+		
+
+

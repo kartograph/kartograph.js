@@ -633,13 +633,14 @@ class Satellite extends Azimuthal
 		return
 		
 		
-	project: (lon, lat) ->
+	project: (lon, lat, alt = 0) ->
 	
 		phi = @rad(lat)
 		lam = @rad(lon)
 		math = Math
 		sin = math.sin
 		cos = math.cos
+		r = @r * (1+alt)
 
 		cos_c = sin(@phi0) * sin(phi) + cos(@phi0) * cos(phi) * cos(lam - @lam0)
 		k = (@dist - 1) / (@dist - cos_c)
@@ -647,8 +648,8 @@ class Satellite extends Azimuthal
 		
 		k *= @scale
 		
-		xo = @r * k * cos(phi) * sin(lam - @lam0)
-		yo = -@r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
+		xo = r * k * cos(phi) * sin(lam - @lam0)
+		yo = -r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
 		
 		# tilt
 		cos_up = cos(@up)
@@ -656,13 +657,13 @@ class Satellite extends Azimuthal
 		cos_tilt = cos(@tilt)
 		sin_tilt = sin(@tilt)
 		
-		H = @r * (@dist - 1)
+		H = r * (@dist - 1)
 		A = ((yo * cos_up + xo * sin_up) * sin(@tilt/H)) + cos_tilt
 		xt = (xo * cos_up - yo * sin_up) * cos(@tilt/A)
 		yt = (yo * cos_up + xo * sin_up) / A
 		
-		x = @r + xt
-		y = @r + yt	
+		x = r + xt
+		y = r + yt	
 		
 		[x,y]	
 
@@ -673,6 +674,14 @@ class Satellite extends Azimuthal
 		# work out if the point is visible
 		cosc = math.sin(elevation)*math.sin(@elevation0)+math.cos(@elevation0)*math.cos(elevation)*math.cos(azimuth-@azimuth0)
 		cosc >= (1.0/@dist)
+		
+	sea: ->
+		out = []
+		r = @r
+		math = Math
+		for phi in [0..360]
+			out.push([r + math.cos(@rad(phi)) * r, r + math.sin(@rad(phi)) * r])
+		out
 
 __proj['satellite'] = Satellite
 

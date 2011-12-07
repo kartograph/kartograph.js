@@ -36,10 +36,20 @@ try {
 */
 
 	var a = new Color_('#222222'),
-		b = new Color_('#888888');
-		
-	console.log(a.interpolate(.5,b)+"");
+		b = new Color_('#888888'),
+		debug = function(hex) {
+			console.log('hsl', hex, new Color_(hex).hsl());
+			console.log('hsv', hex, new Color_(hex).hsv());
+		};
 
+	debug('#ffffff');
+	debug('#000000');
+	debug('#ff0000');
+	debug('#00ff00');
+	debug('#0000ff');
+		
+	
+	
 } catch (er) {
 	console.log('[svgmap.color] test failed: '+er);
 	console.log(er.stack);
