@@ -1,0 +1,2127 @@
+/**
+	Colors from www.ColorBrewer.org by Cynthia A. Brewer, Geography, Pennsylvania State University.
+
+	Apache-Style Software License for ColorBrewer software and ColorBrewer Color Schemes
+	
+	Copyright (c) 2002 Cynthia Brewer, Mark Harrower, and The Pennsylvania State University.
+	
+	Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software distributed
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+	CONDITIONS OF ANY KIND, either express or implied. See the License for the
+	specific language governing permissions and limitations under the License.
+**/
+
+/*
+ * available color scales are
+ *
+ * sequential
+ *   OrRd, PuBu, BuPu, Oranges, BuGn, YlOrBr, YlGn, Reds, RdPu, Greens, 
+ *   YlGnBu, Purples, GnBu, Greys, YlOrRd, PuRd, Blues, PuBuGn
+ *
+ * diverging
+ *   Spectral, RdYlGn, RdBu, PiYG, PRGn, RdYlBu, BrBG, RdGy, PuOr
+ *
+ * qualitative
+ *   Set2, Accent, Set1, Set3, Dark2, Paired, Pastel2, Pastel1
+ *
+ */
+ 
+/*
+ * diverging
+ */
+
+.Spectral.l3.c0 { fill: #fc8d59 }
+.Spectral.l3.c1 { fill: #ffffbf }
+.Spectral.l3.c2 { fill: #99d594 }
+
+.Spectral.l4.c0 { fill: #d7191c }
+.Spectral.l4.c1 { fill: #fdae61 }
+.Spectral.l4.c2 { fill: #abdda4 }
+.Spectral.l4.c3 { fill: #2b83ba }
+
+.Spectral.l5.c0 { fill: #d7191c }
+.Spectral.l5.c1 { fill: #fdae61 }
+.Spectral.l5.c2 { fill: #ffffbf }
+.Spectral.l5.c3 { fill: #abdda4 }
+.Spectral.l5.c4 { fill: #2b83ba }
+
+.Spectral.l6.c0 { fill: #d53e4f }
+.Spectral.l6.c1 { fill: #fc8d59 }
+.Spectral.l6.c2 { fill: #fee08b }
+.Spectral.l6.c3 { fill: #e6f598 }
+.Spectral.l6.c4 { fill: #99d594 }
+.Spectral.l6.c5 { fill: #3288bd }
+
+.Spectral.l7.c0 { fill: #d53e4f }
+.Spectral.l7.c1 { fill: #fc8d59 }
+.Spectral.l7.c2 { fill: #fee08b }
+.Spectral.l7.c3 { fill: #ffffbf }
+.Spectral.l7.c4 { fill: #e6f598 }
+.Spectral.l7.c5 { fill: #99d594 }
+.Spectral.l7.c6 { fill: #3288bd }
+
+.Spectral.l8.c0 { fill: #d53e4f }
+.Spectral.l8.c1 { fill: #f46d43 }
+.Spectral.l8.c2 { fill: #fdae61 }
+.Spectral.l8.c3 { fill: #fee08b }
+.Spectral.l8.c4 { fill: #e6f598 }
+.Spectral.l8.c5 { fill: #abdda4 }
+.Spectral.l8.c6 { fill: #66c2a5 }
+.Spectral.l8.c7 { fill: #3288bd }
+
+.Spectral.l9.c0 { fill: #d53e4f }
+.Spectral.l9.c1 { fill: #f46d43 }
+.Spectral.l9.c2 { fill: #fdae61 }
+.Spectral.l9.c3 { fill: #fee08b }
+.Spectral.l9.c4 { fill: #ffffbf }
+.Spectral.l9.c5 { fill: #e6f598 }
+.Spectral.l9.c6 { fill: #abdda4 }
+.Spectral.l9.c7 { fill: #66c2a5 }
+.Spectral.l9.c8 { fill: #3288bd }
+
+.Spectral.l10.c0 { fill: #9e0142 }
+.Spectral.l10.c1 { fill: #d53e4f }
+.Spectral.l10.c2 { fill: #f46d43 }
+.Spectral.l10.c3 { fill: #fdae61 }
+.Spectral.l10.c4 { fill: #fee08b }
+.Spectral.l10.c5 { fill: #e6f598 }
+.Spectral.l10.c6 { fill: #abdda4 }
+.Spectral.l10.c7 { fill: #66c2a5 }
+.Spectral.l10.c8 { fill: #3288bd }
+.Spectral.l10.c9 { fill: #5e4fa2 }
+
+.Spectral.l11.c0 { fill: #9e0142 }
+.Spectral.l11.c1 { fill: #d53e4f }
+.Spectral.l11.c2 { fill: #f46d43 }
+.Spectral.l11.c3 { fill: #fdae61 }
+.Spectral.l11.c4 { fill: #fee08b }
+.Spectral.l11.c5 { fill: #ffffbf }
+.Spectral.l11.c6 { fill: #e6f598 }
+.Spectral.l11.c7 { fill: #abdda4 }
+.Spectral.l11.c8 { fill: #66c2a5 }
+.Spectral.l11.c9 { fill: #3288bd }
+.Spectral.l11.c10 { fill: #5e4fa2 }
+
+/*
+ * diverging
+ */
+
+.RdYlGn.l3.c0 { fill: #fc8d59 }
+.RdYlGn.l3.c1 { fill: #ffffbf }
+.RdYlGn.l3.c2 { fill: #91cf60 }
+
+.RdYlGn.l4.c0 { fill: #d7191c }
+.RdYlGn.l4.c1 { fill: #fdae61 }
+.RdYlGn.l4.c2 { fill: #a6d96a }
+.RdYlGn.l4.c3 { fill: #1a9641 }
+
+.RdYlGn.l5.c0 { fill: #d7191c }
+.RdYlGn.l5.c1 { fill: #fdae61 }
+.RdYlGn.l5.c2 { fill: #ffffbf }
+.RdYlGn.l5.c3 { fill: #a6d96a }
+.RdYlGn.l5.c4 { fill: #1a9641 }
+
+.RdYlGn.l6.c0 { fill: #d73027 }
+.RdYlGn.l6.c1 { fill: #fc8d59 }
+.RdYlGn.l6.c2 { fill: #fee08b }
+.RdYlGn.l6.c3 { fill: #d9ef8b }
+.RdYlGn.l6.c4 { fill: #91cf60 }
+.RdYlGn.l6.c5 { fill: #1a9850 }
+
+.RdYlGn.l7.c0 { fill: #d73027 }
+.RdYlGn.l7.c1 { fill: #fc8d59 }
+.RdYlGn.l7.c2 { fill: #fee08b }
+.RdYlGn.l7.c3 { fill: #ffffbf }
+.RdYlGn.l7.c4 { fill: #d9ef8b }
+.RdYlGn.l7.c5 { fill: #91cf60 }
+.RdYlGn.l7.c6 { fill: #1a9850 }
+
+.RdYlGn.l8.c0 { fill: #d73027 }
+.RdYlGn.l8.c1 { fill: #f46d43 }
+.RdYlGn.l8.c2 { fill: #fdae61 }
+.RdYlGn.l8.c3 { fill: #fee08b }
+.RdYlGn.l8.c4 { fill: #d9ef8b }
+.RdYlGn.l8.c5 { fill: #a6d96a }
+.RdYlGn.l8.c6 { fill: #66bd63 }
+.RdYlGn.l8.c7 { fill: #1a9850 }
+
+.RdYlGn.l9.c0 { fill: #d73027 }
+.RdYlGn.l9.c1 { fill: #f46d43 }
+.RdYlGn.l9.c2 { fill: #fdae61 }
+.RdYlGn.l9.c3 { fill: #fee08b }
+.RdYlGn.l9.c4 { fill: #ffffbf }
+.RdYlGn.l9.c5 { fill: #d9ef8b }
+.RdYlGn.l9.c6 { fill: #a6d96a }
+.RdYlGn.l9.c7 { fill: #66bd63 }
+.RdYlGn.l9.c8 { fill: #1a9850 }
+
+.RdYlGn.l10.c0 { fill: #a50026 }
+.RdYlGn.l10.c1 { fill: #d73027 }
+.RdYlGn.l10.c2 { fill: #f46d43 }
+.RdYlGn.l10.c3 { fill: #fdae61 }
+.RdYlGn.l10.c4 { fill: #fee08b }
+.RdYlGn.l10.c5 { fill: #d9ef8b }
+.RdYlGn.l10.c6 { fill: #a6d96a }
+.RdYlGn.l10.c7 { fill: #66bd63 }
+.RdYlGn.l10.c8 { fill: #1a9850 }
+.RdYlGn.l10.c9 { fill: #006837 }
+
+.RdYlGn.l11.c0 { fill: #a50026 }
+.RdYlGn.l11.c1 { fill: #d73027 }
+.RdYlGn.l11.c2 { fill: #f46d43 }
+.RdYlGn.l11.c3 { fill: #fdae61 }
+.RdYlGn.l11.c4 { fill: #fee08b }
+.RdYlGn.l11.c5 { fill: #ffffbf }
+.RdYlGn.l11.c6 { fill: #d9ef8b }
+.RdYlGn.l11.c7 { fill: #a6d96a }
+.RdYlGn.l11.c8 { fill: #66bd63 }
+.RdYlGn.l11.c9 { fill: #1a9850 }
+.RdYlGn.l11.c10 { fill: #006837 }
+
+/*
+ * qualitative
+ */
+
+.Set2.l3.c0 { fill: #66c2a5 }
+.Set2.l3.c1 { fill: #fc8d62 }
+.Set2.l3.c2 { fill: #8da0cb }
+
+.Set2.l4.c0 { fill: #66c2a5 }
+.Set2.l4.c1 { fill: #fc8d62 }
+.Set2.l4.c2 { fill: #8da0cb }
+.Set2.l4.c3 { fill: #e78ac3 }
+
+.Set2.l5.c0 { fill: #66c2a5 }
+.Set2.l5.c1 { fill: #fc8d62 }
+.Set2.l5.c2 { fill: #8da0cb }
+.Set2.l5.c3 { fill: #e78ac3 }
+.Set2.l5.c4 { fill: #a6d854 }
+
+.Set2.l6.c0 { fill: #66c2a5 }
+.Set2.l6.c1 { fill: #fc8d62 }
+.Set2.l6.c2 { fill: #8da0cb }
+.Set2.l6.c3 { fill: #e78ac3 }
+.Set2.l6.c4 { fill: #a6d854 }
+.Set2.l6.c5 { fill: #ffd92f }
+
+.Set2.l7.c0 { fill: #66c2a5 }
+.Set2.l7.c1 { fill: #fc8d62 }
+.Set2.l7.c2 { fill: #8da0cb }
+.Set2.l7.c3 { fill: #e78ac3 }
+.Set2.l7.c4 { fill: #a6d854 }
+.Set2.l7.c5 { fill: #ffd92f }
+.Set2.l7.c6 { fill: #e5c494 }
+
+.Set2.l8.c0 { fill: #66c2a5 }
+.Set2.l8.c1 { fill: #fc8d62 }
+.Set2.l8.c2 { fill: #8da0cb }
+.Set2.l8.c3 { fill: #e78ac3 }
+.Set2.l8.c4 { fill: #a6d854 }
+.Set2.l8.c5 { fill: #ffd92f }
+.Set2.l8.c6 { fill: #e5c494 }
+.Set2.l8.c7 { fill: #b3b3b3 }
+
+/*
+ * qualitative
+ */
+
+.Accent.l3.c0 { fill: #7fc97f }
+.Accent.l3.c1 { fill: #beaed4 }
+.Accent.l3.c2 { fill: #fdc086 }
+
+.Accent.l4.c0 { fill: #7fc97f }
+.Accent.l4.c1 { fill: #beaed4 }
+.Accent.l4.c2 { fill: #fdc086 }
+.Accent.l4.c3 { fill: #ffff99 }
+
+.Accent.l5.c0 { fill: #7fc97f }
+.Accent.l5.c1 { fill: #beaed4 }
+.Accent.l5.c2 { fill: #fdc086 }
+.Accent.l5.c3 { fill: #ffff99 }
+.Accent.l5.c4 { fill: #386cb0 }
+
+.Accent.l6.c0 { fill: #7fc97f }
+.Accent.l6.c1 { fill: #beaed4 }
+.Accent.l6.c2 { fill: #fdc086 }
+.Accent.l6.c3 { fill: #ffff99 }
+.Accent.l6.c4 { fill: #386cb0 }
+.Accent.l6.c5 { fill: #f0027f }
+
+.Accent.l7.c0 { fill: #7fc97f }
+.Accent.l7.c1 { fill: #beaed4 }
+.Accent.l7.c2 { fill: #fdc086 }
+.Accent.l7.c3 { fill: #ffff99 }
+.Accent.l7.c4 { fill: #386cb0 }
+.Accent.l7.c5 { fill: #f0027f }
+.Accent.l7.c6 { fill: #bf5b17 }
+
+.Accent.l8.c0 { fill: #7fc97f }
+.Accent.l8.c1 { fill: #beaed4 }
+.Accent.l8.c2 { fill: #fdc086 }
+.Accent.l8.c3 { fill: #ffff99 }
+.Accent.l8.c4 { fill: #386cb0 }
+.Accent.l8.c5 { fill: #f0027f }
+.Accent.l8.c6 { fill: #bf5b17 }
+.Accent.l8.c7 { fill: #666666 }
+
+/*
+ * sequential
+ */
+
+.OrRd.l3.c0 { fill: #fee8c8 }
+.OrRd.l3.c1 { fill: #fdbb84 }
+.OrRd.l3.c2 { fill: #e34a33 }
+
+.OrRd.l4.c0 { fill: #fef0d9 }
+.OrRd.l4.c1 { fill: #fdcc8a }
+.OrRd.l4.c2 { fill: #fc8d59 }
+.OrRd.l4.c3 { fill: #d7301f }
+
+.OrRd.l5.c0 { fill: #fef0d9 }
+.OrRd.l5.c1 { fill: #fdcc8a }
+.OrRd.l5.c2 { fill: #fc8d59 }
+.OrRd.l5.c3 { fill: #e34a33 }
+.OrRd.l5.c4 { fill: #b30000 }
+
+.OrRd.l6.c0 { fill: #fef0d9 }
+.OrRd.l6.c1 { fill: #fdd49e }
+.OrRd.l6.c2 { fill: #fdbb84 }
+.OrRd.l6.c3 { fill: #fc8d59 }
+.OrRd.l6.c4 { fill: #e34a33 }
+.OrRd.l6.c5 { fill: #b30000 }
+
+.OrRd.l7.c0 { fill: #fef0d9 }
+.OrRd.l7.c1 { fill: #fdd49e }
+.OrRd.l7.c2 { fill: #fdbb84 }
+.OrRd.l7.c3 { fill: #fc8d59 }
+.OrRd.l7.c4 { fill: #ef6548 }
+.OrRd.l7.c5 { fill: #d7301f }
+.OrRd.l7.c6 { fill: #990000 }
+
+.OrRd.l8.c0 { fill: #fff7ec }
+.OrRd.l8.c1 { fill: #fee8c8 }
+.OrRd.l8.c2 { fill: #fdd49e }
+.OrRd.l8.c3 { fill: #fdbb84 }
+.OrRd.l8.c4 { fill: #fc8d59 }
+.OrRd.l8.c5 { fill: #ef6548 }
+.OrRd.l8.c6 { fill: #d7301f }
+.OrRd.l8.c7 { fill: #990000 }
+
+.OrRd.l9.c0 { fill: #fff7ec }
+.OrRd.l9.c1 { fill: #fee8c8 }
+.OrRd.l9.c2 { fill: #fdd49e }
+.OrRd.l9.c3 { fill: #fdbb84 }
+.OrRd.l9.c4 { fill: #fc8d59 }
+.OrRd.l9.c5 { fill: #ef6548 }
+.OrRd.l9.c6 { fill: #d7301f }
+.OrRd.l9.c7 { fill: #b30000 }
+.OrRd.l9.c8 { fill: #7f0000 }
+
+/*
+ * qualitative
+ */
+
+.Set1.l3.c0 { fill: #e41a1c }
+.Set1.l3.c1 { fill: #377eb8 }
+.Set1.l3.c2 { fill: #4daf4a }
+
+.Set1.l4.c0 { fill: #e41a1c }
+.Set1.l4.c1 { fill: #377eb8 }
+.Set1.l4.c2 { fill: #4daf4a }
+.Set1.l4.c3 { fill: #984ea3 }
+
+.Set1.l5.c0 { fill: #e41a1c }
+.Set1.l5.c1 { fill: #377eb8 }
+.Set1.l5.c2 { fill: #4daf4a }
+.Set1.l5.c3 { fill: #984ea3 }
+.Set1.l5.c4 { fill: #ff7f00 }
+
+.Set1.l6.c0 { fill: #e41a1c }
+.Set1.l6.c1 { fill: #377eb8 }
+.Set1.l6.c2 { fill: #4daf4a }
+.Set1.l6.c3 { fill: #984ea3 }
+.Set1.l6.c4 { fill: #ff7f00 }
+.Set1.l6.c5 { fill: #ffff33 }
+
+.Set1.l7.c0 { fill: #e41a1c }
+.Set1.l7.c1 { fill: #377eb8 }
+.Set1.l7.c2 { fill: #4daf4a }
+.Set1.l7.c3 { fill: #984ea3 }
+.Set1.l7.c4 { fill: #ff7f00 }
+.Set1.l7.c5 { fill: #ffff33 }
+.Set1.l7.c6 { fill: #a65628 }
+
+.Set1.l8.c0 { fill: #e41a1c }
+.Set1.l8.c1 { fill: #377eb8 }
+.Set1.l8.c2 { fill: #4daf4a }
+.Set1.l8.c3 { fill: #984ea3 }
+.Set1.l8.c4 { fill: #ff7f00 }
+.Set1.l8.c5 { fill: #ffff33 }
+.Set1.l8.c6 { fill: #a65628 }
+.Set1.l8.c7 { fill: #f781bf }
+
+.Set1.l9.c0 { fill: #e41a1c }
+.Set1.l9.c1 { fill: #377eb8 }
+.Set1.l9.c2 { fill: #4daf4a }
+.Set1.l9.c3 { fill: #984ea3 }
+.Set1.l9.c4 { fill: #ff7f00 }
+.Set1.l9.c5 { fill: #ffff33 }
+.Set1.l9.c6 { fill: #a65628 }
+.Set1.l9.c7 { fill: #f781bf }
+.Set1.l9.c8 { fill: #999999 }
+
+/*
+ * sequential
+ */
+
+.PuBu.l3.c0 { fill: #ece7f2 }
+.PuBu.l3.c1 { fill: #a6bddb }
+.PuBu.l3.c2 { fill: #2b8cbe }
+
+.PuBu.l4.c0 { fill: #f1eef6 }
+.PuBu.l4.c1 { fill: #bdc9e1 }
+.PuBu.l4.c2 { fill: #74a9cf }
+.PuBu.l4.c3 { fill: #0570b0 }
+
+.PuBu.l5.c0 { fill: #f1eef6 }
+.PuBu.l5.c1 { fill: #bdc9e1 }
+.PuBu.l5.c2 { fill: #74a9cf }
+.PuBu.l5.c3 { fill: #2b8cbe }
+.PuBu.l5.c4 { fill: #045a8d }
+
+.PuBu.l6.c0 { fill: #f1eef6 }
+.PuBu.l6.c1 { fill: #d0d1e6 }
+.PuBu.l6.c2 { fill: #a6bddb }
+.PuBu.l6.c3 { fill: #74a9cf }
+.PuBu.l6.c4 { fill: #2b8cbe }
+.PuBu.l6.c5 { fill: #045a8d }
+
+.PuBu.l7.c0 { fill: #f1eef6 }
+.PuBu.l7.c1 { fill: #d0d1e6 }
+.PuBu.l7.c2 { fill: #a6bddb }
+.PuBu.l7.c3 { fill: #74a9cf }
+.PuBu.l7.c4 { fill: #3690c0 }
+.PuBu.l7.c5 { fill: #0570b0 }
+.PuBu.l7.c6 { fill: #034e7b }
+
+.PuBu.l8.c0 { fill: #fff7fb }
+.PuBu.l8.c1 { fill: #ece7f2 }
+.PuBu.l8.c2 { fill: #d0d1e6 }
+.PuBu.l8.c3 { fill: #a6bddb }
+.PuBu.l8.c4 { fill: #74a9cf }
+.PuBu.l8.c5 { fill: #3690c0 }
+.PuBu.l8.c6 { fill: #0570b0 }
+.PuBu.l8.c7 { fill: #034e7b }
+
+.PuBu.l9.c0 { fill: #fff7fb }
+.PuBu.l9.c1 { fill: #ece7f2 }
+.PuBu.l9.c2 { fill: #d0d1e6 }
+.PuBu.l9.c3 { fill: #a6bddb }
+.PuBu.l9.c4 { fill: #74a9cf }
+.PuBu.l9.c5 { fill: #3690c0 }
+.PuBu.l9.c6 { fill: #0570b0 }
+.PuBu.l9.c7 { fill: #045a8d }
+.PuBu.l9.c8 { fill: #023858 }
+
+/*
+ * qualitative
+ */
+
+.Set3.l3.c0 { fill: #8dd3c7 }
+.Set3.l3.c1 { fill: #ffffb3 }
+.Set3.l3.c2 { fill: #bebada }
+
+.Set3.l4.c0 { fill: #8dd3c7 }
+.Set3.l4.c1 { fill: #ffffb3 }
+.Set3.l4.c2 { fill: #bebada }
+.Set3.l4.c3 { fill: #fb8072 }
+
+.Set3.l5.c0 { fill: #8dd3c7 }
+.Set3.l5.c1 { fill: #ffffb3 }
+.Set3.l5.c2 { fill: #bebada }
+.Set3.l5.c3 { fill: #fb8072 }
+.Set3.l5.c4 { fill: #80b1d3 }
+
+.Set3.l6.c0 { fill: #8dd3c7 }
+.Set3.l6.c1 { fill: #ffffb3 }
+.Set3.l6.c2 { fill: #bebada }
+.Set3.l6.c3 { fill: #fb8072 }
+.Set3.l6.c4 { fill: #80b1d3 }
+.Set3.l6.c5 { fill: #fdb462 }
+
+.Set3.l7.c0 { fill: #8dd3c7 }
+.Set3.l7.c1 { fill: #ffffb3 }
+.Set3.l7.c2 { fill: #bebada }
+.Set3.l7.c3 { fill: #fb8072 }
+.Set3.l7.c4 { fill: #80b1d3 }
+.Set3.l7.c5 { fill: #fdb462 }
+.Set3.l7.c6 { fill: #b3de69 }
+
+.Set3.l8.c0 { fill: #8dd3c7 }
+.Set3.l8.c1 { fill: #ffffb3 }
+.Set3.l8.c2 { fill: #bebada }
+.Set3.l8.c3 { fill: #fb8072 }
+.Set3.l8.c4 { fill: #80b1d3 }
+.Set3.l8.c5 { fill: #fdb462 }
+.Set3.l8.c6 { fill: #b3de69 }
+.Set3.l8.c7 { fill: #fccde5 }
+
+.Set3.l9.c0 { fill: #8dd3c7 }
+.Set3.l9.c1 { fill: #ffffb3 }
+.Set3.l9.c2 { fill: #bebada }
+.Set3.l9.c3 { fill: #fb8072 }
+.Set3.l9.c4 { fill: #80b1d3 }
+.Set3.l9.c5 { fill: #fdb462 }
+.Set3.l9.c6 { fill: #b3de69 }
+.Set3.l9.c7 { fill: #fccde5 }
+.Set3.l9.c8 { fill: #d9d9d9 }
+
+.Set3.l10.c0 { fill: #8dd3c7 }
+.Set3.l10.c1 { fill: #ffffb3 }
+.Set3.l10.c2 { fill: #bebada }
+.Set3.l10.c3 { fill: #fb8072 }
+.Set3.l10.c4 { fill: #80b1d3 }
+.Set3.l10.c5 { fill: #fdb462 }
+.Set3.l10.c6 { fill: #b3de69 }
+.Set3.l10.c7 { fill: #fccde5 }
+.Set3.l10.c8 { fill: #d9d9d9 }
+.Set3.l10.c9 { fill: #bc80bd }
+
+.Set3.l11.c0 { fill: #8dd3c7 }
+.Set3.l11.c1 { fill: #ffffb3 }
+.Set3.l11.c2 { fill: #bebada }
+.Set3.l11.c3 { fill: #fb8072 }
+.Set3.l11.c4 { fill: #80b1d3 }
+.Set3.l11.c5 { fill: #fdb462 }
+.Set3.l11.c6 { fill: #b3de69 }
+.Set3.l11.c7 { fill: #fccde5 }
+.Set3.l11.c8 { fill: #d9d9d9 }
+.Set3.l11.c9 { fill: #bc80bd }
+.Set3.l11.c10 { fill: #ccebc5 }
+
+.Set3.l12.c0 { fill: #8dd3c7 }
+.Set3.l12.c1 { fill: #ffffb3 }
+.Set3.l12.c2 { fill: #bebada }
+.Set3.l12.c3 { fill: #fb8072 }
+.Set3.l12.c4 { fill: #80b1d3 }
+.Set3.l12.c5 { fill: #fdb462 }
+.Set3.l12.c6 { fill: #b3de69 }
+.Set3.l12.c7 { fill: #fccde5 }
+.Set3.l12.c8 { fill: #d9d9d9 }
+.Set3.l12.c9 { fill: #bc80bd }
+.Set3.l12.c10 { fill: #ccebc5 }
+.Set3.l12.c11 { fill: #ffed6f }
+
+/*
+ * sequential
+ */
+
+.BuPu.l3.c0 { fill: #e0ecf4 }
+.BuPu.l3.c1 { fill: #9ebcda }
+.BuPu.l3.c2 { fill: #8856a7 }
+
+.BuPu.l4.c0 { fill: #edf8fb }
+.BuPu.l4.c1 { fill: #b3cde3 }
+.BuPu.l4.c2 { fill: #8c96c6 }
+.BuPu.l4.c3 { fill: #88419d }
+
+.BuPu.l5.c0 { fill: #edf8fb }
+.BuPu.l5.c1 { fill: #b3cde3 }
+.BuPu.l5.c2 { fill: #8c96c6 }
+.BuPu.l5.c3 { fill: #8856a7 }
+.BuPu.l5.c4 { fill: #810f7c }
+
+.BuPu.l6.c0 { fill: #edf8fb }
+.BuPu.l6.c1 { fill: #bfd3e6 }
+.BuPu.l6.c2 { fill: #9ebcda }
+.BuPu.l6.c3 { fill: #8c96c6 }
+.BuPu.l6.c4 { fill: #8856a7 }
+.BuPu.l6.c5 { fill: #810f7c }
+
+.BuPu.l7.c0 { fill: #edf8fb }
+.BuPu.l7.c1 { fill: #bfd3e6 }
+.BuPu.l7.c2 { fill: #9ebcda }
+.BuPu.l7.c3 { fill: #8c96c6 }
+.BuPu.l7.c4 { fill: #8c6bb1 }
+.BuPu.l7.c5 { fill: #88419d }
+.BuPu.l7.c6 { fill: #6e016b }
+
+.BuPu.l8.c0 { fill: #f7fcfd }
+.BuPu.l8.c1 { fill: #e0ecf4 }
+.BuPu.l8.c2 { fill: #bfd3e6 }
+.BuPu.l8.c3 { fill: #9ebcda }
+.BuPu.l8.c4 { fill: #8c96c6 }
+.BuPu.l8.c5 { fill: #8c6bb1 }
+.BuPu.l8.c6 { fill: #88419d }
+.BuPu.l8.c7 { fill: #6e016b }
+
+.BuPu.l9.c0 { fill: #f7fcfd }
+.BuPu.l9.c1 { fill: #e0ecf4 }
+.BuPu.l9.c2 { fill: #bfd3e6 }
+.BuPu.l9.c3 { fill: #9ebcda }
+.BuPu.l9.c4 { fill: #8c96c6 }
+.BuPu.l9.c5 { fill: #8c6bb1 }
+.BuPu.l9.c6 { fill: #88419d }
+.BuPu.l9.c7 { fill: #810f7c }
+.BuPu.l9.c8 { fill: #4d004b }
+
+/*
+ * qualitative
+ */
+
+.Dark2.l3.c0 { fill: #1b9e77 }
+.Dark2.l3.c1 { fill: #d95f02 }
+.Dark2.l3.c2 { fill: #7570b3 }
+
+.Dark2.l4.c0 { fill: #1b9e77 }
+.Dark2.l4.c1 { fill: #d95f02 }
+.Dark2.l4.c2 { fill: #7570b3 }
+.Dark2.l4.c3 { fill: #e7298a }
+
+.Dark2.l5.c0 { fill: #1b9e77 }
+.Dark2.l5.c1 { fill: #d95f02 }
+.Dark2.l5.c2 { fill: #7570b3 }
+.Dark2.l5.c3 { fill: #e7298a }
+.Dark2.l5.c4 { fill: #66a61e }
+
+.Dark2.l6.c0 { fill: #1b9e77 }
+.Dark2.l6.c1 { fill: #d95f02 }
+.Dark2.l6.c2 { fill: #7570b3 }
+.Dark2.l6.c3 { fill: #e7298a }
+.Dark2.l6.c4 { fill: #66a61e }
+.Dark2.l6.c5 { fill: #e6ab02 }
+
+.Dark2.l7.c0 { fill: #1b9e77 }
+.Dark2.l7.c1 { fill: #d95f02 }
+.Dark2.l7.c2 { fill: #7570b3 }
+.Dark2.l7.c3 { fill: #e7298a }
+.Dark2.l7.c4 { fill: #66a61e }
+.Dark2.l7.c5 { fill: #e6ab02 }
+.Dark2.l7.c6 { fill: #a6761d }
+
+.Dark2.l8.c0 { fill: #1b9e77 }
+.Dark2.l8.c1 { fill: #d95f02 }
+.Dark2.l8.c2 { fill: #7570b3 }
+.Dark2.l8.c3 { fill: #e7298a }
+.Dark2.l8.c4 { fill: #66a61e }
+.Dark2.l8.c5 { fill: #e6ab02 }
+.Dark2.l8.c6 { fill: #a6761d }
+.Dark2.l8.c7 { fill: #666666 }
+
+/*
+ * diverging
+ */
+
+.RdBu.l3.c0 { fill: #ef8a62 }
+.RdBu.l3.c1 { fill: #f7f7f7 }
+.RdBu.l3.c2 { fill: #67a9cf }
+
+.RdBu.l4.c0 { fill: #ca0020 }
+.RdBu.l4.c1 { fill: #f4a582 }
+.RdBu.l4.c2 { fill: #92c5de }
+.RdBu.l4.c3 { fill: #0571b0 }
+
+.RdBu.l5.c0 { fill: #ca0020 }
+.RdBu.l5.c1 { fill: #f4a582 }
+.RdBu.l5.c2 { fill: #f7f7f7 }
+.RdBu.l5.c3 { fill: #92c5de }
+.RdBu.l5.c4 { fill: #0571b0 }
+
+.RdBu.l6.c0 { fill: #b2182b }
+.RdBu.l6.c1 { fill: #ef8a62 }
+.RdBu.l6.c2 { fill: #fddbc7 }
+.RdBu.l6.c3 { fill: #d1e5f0 }
+.RdBu.l6.c4 { fill: #67a9cf }
+.RdBu.l6.c5 { fill: #2166ac }
+
+.RdBu.l7.c0 { fill: #b2182b }
+.RdBu.l7.c1 { fill: #ef8a62 }
+.RdBu.l7.c2 { fill: #fddbc7 }
+.RdBu.l7.c3 { fill: #f7f7f7 }
+.RdBu.l7.c4 { fill: #d1e5f0 }
+.RdBu.l7.c5 { fill: #67a9cf }
+.RdBu.l7.c6 { fill: #2166ac }
+
+.RdBu.l8.c0 { fill: #b2182b }
+.RdBu.l8.c1 { fill: #d6604d }
+.RdBu.l8.c2 { fill: #f4a582 }
+.RdBu.l8.c3 { fill: #fddbc7 }
+.RdBu.l8.c4 { fill: #d1e5f0 }
+.RdBu.l8.c5 { fill: #92c5de }
+.RdBu.l8.c6 { fill: #4393c3 }
+.RdBu.l8.c7 { fill: #2166ac }
+
+.RdBu.l9.c0 { fill: #b2182b }
+.RdBu.l9.c1 { fill: #d6604d }
+.RdBu.l9.c2 { fill: #f4a582 }
+.RdBu.l9.c3 { fill: #fddbc7 }
+.RdBu.l9.c4 { fill: #f7f7f7 }
+.RdBu.l9.c5 { fill: #d1e5f0 }
+.RdBu.l9.c6 { fill: #92c5de }
+.RdBu.l9.c7 { fill: #4393c3 }
+.RdBu.l9.c8 { fill: #2166ac }
+
+.RdBu.l10.c0 { fill: #67001f }
+.RdBu.l10.c1 { fill: #b2182b }
+.RdBu.l10.c2 { fill: #d6604d }
+.RdBu.l10.c3 { fill: #f4a582 }
+.RdBu.l10.c4 { fill: #fddbc7 }
+.RdBu.l10.c5 { fill: #d1e5f0 }
+.RdBu.l10.c6 { fill: #92c5de }
+.RdBu.l10.c7 { fill: #4393c3 }
+.RdBu.l10.c8 { fill: #2166ac }
+.RdBu.l10.c9 { fill: #053061 }
+
+.RdBu.l11.c0 { fill: #67001f }
+.RdBu.l11.c1 { fill: #b2182b }
+.RdBu.l11.c2 { fill: #d6604d }
+.RdBu.l11.c3 { fill: #f4a582 }
+.RdBu.l11.c4 { fill: #fddbc7 }
+.RdBu.l11.c5 { fill: #f7f7f7 }
+.RdBu.l11.c6 { fill: #d1e5f0 }
+.RdBu.l11.c7 { fill: #92c5de }
+.RdBu.l11.c8 { fill: #4393c3 }
+.RdBu.l11.c9 { fill: #2166ac }
+.RdBu.l11.c10 { fill: #053061 }
+
+/*
+ * sequential
+ */
+
+.Oranges.l3.c0 { fill: #fee6ce }
+.Oranges.l3.c1 { fill: #fdae6b }
+.Oranges.l3.c2 { fill: #e6550d }
+
+.Oranges.l4.c0 { fill: #feedde }
+.Oranges.l4.c1 { fill: #fdbe85 }
+.Oranges.l4.c2 { fill: #fd8d3c }
+.Oranges.l4.c3 { fill: #d94701 }
+
+.Oranges.l5.c0 { fill: #feedde }
+.Oranges.l5.c1 { fill: #fdbe85 }
+.Oranges.l5.c2 { fill: #fd8d3c }
+.Oranges.l5.c3 { fill: #e6550d }
+.Oranges.l5.c4 { fill: #a63603 }
+
+.Oranges.l6.c0 { fill: #feedde }
+.Oranges.l6.c1 { fill: #fdd0a2 }
+.Oranges.l6.c2 { fill: #fdae6b }
+.Oranges.l6.c3 { fill: #fd8d3c }
+.Oranges.l6.c4 { fill: #e6550d }
+.Oranges.l6.c5 { fill: #a63603 }
+
+.Oranges.l7.c0 { fill: #feedde }
+.Oranges.l7.c1 { fill: #fdd0a2 }
+.Oranges.l7.c2 { fill: #fdae6b }
+.Oranges.l7.c3 { fill: #fd8d3c }
+.Oranges.l7.c4 { fill: #f16913 }
+.Oranges.l7.c5 { fill: #d94801 }
+.Oranges.l7.c6 { fill: #8c2d04 }
+
+.Oranges.l8.c0 { fill: #fff5eb }
+.Oranges.l8.c1 { fill: #fee6ce }
+.Oranges.l8.c2 { fill: #fdd0a2 }
+.Oranges.l8.c3 { fill: #fdae6b }
+.Oranges.l8.c4 { fill: #fd8d3c }
+.Oranges.l8.c5 { fill: #f16913 }
+.Oranges.l8.c6 { fill: #d94801 }
+.Oranges.l8.c7 { fill: #8c2d04 }
+
+.Oranges.l9.c0 { fill: #fff5eb }
+.Oranges.l9.c1 { fill: #fee6ce }
+.Oranges.l9.c2 { fill: #fdd0a2 }
+.Oranges.l9.c3 { fill: #fdae6b }
+.Oranges.l9.c4 { fill: #fd8d3c }
+.Oranges.l9.c5 { fill: #f16913 }
+.Oranges.l9.c6 { fill: #d94801 }
+.Oranges.l9.c7 { fill: #a63603 }
+.Oranges.l9.c8 { fill: #7f2704 }
+
+/*
+ * sequential
+ */
+
+.BuGn.l3.c0 { fill: #e5f5f9 }
+.BuGn.l3.c1 { fill: #99d8c9 }
+.BuGn.l3.c2 { fill: #2ca25f }
+
+.BuGn.l4.c0 { fill: #edf8fb }
+.BuGn.l4.c1 { fill: #b2e2e2 }
+.BuGn.l4.c2 { fill: #66c2a4 }
+.BuGn.l4.c3 { fill: #238b45 }
+
+.BuGn.l5.c0 { fill: #edf8fb }
+.BuGn.l5.c1 { fill: #b2e2e2 }
+.BuGn.l5.c2 { fill: #66c2a4 }
+.BuGn.l5.c3 { fill: #2ca25f }
+.BuGn.l5.c4 { fill: #006d2c }
+
+.BuGn.l6.c0 { fill: #edf8fb }
+.BuGn.l6.c1 { fill: #ccece6 }
+.BuGn.l6.c2 { fill: #99d8c9 }
+.BuGn.l6.c3 { fill: #66c2a4 }
+.BuGn.l6.c4 { fill: #2ca25f }
+.BuGn.l6.c5 { fill: #006d2c }
+
+.BuGn.l7.c0 { fill: #edf8fb }
+.BuGn.l7.c1 { fill: #ccece6 }
+.BuGn.l7.c2 { fill: #99d8c9 }
+.BuGn.l7.c3 { fill: #66c2a4 }
+.BuGn.l7.c4 { fill: #41ae76 }
+.BuGn.l7.c5 { fill: #238b45 }
+.BuGn.l7.c6 { fill: #005824 }
+
+.BuGn.l8.c0 { fill: #f7fcfd }
+.BuGn.l8.c1 { fill: #e5f5f9 }
+.BuGn.l8.c2 { fill: #ccece6 }
+.BuGn.l8.c3 { fill: #99d8c9 }
+.BuGn.l8.c4 { fill: #66c2a4 }
+.BuGn.l8.c5 { fill: #41ae76 }
+.BuGn.l8.c6 { fill: #238b45 }
+.BuGn.l8.c7 { fill: #005824 }
+
+.BuGn.l9.c0 { fill: #f7fcfd }
+.BuGn.l9.c1 { fill: #e5f5f9 }
+.BuGn.l9.c2 { fill: #ccece6 }
+.BuGn.l9.c3 { fill: #99d8c9 }
+.BuGn.l9.c4 { fill: #66c2a4 }
+.BuGn.l9.c5 { fill: #41ae76 }
+.BuGn.l9.c6 { fill: #238b45 }
+.BuGn.l9.c7 { fill: #006d2c }
+.BuGn.l9.c8 { fill: #00441b }
+
+/*
+ * diverging
+ */
+
+.PiYG.l3.c0 { fill: #e9a3c9 }
+.PiYG.l3.c1 { fill: #f7f7f7 }
+.PiYG.l3.c2 { fill: #a1d76a }
+
+.PiYG.l4.c0 { fill: #d01c8b }
+.PiYG.l4.c1 { fill: #f1b6da }
+.PiYG.l4.c2 { fill: #b8e186 }
+.PiYG.l4.c3 { fill: #4dac26 }
+
+.PiYG.l5.c0 { fill: #d01c8b }
+.PiYG.l5.c1 { fill: #f1b6da }
+.PiYG.l5.c2 { fill: #f7f7f7 }
+.PiYG.l5.c3 { fill: #b8e186 }
+.PiYG.l5.c4 { fill: #4dac26 }
+
+.PiYG.l6.c0 { fill: #c51b7d }
+.PiYG.l6.c1 { fill: #e9a3c9 }
+.PiYG.l6.c2 { fill: #fde0ef }
+.PiYG.l6.c3 { fill: #e6f5d0 }
+.PiYG.l6.c4 { fill: #a1d76a }
+.PiYG.l6.c5 { fill: #4d9221 }
+
+.PiYG.l7.c0 { fill: #c51b7d }
+.PiYG.l7.c1 { fill: #e9a3c9 }
+.PiYG.l7.c2 { fill: #fde0ef }
+.PiYG.l7.c3 { fill: #f7f7f7 }
+.PiYG.l7.c4 { fill: #e6f5d0 }
+.PiYG.l7.c5 { fill: #a1d76a }
+.PiYG.l7.c6 { fill: #4d9221 }
+
+.PiYG.l8.c0 { fill: #c51b7d }
+.PiYG.l8.c1 { fill: #de77ae }
+.PiYG.l8.c2 { fill: #f1b6da }
+.PiYG.l8.c3 { fill: #fde0ef }
+.PiYG.l8.c4 { fill: #e6f5d0 }
+.PiYG.l8.c5 { fill: #b8e186 }
+.PiYG.l8.c6 { fill: #7fbc41 }
+.PiYG.l8.c7 { fill: #4d9221 }
+
+.PiYG.l9.c0 { fill: #c51b7d }
+.PiYG.l9.c1 { fill: #de77ae }
+.PiYG.l9.c2 { fill: #f1b6da }
+.PiYG.l9.c3 { fill: #fde0ef }
+.PiYG.l9.c4 { fill: #f7f7f7 }
+.PiYG.l9.c5 { fill: #e6f5d0 }
+.PiYG.l9.c6 { fill: #b8e186 }
+.PiYG.l9.c7 { fill: #7fbc41 }
+.PiYG.l9.c8 { fill: #4d9221 }
+
+.PiYG.l10.c0 { fill: #8e0152 }
+.PiYG.l10.c1 { fill: #c51b7d }
+.PiYG.l10.c2 { fill: #de77ae }
+.PiYG.l10.c3 { fill: #f1b6da }
+.PiYG.l10.c4 { fill: #fde0ef }
+.PiYG.l10.c5 { fill: #e6f5d0 }
+.PiYG.l10.c6 { fill: #b8e186 }
+.PiYG.l10.c7 { fill: #7fbc41 }
+.PiYG.l10.c8 { fill: #4d9221 }
+.PiYG.l10.c9 { fill: #276419 }
+
+.PiYG.l11.c0 { fill: #8e0152 }
+.PiYG.l11.c1 { fill: #c51b7d }
+.PiYG.l11.c2 { fill: #de77ae }
+.PiYG.l11.c3 { fill: #f1b6da }
+.PiYG.l11.c4 { fill: #fde0ef }
+.PiYG.l11.c5 { fill: #f7f7f7 }
+.PiYG.l11.c6 { fill: #e6f5d0 }
+.PiYG.l11.c7 { fill: #b8e186 }
+.PiYG.l11.c8 { fill: #7fbc41 }
+.PiYG.l11.c9 { fill: #4d9221 }
+.PiYG.l11.c10 { fill: #276419 }
+
+/*
+ * sequential
+ */
+
+.YlOrBr.l3.c0 { fill: #fff7bc }
+.YlOrBr.l3.c1 { fill: #fec44f }
+.YlOrBr.l3.c2 { fill: #d95f0e }
+
+.YlOrBr.l4.c0 { fill: #ffffd4 }
+.YlOrBr.l4.c1 { fill: #fed98e }
+.YlOrBr.l4.c2 { fill: #fe9929 }
+.YlOrBr.l4.c3 { fill: #cc4c02 }
+
+.YlOrBr.l5.c0 { fill: #ffffd4 }
+.YlOrBr.l5.c1 { fill: #fed98e }
+.YlOrBr.l5.c2 { fill: #fe9929 }
+.YlOrBr.l5.c3 { fill: #d95f0e }
+.YlOrBr.l5.c4 { fill: #993404 }
+
+.YlOrBr.l6.c0 { fill: #ffffd4 }
+.YlOrBr.l6.c1 { fill: #fee391 }
+.YlOrBr.l6.c2 { fill: #fec44f }
+.YlOrBr.l6.c3 { fill: #fe9929 }
+.YlOrBr.l6.c4 { fill: #d95f0e }
+.YlOrBr.l6.c5 { fill: #993404 }
+
+.YlOrBr.l7.c0 { fill: #ffffd4 }
+.YlOrBr.l7.c1 { fill: #fee391 }
+.YlOrBr.l7.c2 { fill: #fec44f }
+.YlOrBr.l7.c3 { fill: #fe9929 }
+.YlOrBr.l7.c4 { fill: #ec7014 }
+.YlOrBr.l7.c5 { fill: #cc4c02 }
+.YlOrBr.l7.c6 { fill: #8c2d04 }
+
+.YlOrBr.l8.c0 { fill: #ffffe5 }
+.YlOrBr.l8.c1 { fill: #fff7bc }
+.YlOrBr.l8.c2 { fill: #fee391 }
+.YlOrBr.l8.c3 { fill: #fec44f }
+.YlOrBr.l8.c4 { fill: #fe9929 }
+.YlOrBr.l8.c5 { fill: #ec7014 }
+.YlOrBr.l8.c6 { fill: #cc4c02 }
+.YlOrBr.l8.c7 { fill: #8c2d04 }
+
+.YlOrBr.l9.c0 { fill: #ffffe5 }
+.YlOrBr.l9.c1 { fill: #fff7bc }
+.YlOrBr.l9.c2 { fill: #fee391 }
+.YlOrBr.l9.c3 { fill: #fec44f }
+.YlOrBr.l9.c4 { fill: #fe9929 }
+.YlOrBr.l9.c5 { fill: #ec7014 }
+.YlOrBr.l9.c6 { fill: #cc4c02 }
+.YlOrBr.l9.c7 { fill: #993404 }
+.YlOrBr.l9.c8 { fill: #662506 }
+
+/*
+ * sequential
+ */
+
+.YlGn.l3.c0 { fill: #f7fcb9 }
+.YlGn.l3.c1 { fill: #addd8e }
+.YlGn.l3.c2 { fill: #31a354 }
+
+.YlGn.l4.c0 { fill: #ffffcc }
+.YlGn.l4.c1 { fill: #c2e699 }
+.YlGn.l4.c2 { fill: #78c679 }
+.YlGn.l4.c3 { fill: #238443 }
+
+.YlGn.l5.c0 { fill: #ffffcc }
+.YlGn.l5.c1 { fill: #c2e699 }
+.YlGn.l5.c2 { fill: #78c679 }
+.YlGn.l5.c3 { fill: #31a354 }
+.YlGn.l5.c4 { fill: #006837 }
+
+.YlGn.l6.c0 { fill: #ffffcc }
+.YlGn.l6.c1 { fill: #d9f0a3 }
+.YlGn.l6.c2 { fill: #addd8e }
+.YlGn.l6.c3 { fill: #78c679 }
+.YlGn.l6.c4 { fill: #31a354 }
+.YlGn.l6.c5 { fill: #006837 }
+
+.YlGn.l7.c0 { fill: #ffffcc }
+.YlGn.l7.c1 { fill: #d9f0a3 }
+.YlGn.l7.c2 { fill: #addd8e }
+.YlGn.l7.c3 { fill: #78c679 }
+.YlGn.l7.c4 { fill: #41ab5d }
+.YlGn.l7.c5 { fill: #238443 }
+.YlGn.l7.c6 { fill: #005a32 }
+
+.YlGn.l8.c0 { fill: #ffffe5 }
+.YlGn.l8.c1 { fill: #f7fcb9 }
+.YlGn.l8.c2 { fill: #d9f0a3 }
+.YlGn.l8.c3 { fill: #addd8e }
+.YlGn.l8.c4 { fill: #78c679 }
+.YlGn.l8.c5 { fill: #41ab5d }
+.YlGn.l8.c6 { fill: #238443 }
+.YlGn.l8.c7 { fill: #005a32 }
+
+.YlGn.l9.c0 { fill: #ffffe5 }
+.YlGn.l9.c1 { fill: #f7fcb9 }
+.YlGn.l9.c2 { fill: #d9f0a3 }
+.YlGn.l9.c3 { fill: #addd8e }
+.YlGn.l9.c4 { fill: #78c679 }
+.YlGn.l9.c5 { fill: #41ab5d }
+.YlGn.l9.c6 { fill: #238443 }
+.YlGn.l9.c7 { fill: #006837 }
+.YlGn.l9.c8 { fill: #004529 }
+
+/*
+ * sequential
+ */
+
+.Reds.l3.c0 { fill: #fee0d2 }
+.Reds.l3.c1 { fill: #fc9272 }
+.Reds.l3.c2 { fill: #de2d26 }
+
+.Reds.l4.c0 { fill: #fee5d9 }
+.Reds.l4.c1 { fill: #fcae91 }
+.Reds.l4.c2 { fill: #fb6a4a }
+.Reds.l4.c3 { fill: #cb181d }
+
+.Reds.l5.c0 { fill: #fee5d9 }
+.Reds.l5.c1 { fill: #fcae91 }
+.Reds.l5.c2 { fill: #fb6a4a }
+.Reds.l5.c3 { fill: #de2d26 }
+.Reds.l5.c4 { fill: #a50f15 }
+
+.Reds.l6.c0 { fill: #fee5d9 }
+.Reds.l6.c1 { fill: #fcbba1 }
+.Reds.l6.c2 { fill: #fc9272 }
+.Reds.l6.c3 { fill: #fb6a4a }
+.Reds.l6.c4 { fill: #de2d26 }
+.Reds.l6.c5 { fill: #a50f15 }
+
+.Reds.l7.c0 { fill: #fee5d9 }
+.Reds.l7.c1 { fill: #fcbba1 }
+.Reds.l7.c2 { fill: #fc9272 }
+.Reds.l7.c3 { fill: #fb6a4a }
+.Reds.l7.c4 { fill: #ef3b2c }
+.Reds.l7.c5 { fill: #cb181d }
+.Reds.l7.c6 { fill: #99000d }
+
+.Reds.l8.c0 { fill: #fff5f0 }
+.Reds.l8.c1 { fill: #fee0d2 }
+.Reds.l8.c2 { fill: #fcbba1 }
+.Reds.l8.c3 { fill: #fc9272 }
+.Reds.l8.c4 { fill: #fb6a4a }
+.Reds.l8.c5 { fill: #ef3b2c }
+.Reds.l8.c6 { fill: #cb181d }
+.Reds.l8.c7 { fill: #99000d }
+
+.Reds.l9.c0 { fill: #fff5f0 }
+.Reds.l9.c1 { fill: #fee0d2 }
+.Reds.l9.c2 { fill: #fcbba1 }
+.Reds.l9.c3 { fill: #fc9272 }
+.Reds.l9.c4 { fill: #fb6a4a }
+.Reds.l9.c5 { fill: #ef3b2c }
+.Reds.l9.c6 { fill: #cb181d }
+.Reds.l9.c7 { fill: #a50f15 }
+.Reds.l9.c8 { fill: #67000d }
+
+/*
+ * sequential
+ */
+
+.RdPu.l3.c0 { fill: #fde0dd }
+.RdPu.l3.c1 { fill: #fa9fb5 }
+.RdPu.l3.c2 { fill: #c51b8a }
+
+.RdPu.l4.c0 { fill: #feebe2 }
+.RdPu.l4.c1 { fill: #fbb4b9 }
+.RdPu.l4.c2 { fill: #f768a1 }
+.RdPu.l4.c3 { fill: #ae017e }
+
+.RdPu.l5.c0 { fill: #feebe2 }
+.RdPu.l5.c1 { fill: #fbb4b9 }
+.RdPu.l5.c2 { fill: #f768a1 }
+.RdPu.l5.c3 { fill: #c51b8a }
+.RdPu.l5.c4 { fill: #7a0177 }
+
+.RdPu.l6.c0 { fill: #feebe2 }
+.RdPu.l6.c1 { fill: #fcc5c0 }
+.RdPu.l6.c2 { fill: #fa9fb5 }
+.RdPu.l6.c3 { fill: #f768a1 }
+.RdPu.l6.c4 { fill: #c51b8a }
+.RdPu.l6.c5 { fill: #7a0177 }
+
+.RdPu.l7.c0 { fill: #feebe2 }
+.RdPu.l7.c1 { fill: #fcc5c0 }
+.RdPu.l7.c2 { fill: #fa9fb5 }
+.RdPu.l7.c3 { fill: #f768a1 }
+.RdPu.l7.c4 { fill: #dd3497 }
+.RdPu.l7.c5 { fill: #ae017e }
+.RdPu.l7.c6 { fill: #7a0177 }
+
+.RdPu.l8.c0 { fill: #fff7f3 }
+.RdPu.l8.c1 { fill: #fde0dd }
+.RdPu.l8.c2 { fill: #fcc5c0 }
+.RdPu.l8.c3 { fill: #fa9fb5 }
+.RdPu.l8.c4 { fill: #f768a1 }
+.RdPu.l8.c5 { fill: #dd3497 }
+.RdPu.l8.c6 { fill: #ae017e }
+.RdPu.l8.c7 { fill: #7a0177 }
+
+.RdPu.l9.c0 { fill: #fff7f3 }
+.RdPu.l9.c1 { fill: #fde0dd }
+.RdPu.l9.c2 { fill: #fcc5c0 }
+.RdPu.l9.c3 { fill: #fa9fb5 }
+.RdPu.l9.c4 { fill: #f768a1 }
+.RdPu.l9.c5 { fill: #dd3497 }
+.RdPu.l9.c6 { fill: #ae017e }
+.RdPu.l9.c7 { fill: #7a0177 }
+.RdPu.l9.c8 { fill: #49006a }
+
+/*
+ * sequential
+ */
+
+.Greens.l3.c0 { fill: #e5f5e0 }
+.Greens.l3.c1 { fill: #a1d99b }
+.Greens.l3.c2 { fill: #31a354 }
+
+.Greens.l4.c0 { fill: #edf8e9 }
+.Greens.l4.c1 { fill: #bae4b3 }
+.Greens.l4.c2 { fill: #74c476 }
+.Greens.l4.c3 { fill: #238b45 }
+
+.Greens.l5.c0 { fill: #edf8e9 }
+.Greens.l5.c1 { fill: #bae4b3 }
+.Greens.l5.c2 { fill: #74c476 }
+.Greens.l5.c3 { fill: #31a354 }
+.Greens.l5.c4 { fill: #006d2c }
+
+.Greens.l6.c0 { fill: #edf8e9 }
+.Greens.l6.c1 { fill: #c7e9c0 }
+.Greens.l6.c2 { fill: #a1d99b }
+.Greens.l6.c3 { fill: #74c476 }
+.Greens.l6.c4 { fill: #31a354 }
+.Greens.l6.c5 { fill: #006d2c }
+
+.Greens.l7.c0 { fill: #edf8e9 }
+.Greens.l7.c1 { fill: #c7e9c0 }
+.Greens.l7.c2 { fill: #a1d99b }
+.Greens.l7.c3 { fill: #74c476 }
+.Greens.l7.c4 { fill: #41ab5d }
+.Greens.l7.c5 { fill: #238b45 }
+.Greens.l7.c6 { fill: #005a32 }
+
+.Greens.l8.c0 { fill: #f7fcf5 }
+.Greens.l8.c1 { fill: #e5f5e0 }
+.Greens.l8.c2 { fill: #c7e9c0 }
+.Greens.l8.c3 { fill: #a1d99b }
+.Greens.l8.c4 { fill: #74c476 }
+.Greens.l8.c5 { fill: #41ab5d }
+.Greens.l8.c6 { fill: #238b45 }
+.Greens.l8.c7 { fill: #005a32 }
+
+.Greens.l9.c0 { fill: #f7fcf5 }
+.Greens.l9.c1 { fill: #e5f5e0 }
+.Greens.l9.c2 { fill: #c7e9c0 }
+.Greens.l9.c3 { fill: #a1d99b }
+.Greens.l9.c4 { fill: #74c476 }
+.Greens.l9.c5 { fill: #41ab5d }
+.Greens.l9.c6 { fill: #238b45 }
+.Greens.l9.c7 { fill: #006d2c }
+.Greens.l9.c8 { fill: #00441b }
+
+/*
+ * diverging
+ */
+
+.PRGn.l3.c0 { fill: #af8dc3 }
+.PRGn.l3.c1 { fill: #f7f7f7 }
+.PRGn.l3.c2 { fill: #7fbf7b }
+
+.PRGn.l4.c0 { fill: #7b3294 }
+.PRGn.l4.c1 { fill: #c2a5cf }
+.PRGn.l4.c2 { fill: #a6dba0 }
+.PRGn.l4.c3 { fill: #008837 }
+
+.PRGn.l5.c0 { fill: #7b3294 }
+.PRGn.l5.c1 { fill: #c2a5cf }
+.PRGn.l5.c2 { fill: #f7f7f7 }
+.PRGn.l5.c3 { fill: #a6dba0 }
+.PRGn.l5.c4 { fill: #008837 }
+
+.PRGn.l6.c0 { fill: #762a83 }
+.PRGn.l6.c1 { fill: #af8dc3 }
+.PRGn.l6.c2 { fill: #e7d4e8 }
+.PRGn.l6.c3 { fill: #d9f0d3 }
+.PRGn.l6.c4 { fill: #7fbf7b }
+.PRGn.l6.c5 { fill: #1b7837 }
+
+.PRGn.l7.c0 { fill: #762a83 }
+.PRGn.l7.c1 { fill: #af8dc3 }
+.PRGn.l7.c2 { fill: #e7d4e8 }
+.PRGn.l7.c3 { fill: #f7f7f7 }
+.PRGn.l7.c4 { fill: #d9f0d3 }
+.PRGn.l7.c5 { fill: #7fbf7b }
+.PRGn.l7.c6 { fill: #1b7837 }
+
+.PRGn.l8.c0 { fill: #762a83 }
+.PRGn.l8.c1 { fill: #9970ab }
+.PRGn.l8.c2 { fill: #c2a5cf }
+.PRGn.l8.c3 { fill: #e7d4e8 }
+.PRGn.l8.c4 { fill: #d9f0d3 }
+.PRGn.l8.c5 { fill: #a6dba0 }
+.PRGn.l8.c6 { fill: #5aae61 }
+.PRGn.l8.c7 { fill: #1b7837 }
+
+.PRGn.l9.c0 { fill: #762a83 }
+.PRGn.l9.c1 { fill: #9970ab }
+.PRGn.l9.c2 { fill: #c2a5cf }
+.PRGn.l9.c3 { fill: #e7d4e8 }
+.PRGn.l9.c4 { fill: #f7f7f7 }
+.PRGn.l9.c5 { fill: #d9f0d3 }
+.PRGn.l9.c6 { fill: #a6dba0 }
+.PRGn.l9.c7 { fill: #5aae61 }
+.PRGn.l9.c8 { fill: #1b7837 }
+
+.PRGn.l10.c0 { fill: #40004b }
+.PRGn.l10.c1 { fill: #762a83 }
+.PRGn.l10.c2 { fill: #9970ab }
+.PRGn.l10.c3 { fill: #c2a5cf }
+.PRGn.l10.c4 { fill: #e7d4e8 }
+.PRGn.l10.c5 { fill: #d9f0d3 }
+.PRGn.l10.c6 { fill: #a6dba0 }
+.PRGn.l10.c7 { fill: #5aae61 }
+.PRGn.l10.c8 { fill: #1b7837 }
+.PRGn.l10.c9 { fill: #00441b }
+
+.PRGn.l11.c0 { fill: #40004b }
+.PRGn.l11.c1 { fill: #762a83 }
+.PRGn.l11.c2 { fill: #9970ab }
+.PRGn.l11.c3 { fill: #c2a5cf }
+.PRGn.l11.c4 { fill: #e7d4e8 }
+.PRGn.l11.c5 { fill: #f7f7f7 }
+.PRGn.l11.c6 { fill: #d9f0d3 }
+.PRGn.l11.c7 { fill: #a6dba0 }
+.PRGn.l11.c8 { fill: #5aae61 }
+.PRGn.l11.c9 { fill: #1b7837 }
+.PRGn.l11.c10 { fill: #00441b }
+
+/*
+ * sequential
+ */
+
+.YlGnBu.l3.c0 { fill: #edf8b1 }
+.YlGnBu.l3.c1 { fill: #7fcdbb }
+.YlGnBu.l3.c2 { fill: #2c7fb8 }
+
+.YlGnBu.l4.c0 { fill: #ffffcc }
+.YlGnBu.l4.c1 { fill: #a1dab4 }
+.YlGnBu.l4.c2 { fill: #41b6c4 }
+.YlGnBu.l4.c3 { fill: #225ea8 }
+
+.YlGnBu.l5.c0 { fill: #ffffcc }
+.YlGnBu.l5.c1 { fill: #a1dab4 }
+.YlGnBu.l5.c2 { fill: #41b6c4 }
+.YlGnBu.l5.c3 { fill: #2c7fb8 }
+.YlGnBu.l5.c4 { fill: #253494 }
+
+.YlGnBu.l6.c0 { fill: #ffffcc }
+.YlGnBu.l6.c1 { fill: #c7e9b4 }
+.YlGnBu.l6.c2 { fill: #7fcdbb }
+.YlGnBu.l6.c3 { fill: #41b6c4 }
+.YlGnBu.l6.c4 { fill: #2c7fb8 }
+.YlGnBu.l6.c5 { fill: #253494 }
+
+.YlGnBu.l7.c0 { fill: #ffffcc }
+.YlGnBu.l7.c1 { fill: #c7e9b4 }
+.YlGnBu.l7.c2 { fill: #7fcdbb }
+.YlGnBu.l7.c3 { fill: #41b6c4 }
+.YlGnBu.l7.c4 { fill: #1d91c0 }
+.YlGnBu.l7.c5 { fill: #225ea8 }
+.YlGnBu.l7.c6 { fill: #0c2c84 }
+
+.YlGnBu.l8.c0 { fill: #ffffd9 }
+.YlGnBu.l8.c1 { fill: #edf8b1 }
+.YlGnBu.l8.c2 { fill: #c7e9b4 }
+.YlGnBu.l8.c3 { fill: #7fcdbb }
+.YlGnBu.l8.c4 { fill: #41b6c4 }
+.YlGnBu.l8.c5 { fill: #1d91c0 }
+.YlGnBu.l8.c6 { fill: #225ea8 }
+.YlGnBu.l8.c7 { fill: #0c2c84 }
+
+.YlGnBu.l9.c0 { fill: #ffffd9 }
+.YlGnBu.l9.c1 { fill: #edf8b1 }
+.YlGnBu.l9.c2 { fill: #c7e9b4 }
+.YlGnBu.l9.c3 { fill: #7fcdbb }
+.YlGnBu.l9.c4 { fill: #41b6c4 }
+.YlGnBu.l9.c5 { fill: #1d91c0 }
+.YlGnBu.l9.c6 { fill: #225ea8 }
+.YlGnBu.l9.c7 { fill: #253494 }
+.YlGnBu.l9.c8 { fill: #081d58 }
+
+/*
+ * diverging
+ */
+
+.RdYlBu.l3.c0 { fill: #fc8d59 }
+.RdYlBu.l3.c1 { fill: #ffffbf }
+.RdYlBu.l3.c2 { fill: #91bfdb }
+
+.RdYlBu.l4.c0 { fill: #d7191c }
+.RdYlBu.l4.c1 { fill: #fdae61 }
+.RdYlBu.l4.c2 { fill: #abd9e9 }
+.RdYlBu.l4.c3 { fill: #2c7bb6 }
+
+.RdYlBu.l5.c0 { fill: #d7191c }
+.RdYlBu.l5.c1 { fill: #fdae61 }
+.RdYlBu.l5.c2 { fill: #ffffbf }
+.RdYlBu.l5.c3 { fill: #abd9e9 }
+.RdYlBu.l5.c4 { fill: #2c7bb6 }
+
+.RdYlBu.l6.c0 { fill: #d73027 }
+.RdYlBu.l6.c1 { fill: #fc8d59 }
+.RdYlBu.l6.c2 { fill: #fee090 }
+.RdYlBu.l6.c3 { fill: #e0f3f8 }
+.RdYlBu.l6.c4 { fill: #91bfdb }
+.RdYlBu.l6.c5 { fill: #4575b4 }
+
+.RdYlBu.l7.c0 { fill: #d73027 }
+.RdYlBu.l7.c1 { fill: #fc8d59 }
+.RdYlBu.l7.c2 { fill: #fee090 }
+.RdYlBu.l7.c3 { fill: #ffffbf }
+.RdYlBu.l7.c4 { fill: #e0f3f8 }
+.RdYlBu.l7.c5 { fill: #91bfdb }
+.RdYlBu.l7.c6 { fill: #4575b4 }
+
+.RdYlBu.l8.c0 { fill: #d73027 }
+.RdYlBu.l8.c1 { fill: #f46d43 }
+.RdYlBu.l8.c2 { fill: #fdae61 }
+.RdYlBu.l8.c3 { fill: #fee090 }
+.RdYlBu.l8.c4 { fill: #e0f3f8 }
+.RdYlBu.l8.c5 { fill: #abd9e9 }
+.RdYlBu.l8.c6 { fill: #74add1 }
+.RdYlBu.l8.c7 { fill: #4575b4 }
+
+.RdYlBu.l9.c0 { fill: #d73027 }
+.RdYlBu.l9.c1 { fill: #f46d43 }
+.RdYlBu.l9.c2 { fill: #fdae61 }
+.RdYlBu.l9.c3 { fill: #fee090 }
+.RdYlBu.l9.c4 { fill: #ffffbf }
+.RdYlBu.l9.c5 { fill: #e0f3f8 }
+.RdYlBu.l9.c6 { fill: #abd9e9 }
+.RdYlBu.l9.c7 { fill: #74add1 }
+.RdYlBu.l9.c8 { fill: #4575b4 }
+
+.RdYlBu.l10.c0 { fill: #a50026 }
+.RdYlBu.l10.c1 { fill: #d73027 }
+.RdYlBu.l10.c2 { fill: #f46d43 }
+.RdYlBu.l10.c3 { fill: #fdae61 }
+.RdYlBu.l10.c4 { fill: #fee090 }
+.RdYlBu.l10.c5 { fill: #e0f3f8 }
+.RdYlBu.l10.c6 { fill: #abd9e9 }
+.RdYlBu.l10.c7 { fill: #74add1 }
+.RdYlBu.l10.c8 { fill: #4575b4 }
+.RdYlBu.l10.c9 { fill: #313695 }
+
+.RdYlBu.l11.c0 { fill: #a50026 }
+.RdYlBu.l11.c1 { fill: #d73027 }
+.RdYlBu.l11.c2 { fill: #f46d43 }
+.RdYlBu.l11.c3 { fill: #fdae61 }
+.RdYlBu.l11.c4 { fill: #fee090 }
+.RdYlBu.l11.c5 { fill: #ffffbf }
+.RdYlBu.l11.c6 { fill: #e0f3f8 }
+.RdYlBu.l11.c7 { fill: #abd9e9 }
+.RdYlBu.l11.c8 { fill: #74add1 }
+.RdYlBu.l11.c9 { fill: #4575b4 }
+.RdYlBu.l11.c10 { fill: #313695 }
+
+/*
+ * qualitative
+ */
+
+.Paired.l3.c0 { fill: #a6cee3 }
+.Paired.l3.c1 { fill: #1f78b4 }
+.Paired.l3.c2 { fill: #b2df8a }
+
+.Paired.l4.c0 { fill: #a6cee3 }
+.Paired.l4.c1 { fill: #1f78b4 }
+.Paired.l4.c2 { fill: #b2df8a }
+.Paired.l4.c3 { fill: #33a02c }
+
+.Paired.l5.c0 { fill: #a6cee3 }
+.Paired.l5.c1 { fill: #1f78b4 }
+.Paired.l5.c2 { fill: #b2df8a }
+.Paired.l5.c3 { fill: #33a02c }
+.Paired.l5.c4 { fill: #fb9a99 }
+
+.Paired.l6.c0 { fill: #a6cee3 }
+.Paired.l6.c1 { fill: #1f78b4 }
+.Paired.l6.c2 { fill: #b2df8a }
+.Paired.l6.c3 { fill: #33a02c }
+.Paired.l6.c4 { fill: #fb9a99 }
+.Paired.l6.c5 { fill: #e31a1c }
+
+.Paired.l7.c0 { fill: #a6cee3 }
+.Paired.l7.c1 { fill: #1f78b4 }
+.Paired.l7.c2 { fill: #b2df8a }
+.Paired.l7.c3 { fill: #33a02c }
+.Paired.l7.c4 { fill: #fb9a99 }
+.Paired.l7.c5 { fill: #e31a1c }
+.Paired.l7.c6 { fill: #fdbf6f }
+
+.Paired.l8.c0 { fill: #a6cee3 }
+.Paired.l8.c1 { fill: #1f78b4 }
+.Paired.l8.c2 { fill: #b2df8a }
+.Paired.l8.c3 { fill: #33a02c }
+.Paired.l8.c4 { fill: #fb9a99 }
+.Paired.l8.c5 { fill: #e31a1c }
+.Paired.l8.c6 { fill: #fdbf6f }
+.Paired.l8.c7 { fill: #ff7f00 }
+
+.Paired.l9.c0 { fill: #a6cee3 }
+.Paired.l9.c1 { fill: #1f78b4 }
+.Paired.l9.c2 { fill: #b2df8a }
+.Paired.l9.c3 { fill: #33a02c }
+.Paired.l9.c4 { fill: #fb9a99 }
+.Paired.l9.c5 { fill: #e31a1c }
+.Paired.l9.c6 { fill: #fdbf6f }
+.Paired.l9.c7 { fill: #ff7f00 }
+.Paired.l9.c8 { fill: #cab2d6 }
+
+.Paired.l10.c0 { fill: #a6cee3 }
+.Paired.l10.c1 { fill: #1f78b4 }
+.Paired.l10.c2 { fill: #b2df8a }
+.Paired.l10.c3 { fill: #33a02c }
+.Paired.l10.c4 { fill: #fb9a99 }
+.Paired.l10.c5 { fill: #e31a1c }
+.Paired.l10.c6 { fill: #fdbf6f }
+.Paired.l10.c7 { fill: #ff7f00 }
+.Paired.l10.c8 { fill: #cab2d6 }
+.Paired.l10.c9 { fill: #6a3d9a }
+
+.Paired.l11.c0 { fill: #a6cee3 }
+.Paired.l11.c1 { fill: #1f78b4 }
+.Paired.l11.c2 { fill: #b2df8a }
+.Paired.l11.c3 { fill: #33a02c }
+.Paired.l11.c4 { fill: #fb9a99 }
+.Paired.l11.c5 { fill: #e31a1c }
+.Paired.l11.c6 { fill: #fdbf6f }
+.Paired.l11.c7 { fill: #ff7f00 }
+.Paired.l11.c8 { fill: #cab2d6 }
+.Paired.l11.c9 { fill: #6a3d9a }
+.Paired.l11.c10 { fill: #ffff99 }
+
+.Paired.l12.c0 { fill: #a6cee3 }
+.Paired.l12.c1 { fill: #1f78b4 }
+.Paired.l12.c2 { fill: #b2df8a }
+.Paired.l12.c3 { fill: #33a02c }
+.Paired.l12.c4 { fill: #fb9a99 }
+.Paired.l12.c5 { fill: #e31a1c }
+.Paired.l12.c6 { fill: #fdbf6f }
+.Paired.l12.c7 { fill: #ff7f00 }
+.Paired.l12.c8 { fill: #cab2d6 }
+.Paired.l12.c9 { fill: #6a3d9a }
+.Paired.l12.c10 { fill: #ffff99 }
+.Paired.l12.c11 { fill: #b15928 }
+
+/*
+ * diverging
+ */
+
+.BrBG.l3.c0 { fill: #d8b365 }
+.BrBG.l3.c1 { fill: #f5f5f5 }
+.BrBG.l3.c2 { fill: #5ab4ac }
+
+.BrBG.l4.c0 { fill: #a6611a }
+.BrBG.l4.c1 { fill: #dfc27d }
+.BrBG.l4.c2 { fill: #80cdc1 }
+.BrBG.l4.c3 { fill: #018571 }
+
+.BrBG.l5.c0 { fill: #a6611a }
+.BrBG.l5.c1 { fill: #dfc27d }
+.BrBG.l5.c2 { fill: #f5f5f5 }
+.BrBG.l5.c3 { fill: #80cdc1 }
+.BrBG.l5.c4 { fill: #018571 }
+
+.BrBG.l6.c0 { fill: #8c510a }
+.BrBG.l6.c1 { fill: #d8b365 }
+.BrBG.l6.c2 { fill: #f6e8c3 }
+.BrBG.l6.c3 { fill: #c7eae5 }
+.BrBG.l6.c4 { fill: #5ab4ac }
+.BrBG.l6.c5 { fill: #01665e }
+
+.BrBG.l7.c0 { fill: #8c510a }
+.BrBG.l7.c1 { fill: #d8b365 }
+.BrBG.l7.c2 { fill: #f6e8c3 }
+.BrBG.l7.c3 { fill: #f5f5f5 }
+.BrBG.l7.c4 { fill: #c7eae5 }
+.BrBG.l7.c5 { fill: #5ab4ac }
+.BrBG.l7.c6 { fill: #01665e }
+
+.BrBG.l8.c0 { fill: #8c510a }
+.BrBG.l8.c1 { fill: #bf812d }
+.BrBG.l8.c2 { fill: #dfc27d }
+.BrBG.l8.c3 { fill: #f6e8c3 }
+.BrBG.l8.c4 { fill: #c7eae5 }
+.BrBG.l8.c5 { fill: #80cdc1 }
+.BrBG.l8.c6 { fill: #35978f }
+.BrBG.l8.c7 { fill: #01665e }
+
+.BrBG.l9.c0 { fill: #8c510a }
+.BrBG.l9.c1 { fill: #bf812d }
+.BrBG.l9.c2 { fill: #dfc27d }
+.BrBG.l9.c3 { fill: #f6e8c3 }
+.BrBG.l9.c4 { fill: #f5f5f5 }
+.BrBG.l9.c5 { fill: #c7eae5 }
+.BrBG.l9.c6 { fill: #80cdc1 }
+.BrBG.l9.c7 { fill: #35978f }
+.BrBG.l9.c8 { fill: #01665e }
+
+.BrBG.l10.c0 { fill: #543005 }
+.BrBG.l10.c1 { fill: #8c510a }
+.BrBG.l10.c2 { fill: #bf812d }
+.BrBG.l10.c3 { fill: #dfc27d }
+.BrBG.l10.c4 { fill: #f6e8c3 }
+.BrBG.l10.c5 { fill: #c7eae5 }
+.BrBG.l10.c6 { fill: #80cdc1 }
+.BrBG.l10.c7 { fill: #35978f }
+.BrBG.l10.c8 { fill: #01665e }
+.BrBG.l10.c9 { fill: #003c30 }
+
+.BrBG.l11.c0 { fill: #543005 }
+.BrBG.l11.c1 { fill: #8c510a }
+.BrBG.l11.c2 { fill: #bf812d }
+.BrBG.l11.c3 { fill: #dfc27d }
+.BrBG.l11.c4 { fill: #f6e8c3 }
+.BrBG.l11.c5 { fill: #f5f5f5 }
+.BrBG.l11.c6 { fill: #c7eae5 }
+.BrBG.l11.c7 { fill: #80cdc1 }
+.BrBG.l11.c8 { fill: #35978f }
+.BrBG.l11.c9 { fill: #01665e }
+.BrBG.l11.c10 { fill: #003c30 }
+
+/*
+ * sequential
+ */
+
+.Purples.l3.c0 { fill: #efedf5 }
+.Purples.l3.c1 { fill: #bcbddc }
+.Purples.l3.c2 { fill: #756bb1 }
+
+.Purples.l4.c0 { fill: #f2f0f7 }
+.Purples.l4.c1 { fill: #cbc9e2 }
+.Purples.l4.c2 { fill: #9e9ac8 }
+.Purples.l4.c3 { fill: #6a51a3 }
+
+.Purples.l5.c0 { fill: #f2f0f7 }
+.Purples.l5.c1 { fill: #cbc9e2 }
+.Purples.l5.c2 { fill: #9e9ac8 }
+.Purples.l5.c3 { fill: #756bb1 }
+.Purples.l5.c4 { fill: #54278f }
+
+.Purples.l6.c0 { fill: #f2f0f7 }
+.Purples.l6.c1 { fill: #dadaeb }
+.Purples.l6.c2 { fill: #bcbddc }
+.Purples.l6.c3 { fill: #9e9ac8 }
+.Purples.l6.c4 { fill: #756bb1 }
+.Purples.l6.c5 { fill: #54278f }
+
+.Purples.l7.c0 { fill: #f2f0f7 }
+.Purples.l7.c1 { fill: #dadaeb }
+.Purples.l7.c2 { fill: #bcbddc }
+.Purples.l7.c3 { fill: #9e9ac8 }
+.Purples.l7.c4 { fill: #807dba }
+.Purples.l7.c5 { fill: #6a51a3 }
+.Purples.l7.c6 { fill: #4a1486 }
+
+.Purples.l8.c0 { fill: #fcfbfd }
+.Purples.l8.c1 { fill: #efedf5 }
+.Purples.l8.c2 { fill: #dadaeb }
+.Purples.l8.c3 { fill: #bcbddc }
+.Purples.l8.c4 { fill: #9e9ac8 }
+.Purples.l8.c5 { fill: #807dba }
+.Purples.l8.c6 { fill: #6a51a3 }
+.Purples.l8.c7 { fill: #4a1486 }
+
+.Purples.l9.c0 { fill: #fcfbfd }
+.Purples.l9.c1 { fill: #efedf5 }
+.Purples.l9.c2 { fill: #dadaeb }
+.Purples.l9.c3 { fill: #bcbddc }
+.Purples.l9.c4 { fill: #9e9ac8 }
+.Purples.l9.c5 { fill: #807dba }
+.Purples.l9.c6 { fill: #6a51a3 }
+.Purples.l9.c7 { fill: #54278f }
+.Purples.l9.c8 { fill: #3f007d }
+
+/*
+ * qualitative
+ */
+
+.Pastel2.l3.c0 { fill: #b3e2cd }
+.Pastel2.l3.c1 { fill: #fdcdac }
+.Pastel2.l3.c2 { fill: #cbd5e8 }
+
+.Pastel2.l4.c0 { fill: #b3e2cd }
+.Pastel2.l4.c1 { fill: #fdcdac }
+.Pastel2.l4.c2 { fill: #cbd5e8 }
+.Pastel2.l4.c3 { fill: #f4cae4 }
+
+.Pastel2.l5.c0 { fill: #b3e2cd }
+.Pastel2.l5.c1 { fill: #fdcdac }
+.Pastel2.l5.c2 { fill: #cbd5e8 }
+.Pastel2.l5.c3 { fill: #f4cae4 }
+.Pastel2.l5.c4 { fill: #e6f5c9 }
+
+.Pastel2.l6.c0 { fill: #b3e2cd }
+.Pastel2.l6.c1 { fill: #fdcdac }
+.Pastel2.l6.c2 { fill: #cbd5e8 }
+.Pastel2.l6.c3 { fill: #f4cae4 }
+.Pastel2.l6.c4 { fill: #e6f5c9 }
+.Pastel2.l6.c5 { fill: #fff2ae }
+
+.Pastel2.l7.c0 { fill: #b3e2cd }
+.Pastel2.l7.c1 { fill: #fdcdac }
+.Pastel2.l7.c2 { fill: #cbd5e8 }
+.Pastel2.l7.c3 { fill: #f4cae4 }
+.Pastel2.l7.c4 { fill: #e6f5c9 }
+.Pastel2.l7.c5 { fill: #fff2ae }
+.Pastel2.l7.c6 { fill: #f1e2cc }
+
+.Pastel2.l8.c0 { fill: #b3e2cd }
+.Pastel2.l8.c1 { fill: #fdcdac }
+.Pastel2.l8.c2 { fill: #cbd5e8 }
+.Pastel2.l8.c3 { fill: #f4cae4 }
+.Pastel2.l8.c4 { fill: #e6f5c9 }
+.Pastel2.l8.c5 { fill: #fff2ae }
+.Pastel2.l8.c6 { fill: #f1e2cc }
+.Pastel2.l8.c7 { fill: #cccccc }
+
+/*
+ * qualitative
+ */
+
+.Pastel1.l3.c0 { fill: #fbb4ae }
+.Pastel1.l3.c1 { fill: #b3cde3 }
+.Pastel1.l3.c2 { fill: #ccebc5 }
+
+.Pastel1.l4.c0 { fill: #fbb4ae }
+.Pastel1.l4.c1 { fill: #b3cde3 }
+.Pastel1.l4.c2 { fill: #ccebc5 }
+.Pastel1.l4.c3 { fill: #decbe4 }
+
+.Pastel1.l5.c0 { fill: #fbb4ae }
+.Pastel1.l5.c1 { fill: #b3cde3 }
+.Pastel1.l5.c2 { fill: #ccebc5 }
+.Pastel1.l5.c3 { fill: #decbe4 }
+.Pastel1.l5.c4 { fill: #fed9a6 }
+
+.Pastel1.l6.c0 { fill: #fbb4ae }
+.Pastel1.l6.c1 { fill: #b3cde3 }
+.Pastel1.l6.c2 { fill: #ccebc5 }
+.Pastel1.l6.c3 { fill: #decbe4 }
+.Pastel1.l6.c4 { fill: #fed9a6 }
+.Pastel1.l6.c5 { fill: #ffffcc }
+
+.Pastel1.l7.c0 { fill: #fbb4ae }
+.Pastel1.l7.c1 { fill: #b3cde3 }
+.Pastel1.l7.c2 { fill: #ccebc5 }
+.Pastel1.l7.c3 { fill: #decbe4 }
+.Pastel1.l7.c4 { fill: #fed9a6 }
+.Pastel1.l7.c5 { fill: #ffffcc }
+.Pastel1.l7.c6 { fill: #e5d8bd }
+
+.Pastel1.l8.c0 { fill: #fbb4ae }
+.Pastel1.l8.c1 { fill: #b3cde3 }
+.Pastel1.l8.c2 { fill: #ccebc5 }
+.Pastel1.l8.c3 { fill: #decbe4 }
+.Pastel1.l8.c4 { fill: #fed9a6 }
+.Pastel1.l8.c5 { fill: #ffffcc }
+.Pastel1.l8.c6 { fill: #e5d8bd }
+.Pastel1.l8.c7 { fill: #fddaec }
+
+.Pastel1.l9.c0 { fill: #fbb4ae }
+.Pastel1.l9.c1 { fill: #b3cde3 }
+.Pastel1.l9.c2 { fill: #ccebc5 }
+.Pastel1.l9.c3 { fill: #decbe4 }
+.Pastel1.l9.c4 { fill: #fed9a6 }
+.Pastel1.l9.c5 { fill: #ffffcc }
+.Pastel1.l9.c6 { fill: #e5d8bd }
+.Pastel1.l9.c7 { fill: #fddaec }
+.Pastel1.l9.c8 { fill: #f2f2f2 }
+
+/*
+ * sequential
+ */
+
+.GnBu.l3.c0 { fill: #e0f3db }
+.GnBu.l3.c1 { fill: #a8ddb5 }
+.GnBu.l3.c2 { fill: #43a2ca }
+
+.GnBu.l4.c0 { fill: #f0f9e8 }
+.GnBu.l4.c1 { fill: #bae4bc }
+.GnBu.l4.c2 { fill: #7bccc4 }
+.GnBu.l4.c3 { fill: #2b8cbe }
+
+.GnBu.l5.c0 { fill: #f0f9e8 }
+.GnBu.l5.c1 { fill: #bae4bc }
+.GnBu.l5.c2 { fill: #7bccc4 }
+.GnBu.l5.c3 { fill: #43a2ca }
+.GnBu.l5.c4 { fill: #0868ac }
+
+.GnBu.l6.c0 { fill: #f0f9e8 }
+.GnBu.l6.c1 { fill: #ccebc5 }
+.GnBu.l6.c2 { fill: #a8ddb5 }
+.GnBu.l6.c3 { fill: #7bccc4 }
+.GnBu.l6.c4 { fill: #43a2ca }
+.GnBu.l6.c5 { fill: #0868ac }
+
+.GnBu.l7.c0 { fill: #f0f9e8 }
+.GnBu.l7.c1 { fill: #ccebc5 }
+.GnBu.l7.c2 { fill: #a8ddb5 }
+.GnBu.l7.c3 { fill: #7bccc4 }
+.GnBu.l7.c4 { fill: #4eb3d3 }
+.GnBu.l7.c5 { fill: #2b8cbe }
+.GnBu.l7.c6 { fill: #08589e }
+
+.GnBu.l8.c0 { fill: #f7fcf0 }
+.GnBu.l8.c1 { fill: #e0f3db }
+.GnBu.l8.c2 { fill: #ccebc5 }
+.GnBu.l8.c3 { fill: #a8ddb5 }
+.GnBu.l8.c4 { fill: #7bccc4 }
+.GnBu.l8.c5 { fill: #4eb3d3 }
+.GnBu.l8.c6 { fill: #2b8cbe }
+.GnBu.l8.c7 { fill: #08589e }
+
+.GnBu.l9.c0 { fill: #f7fcf0 }
+.GnBu.l9.c1 { fill: #e0f3db }
+.GnBu.l9.c2 { fill: #ccebc5 }
+.GnBu.l9.c3 { fill: #a8ddb5 }
+.GnBu.l9.c4 { fill: #7bccc4 }
+.GnBu.l9.c5 { fill: #4eb3d3 }
+.GnBu.l9.c6 { fill: #2b8cbe }
+.GnBu.l9.c7 { fill: #0868ac }
+.GnBu.l9.c8 { fill: #084081 }
+
+/*
+ * sequential
+ */
+
+.Greys.l3.c0 { fill: #f0f0f0 }
+.Greys.l3.c1 { fill: #bdbdbd }
+.Greys.l3.c2 { fill: #636363 }
+
+.Greys.l4.c0 { fill: #f7f7f7 }
+.Greys.l4.c1 { fill: #cccccc }
+.Greys.l4.c2 { fill: #969696 }
+.Greys.l4.c3 { fill: #525252 }
+
+.Greys.l5.c0 { fill: #f7f7f7 }
+.Greys.l5.c1 { fill: #cccccc }
+.Greys.l5.c2 { fill: #969696 }
+.Greys.l5.c3 { fill: #636363 }
+.Greys.l5.c4 { fill: #252525 }
+
+.Greys.l6.c0 { fill: #f7f7f7 }
+.Greys.l6.c1 { fill: #d9d9d9 }
+.Greys.l6.c2 { fill: #bdbdbd }
+.Greys.l6.c3 { fill: #969696 }
+.Greys.l6.c4 { fill: #636363 }
+.Greys.l6.c5 { fill: #252525 }
+
+.Greys.l7.c0 { fill: #f7f7f7 }
+.Greys.l7.c1 { fill: #d9d9d9 }
+.Greys.l7.c2 { fill: #bdbdbd }
+.Greys.l7.c3 { fill: #969696 }
+.Greys.l7.c4 { fill: #737373 }
+.Greys.l7.c5 { fill: #525252 }
+.Greys.l7.c6 { fill: #252525 }
+
+.Greys.l8.c0 { fill: #ffffff }
+.Greys.l8.c1 { fill: #f0f0f0 }
+.Greys.l8.c2 { fill: #d9d9d9 }
+.Greys.l8.c3 { fill: #bdbdbd }
+.Greys.l8.c4 { fill: #969696 }
+.Greys.l8.c5 { fill: #737373 }
+.Greys.l8.c6 { fill: #525252 }
+.Greys.l8.c7 { fill: #252525 }
+
+.Greys.l9.c0 { fill: #ffffff }
+.Greys.l9.c1 { fill: #f0f0f0 }
+.Greys.l9.c2 { fill: #d9d9d9 }
+.Greys.l9.c3 { fill: #bdbdbd }
+.Greys.l9.c4 { fill: #969696 }
+.Greys.l9.c5 { fill: #737373 }
+.Greys.l9.c6 { fill: #525252 }
+.Greys.l9.c7 { fill: #252525 }
+.Greys.l9.c8 { fill: #000000 }
+
+/*
+ * diverging
+ */
+
+.RdGy.l3.c0 { fill: #ef8a62 }
+.RdGy.l3.c1 { fill: #ffffff }
+.RdGy.l3.c2 { fill: #999999 }
+
+.RdGy.l4.c0 { fill: #ca0020 }
+.RdGy.l4.c1 { fill: #f4a582 }
+.RdGy.l4.c2 { fill: #bababa }
+.RdGy.l4.c3 { fill: #404040 }
+
+.RdGy.l5.c0 { fill: #ca0020 }
+.RdGy.l5.c1 { fill: #f4a582 }
+.RdGy.l5.c2 { fill: #ffffff }
+.RdGy.l5.c3 { fill: #bababa }
+.RdGy.l5.c4 { fill: #404040 }
+
+.RdGy.l6.c0 { fill: #b2182b }
+.RdGy.l6.c1 { fill: #ef8a62 }
+.RdGy.l6.c2 { fill: #fddbc7 }
+.RdGy.l6.c3 { fill: #e0e0e0 }
+.RdGy.l6.c4 { fill: #999999 }
+.RdGy.l6.c5 { fill: #4d4d4d }
+
+.RdGy.l7.c0 { fill: #b2182b }
+.RdGy.l7.c1 { fill: #ef8a62 }
+.RdGy.l7.c2 { fill: #fddbc7 }
+.RdGy.l7.c3 { fill: #ffffff }
+.RdGy.l7.c4 { fill: #e0e0e0 }
+.RdGy.l7.c5 { fill: #999999 }
+.RdGy.l7.c6 { fill: #4d4d4d }
+
+.RdGy.l8.c0 { fill: #b2182b }
+.RdGy.l8.c1 { fill: #d6604d }
+.RdGy.l8.c2 { fill: #f4a582 }
+.RdGy.l8.c3 { fill: #fddbc7 }
+.RdGy.l8.c4 { fill: #e0e0e0 }
+.RdGy.l8.c5 { fill: #bababa }
+.RdGy.l8.c6 { fill: #878787 }
+.RdGy.l8.c7 { fill: #4d4d4d }
+
+.RdGy.l9.c0 { fill: #b2182b }
+.RdGy.l9.c1 { fill: #d6604d }
+.RdGy.l9.c2 { fill: #f4a582 }
+.RdGy.l9.c3 { fill: #fddbc7 }
+.RdGy.l9.c4 { fill: #ffffff }
+.RdGy.l9.c5 { fill: #e0e0e0 }
+.RdGy.l9.c6 { fill: #bababa }
+.RdGy.l9.c7 { fill: #878787 }
+.RdGy.l9.c8 { fill: #4d4d4d }
+
+.RdGy.l10.c0 { fill: #67001f }
+.RdGy.l10.c1 { fill: #b2182b }
+.RdGy.l10.c2 { fill: #d6604d }
+.RdGy.l10.c3 { fill: #f4a582 }
+.RdGy.l10.c4 { fill: #fddbc7 }
+.RdGy.l10.c5 { fill: #e0e0e0 }
+.RdGy.l10.c6 { fill: #bababa }
+.RdGy.l10.c7 { fill: #878787 }
+.RdGy.l10.c8 { fill: #4d4d4d }
+.RdGy.l10.c9 { fill: #1a1a1a }
+
+.RdGy.l11.c0 { fill: #67001f }
+.RdGy.l11.c1 { fill: #b2182b }
+.RdGy.l11.c2 { fill: #d6604d }
+.RdGy.l11.c3 { fill: #f4a582 }
+.RdGy.l11.c4 { fill: #fddbc7 }
+.RdGy.l11.c5 { fill: #ffffff }
+.RdGy.l11.c6 { fill: #e0e0e0 }
+.RdGy.l11.c7 { fill: #bababa }
+.RdGy.l11.c8 { fill: #878787 }
+.RdGy.l11.c9 { fill: #4d4d4d }
+.RdGy.l11.c10 { fill: #1a1a1a }
+
+/*
+ * sequential
+ */
+
+.YlOrRd.l3.c0 { fill: #ffeda0 }
+.YlOrRd.l3.c1 { fill: #feb24c }
+.YlOrRd.l3.c2 { fill: #f03b20 }
+
+.YlOrRd.l4.c0 { fill: #ffffb2 }
+.YlOrRd.l4.c1 { fill: #fecc5c }
+.YlOrRd.l4.c2 { fill: #fd8d3c }
+.YlOrRd.l4.c3 { fill: #e31a1c }
+
+.YlOrRd.l5.c0 { fill: #ffffb2 }
+.YlOrRd.l5.c1 { fill: #fecc5c }
+.YlOrRd.l5.c2 { fill: #fd8d3c }
+.YlOrRd.l5.c3 { fill: #f03b20 }
+.YlOrRd.l5.c4 { fill: #bd0026 }
+
+.YlOrRd.l6.c0 { fill: #ffffb2 }
+.YlOrRd.l6.c1 { fill: #fed976 }
+.YlOrRd.l6.c2 { fill: #feb24c }
+.YlOrRd.l6.c3 { fill: #fd8d3c }
+.YlOrRd.l6.c4 { fill: #f03b20 }
+.YlOrRd.l6.c5 { fill: #bd0026 }
+
+.YlOrRd.l7.c0 { fill: #ffffb2 }
+.YlOrRd.l7.c1 { fill: #fed976 }
+.YlOrRd.l7.c2 { fill: #feb24c }
+.YlOrRd.l7.c3 { fill: #fd8d3c }
+.YlOrRd.l7.c4 { fill: #fc4e2a }
+.YlOrRd.l7.c5 { fill: #e31a1c }
+.YlOrRd.l7.c6 { fill: #b10026 }
+
+.YlOrRd.l8.c0 { fill: #ffffcc }
+.YlOrRd.l8.c1 { fill: #ffeda0 }
+.YlOrRd.l8.c2 { fill: #fed976 }
+.YlOrRd.l8.c3 { fill: #feb24c }
+.YlOrRd.l8.c4 { fill: #fd8d3c }
+.YlOrRd.l8.c5 { fill: #fc4e2a }
+.YlOrRd.l8.c6 { fill: #e31a1c }
+.YlOrRd.l8.c7 { fill: #b10026 }
+
+.YlOrRd.l9.c0 { fill: #ffffcc }
+.YlOrRd.l9.c1 { fill: #ffeda0 }
+.YlOrRd.l9.c2 { fill: #fed976 }
+.YlOrRd.l9.c3 { fill: #feb24c }
+.YlOrRd.l9.c4 { fill: #fd8d3c }
+.YlOrRd.l9.c5 { fill: #fc4e2a }
+.YlOrRd.l9.c6 { fill: #e31a1c }
+.YlOrRd.l9.c7 { fill: #bd0026 }
+.YlOrRd.l9.c8 { fill: #800026 }
+
+/*
+ * diverging
+ */
+
+.PuOr.l3.c0 { fill: #f1a340 }
+.PuOr.l3.c1 { fill: #f7f7f7 }
+.PuOr.l3.c2 { fill: #998ec3 }
+
+.PuOr.l4.c0 { fill: #e66101 }
+.PuOr.l4.c1 { fill: #fdb863 }
+.PuOr.l4.c2 { fill: #b2abd2 }
+.PuOr.l4.c3 { fill: #5e3c99 }
+
+.PuOr.l5.c0 { fill: #e66101 }
+.PuOr.l5.c1 { fill: #fdb863 }
+.PuOr.l5.c2 { fill: #f7f7f7 }
+.PuOr.l5.c3 { fill: #b2abd2 }
+.PuOr.l5.c4 { fill: #5e3c99 }
+
+.PuOr.l6.c0 { fill: #b35806 }
+.PuOr.l6.c1 { fill: #f1a340 }
+.PuOr.l6.c2 { fill: #fee0b6 }
+.PuOr.l6.c3 { fill: #d8daeb }
+.PuOr.l6.c4 { fill: #998ec3 }
+.PuOr.l6.c5 { fill: #542788 }
+
+.PuOr.l7.c0 { fill: #b35806 }
+.PuOr.l7.c1 { fill: #f1a340 }
+.PuOr.l7.c2 { fill: #fee0b6 }
+.PuOr.l7.c3 { fill: #f7f7f7 }
+.PuOr.l7.c4 { fill: #d8daeb }
+.PuOr.l7.c5 { fill: #998ec3 }
+.PuOr.l7.c6 { fill: #542788 }
+
+.PuOr.l8.c0 { fill: #b35806 }
+.PuOr.l8.c1 { fill: #e08214 }
+.PuOr.l8.c2 { fill: #fdb863 }
+.PuOr.l8.c3 { fill: #fee0b6 }
+.PuOr.l8.c4 { fill: #d8daeb }
+.PuOr.l8.c5 { fill: #b2abd2 }
+.PuOr.l8.c6 { fill: #8073ac }
+.PuOr.l8.c7 { fill: #542788 }
+
+.PuOr.l9.c0 { fill: #b35806 }
+.PuOr.l9.c1 { fill: #e08214 }
+.PuOr.l9.c2 { fill: #fdb863 }
+.PuOr.l9.c3 { fill: #fee0b6 }
+.PuOr.l9.c4 { fill: #f7f7f7 }
+.PuOr.l9.c5 { fill: #d8daeb }
+.PuOr.l9.c6 { fill: #b2abd2 }
+.PuOr.l9.c7 { fill: #8073ac }
+.PuOr.l9.c8 { fill: #542788 }
+
+.PuOr.l10.c0 { fill: #7f3b08 }
+.PuOr.l10.c1 { fill: #b35806 }
+.PuOr.l10.c2 { fill: #e08214 }
+.PuOr.l10.c3 { fill: #fdb863 }
+.PuOr.l10.c4 { fill: #fee0b6 }
+.PuOr.l10.c5 { fill: #d8daeb }
+.PuOr.l10.c6 { fill: #b2abd2 }
+.PuOr.l10.c7 { fill: #8073ac }
+.PuOr.l10.c8 { fill: #542788 }
+.PuOr.l10.c9 { fill: #2d004b }
+
+.PuOr.l11.c0 { fill: #7f3b08 }
+.PuOr.l11.c1 { fill: #b35806 }
+.PuOr.l11.c2 { fill: #e08214 }
+.PuOr.l11.c3 { fill: #fdb863 }
+.PuOr.l11.c4 { fill: #fee0b6 }
+.PuOr.l11.c5 { fill: #f7f7f7 }
+.PuOr.l11.c6 { fill: #d8daeb }
+.PuOr.l11.c7 { fill: #b2abd2 }
+.PuOr.l11.c8 { fill: #8073ac }
+.PuOr.l11.c9 { fill: #542788 }
+.PuOr.l11.c10 { fill: #2d004b }
+
+/*
+ * sequential
+ */
+
+.PuRd.l3.c0 { fill: #e7e1ef }
+.PuRd.l3.c1 { fill: #c994c7 }
+.PuRd.l3.c2 { fill: #dd1c77 }
+
+.PuRd.l4.c0 { fill: #f1eef6 }
+.PuRd.l4.c1 { fill: #d7b5d8 }
+.PuRd.l4.c2 { fill: #df65b0 }
+.PuRd.l4.c3 { fill: #ce1256 }
+
+.PuRd.l5.c0 { fill: #f1eef6 }
+.PuRd.l5.c1 { fill: #d7b5d8 }
+.PuRd.l5.c2 { fill: #df65b0 }
+.PuRd.l5.c3 { fill: #dd1c77 }
+.PuRd.l5.c4 { fill: #980043 }
+
+.PuRd.l6.c0 { fill: #f1eef6 }
+.PuRd.l6.c1 { fill: #d4b9da }
+.PuRd.l6.c2 { fill: #c994c7 }
+.PuRd.l6.c3 { fill: #df65b0 }
+.PuRd.l6.c4 { fill: #dd1c77 }
+.PuRd.l6.c5 { fill: #980043 }
+
+.PuRd.l7.c0 { fill: #f1eef6 }
+.PuRd.l7.c1 { fill: #d4b9da }
+.PuRd.l7.c2 { fill: #c994c7 }
+.PuRd.l7.c3 { fill: #df65b0 }
+.PuRd.l7.c4 { fill: #e7298a }
+.PuRd.l7.c5 { fill: #ce1256 }
+.PuRd.l7.c6 { fill: #91003f }
+
+.PuRd.l8.c0 { fill: #f7f4f9 }
+.PuRd.l8.c1 { fill: #e7e1ef }
+.PuRd.l8.c2 { fill: #d4b9da }
+.PuRd.l8.c3 { fill: #c994c7 }
+.PuRd.l8.c4 { fill: #df65b0 }
+.PuRd.l8.c5 { fill: #e7298a }
+.PuRd.l8.c6 { fill: #ce1256 }
+.PuRd.l8.c7 { fill: #91003f }
+
+.PuRd.l9.c0 { fill: #f7f4f9 }
+.PuRd.l9.c1 { fill: #e7e1ef }
+.PuRd.l9.c2 { fill: #d4b9da }
+.PuRd.l9.c3 { fill: #c994c7 }
+.PuRd.l9.c4 { fill: #df65b0 }
+.PuRd.l9.c5 { fill: #e7298a }
+.PuRd.l9.c6 { fill: #ce1256 }
+.PuRd.l9.c7 { fill: #980043 }
+.PuRd.l9.c8 { fill: #67001f }
+
+/*
+ * sequential
+ */
+
+.Blues.l3.c0 { fill: #deebf7 }
+.Blues.l3.c1 { fill: #9ecae1 }
+.Blues.l3.c2 { fill: #3182bd }
+
+.Blues.l4.c0 { fill: #eff3ff }
+.Blues.l4.c1 { fill: #bdd7e7 }
+.Blues.l4.c2 { fill: #6baed6 }
+.Blues.l4.c3 { fill: #2171b5 }
+
+.Blues.l5.c0 { fill: #eff3ff }
+.Blues.l5.c1 { fill: #bdd7e7 }
+.Blues.l5.c2 { fill: #6baed6 }
+.Blues.l5.c3 { fill: #3182bd }
+.Blues.l5.c4 { fill: #08519c }
+
+.Blues.l6.c0 { fill: #eff3ff }
+.Blues.l6.c1 { fill: #c6dbef }
+.Blues.l6.c2 { fill: #9ecae1 }
+.Blues.l6.c3 { fill: #6baed6 }
+.Blues.l6.c4 { fill: #3182bd }
+.Blues.l6.c5 { fill: #08519c }
+
+.Blues.l7.c0 { fill: #eff3ff }
+.Blues.l7.c1 { fill: #c6dbef }
+.Blues.l7.c2 { fill: #9ecae1 }
+.Blues.l7.c3 { fill: #6baed6 }
+.Blues.l7.c4 { fill: #4292c6 }
+.Blues.l7.c5 { fill: #2171b5 }
+.Blues.l7.c6 { fill: #084594 }
+
+.Blues.l8.c0 { fill: #f7fbff }
+.Blues.l8.c1 { fill: #deebf7 }
+.Blues.l8.c2 { fill: #c6dbef }
+.Blues.l8.c3 { fill: #9ecae1 }
+.Blues.l8.c4 { fill: #6baed6 }
+.Blues.l8.c5 { fill: #4292c6 }
+.Blues.l8.c6 { fill: #2171b5 }
+.Blues.l8.c7 { fill: #084594 }
+
+.Blues.l9.c0 { fill: #f7fbff }
+.Blues.l9.c1 { fill: #deebf7 }
+.Blues.l9.c2 { fill: #c6dbef }
+.Blues.l9.c3 { fill: #9ecae1 }
+.Blues.l9.c4 { fill: #6baed6 }
+.Blues.l9.c5 { fill: #4292c6 }
+.Blues.l9.c6 { fill: #2171b5 }
+.Blues.l9.c7 { fill: #08519c }
+.Blues.l9.c8 { fill: #08306b }
+
+/*
+ * sequential
+ */
+
+.PuBuGn.l3.c0 { fill: #ece2f0 }
+.PuBuGn.l3.c1 { fill: #a6bddb }
+.PuBuGn.l3.c2 { fill: #1c9099 }
+
+.PuBuGn.l4.c0 { fill: #f6eff7 }
+.PuBuGn.l4.c1 { fill: #bdc9e1 }
+.PuBuGn.l4.c2 { fill: #67a9cf }
+.PuBuGn.l4.c3 { fill: #02818a }
+
+.PuBuGn.l5.c0 { fill: #f6eff7 }
+.PuBuGn.l5.c1 { fill: #bdc9e1 }
+.PuBuGn.l5.c2 { fill: #67a9cf }
+.PuBuGn.l5.c3 { fill: #1c9099 }
+.PuBuGn.l5.c4 { fill: #016c59 }
+
+.PuBuGn.l6.c0 { fill: #f6eff7 }
+.PuBuGn.l6.c1 { fill: #d0d1e6 }
+.PuBuGn.l6.c2 { fill: #a6bddb }
+.PuBuGn.l6.c3 { fill: #67a9cf }
+.PuBuGn.l6.c4 { fill: #1c9099 }
+.PuBuGn.l6.c5 { fill: #016c59 }
+
+.PuBuGn.l7.c0 { fill: #f6eff7 }
+.PuBuGn.l7.c1 { fill: #d0d1e6 }
+.PuBuGn.l7.c2 { fill: #a6bddb }
+.PuBuGn.l7.c3 { fill: #67a9cf }
+.PuBuGn.l7.c4 { fill: #3690c0 }
+.PuBuGn.l7.c5 { fill: #02818a }
+.PuBuGn.l7.c6 { fill: #016450 }
+
+.PuBuGn.l8.c0 { fill: #fff7fb }
+.PuBuGn.l8.c1 { fill: #ece2f0 }
+.PuBuGn.l8.c2 { fill: #d0d1e6 }
+.PuBuGn.l8.c3 { fill: #a6bddb }
+.PuBuGn.l8.c4 { fill: #67a9cf }
+.PuBuGn.l8.c5 { fill: #3690c0 }
+.PuBuGn.l8.c6 { fill: #02818a }
+.PuBuGn.l8.c7 { fill: #016450 }
+
+.PuBuGn.l9.c0 { fill: #fff7fb }
+.PuBuGn.l9.c1 { fill: #ece2f0 }
+.PuBuGn.l9.c2 { fill: #d0d1e6 }
+.PuBuGn.l9.c3 { fill: #a6bddb }
+.PuBuGn.l9.c4 { fill: #67a9cf }
+.PuBuGn.l9.c5 { fill: #3690c0 }
+.PuBuGn.l9.c6 { fill: #02818a }
+.PuBuGn.l9.c7 { fill: #016c59 }
+.PuBuGn.l9.c8 { fill: #014636 }
+

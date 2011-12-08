@@ -305,6 +305,7 @@ class ColorScale
 		me.pos = positions
 		me.mode = mode
 		me.nacol = nacol
+		me
 		
 	
 	getColor: (value) ->
@@ -332,11 +333,11 @@ class ColorScale
 		# use this if you want to display a limited number of data classes
 		# possible methods are "equalinterval", "quantiles", "custom"
 		###
-		self = @
-		self.classMethod = method
-		self.numClasses = numClasses
-		self.classLimits = limits
-		return	
+		me = @
+		me.classMethod = method
+		me.numClasses = numClasses
+		me.classLimits = limits
+		me
 			
 	parseData: (data, data_col) ->
 		self = @
@@ -475,41 +476,19 @@ svgmap.color.scale.GWP = new Diverging(Color.hsl(120,.8,.4),'#ffffff', new Color
 
 
 
-class ColorBrewerRamp extends ColorScale
+class CSSColors extends ColorScale
 
-	constructor: (name, colors) ->
+	constructor: (name) ->
 		me = @
-		me.name = name
-		me.cbcc = {}
-		for cols in colors
-			me.cbcc[cols.length] = cols
-			
+		me.name = name			
 		me.setClasses(7)
-	
-	setClasses: (numClasses = 5, method='equalinterval', limits = []) ->
-		me = @
-		if me.cbcc.hasOwnProperty(numClasses)
-			super numClasses, method, limits
-		else
-			throw 'number of colors is not supported by color scale '+me.name
-	
+		me
+		
 	getColor: (value) ->
 		me = @
 		c = me.getClass(value)
-		me.cbcc[me.numClasses][c]
-	
-class ColorBrewerDiverging
+		me.name + ' l'+me.numClasses+' c'+c
 
-class ColorBrewerCategories
+svgmap.color.scale.CSSColors = CSSColors
 
-
-cb = svgmap.color.scale.colorbrewer ?= {}
-
-cb.PuRd = new ColorBrewerRamp("PuRd", [['#e7e1ef', '#c994c7', '#dd1c77'], ['#f1eef6', '#d7b5d8', '#df65b0', '#ce1256'], ['#f1eef6', '#d7b5d8', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#980043', '#67001f']])
-
-cb.Blues = new ColorBrewerRamp("Blues", [['#deebf7', '#9ecae1', '#3182bd'], ['#eff3ff', '#bdd7e7', '#6baed6', '#2171b5'], ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b']])
-
-cb.PuBuGn = new ColorBrewerRamp("PuBuGn", [['#ece2f0', '#a6bddb', '#1c9099'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#02818a'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016c59', '#014636']])
-
-	
 

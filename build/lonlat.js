@@ -31,10 +31,26 @@
     	represents a Point
     */
 
-    function LonLat(lon, lat) {
+    function LonLat(lon, lat, alt) {
+      if (alt == null) alt = 0;
       this.lon = Number(lon);
       this.lat = Number(lat);
+      this.alt = Number(alt);
     }
+
+    LonLat.prototype.distance = function(ll) {
+      var R, a, c, dLat, dLon, deg2rad, lat1, lat2, me;
+      me = this;
+      R = 6371;
+      deg2rad = Math.PI / 180;
+      dLat = (ll.lat - me.lat) * deg2rad;
+      dLon = (ll.lon - me.lon) * deg2rad;
+      lat1 = me.lat * deg2rad;
+      lat2 = ll.lat * deg2rad;
+      a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+      c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
 
     return LonLat;
 
@@ -44,8 +60,9 @@
 
     __extends(LatLon, LonLat);
 
-    function LatLon(lat, lon) {
-      LatLon.__super__.constructor.call(this, lon, lat);
+    function LatLon(lat, lon, alt) {
+      if (alt == null) alt = 0;
+      LatLon.__super__.constructor.call(this, lon, lat, alt);
     }
 
     return LatLon;

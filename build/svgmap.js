@@ -165,7 +165,13 @@
           if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
             v = pathData[id];
             col = colorscale.getColor(v);
-            path.svgPath.node.setAttribute('style', 'fill:' + col);
+            if ('' + col.substr(0, 1) === '#') {
+              path.svgPath.node.setAttribute('style', 'fill:' + col);
+              path.svgPath.node.setAttribute('class', path.baseClass);
+            } else {
+              path.svgPath.node.setAttribute('class', path.baseClass + ' ' + col);
+              path.svgPath.node.setAttribute('style', '');
+            }
           } else {
             path.svgPath.node.setAttribute('style', 'fill:' + no_data_color);
           }
@@ -393,6 +399,34 @@
       });
     };
 
+    SVGMap.prototype.lonlat2xy = function(lonlat) {
+      var a, me;
+      me = this;
+      if (lonlat.length === 2) lonlat = new svgmap.LonLat(lonlat[0], lonlat[1]);
+      if (lonlat.length === 3) {
+        lonlat = new svgmap.LonLat(lonlat[0], lonlat[1], lonlat[2]);
+      }
+      a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt);
+      return me.viewBC.project(me.viewAB.project(a));
+    };
+
+    SVGMap.prototype.addGeoPath = function(points, cmds, className) {
+      var cmd, i, me, path, path_str, pt, xy, _ref2;
+      if (cmds == null) cmds = [];
+      if (className == null) className = '';
+      me = this;
+      if (cmds.length === 0) cmds.push('M');
+      path_str = '';
+      for (i in points) {
+        pt = points[i];
+        cmd = (_ref2 = cmds[i]) != null ? _ref2 : 'L';
+        xy = me.lonlat2xy(pt);
+        path_str += cmd + xy[0] + ',' + xy[1];
+      }
+      path = me.paper.path(path_str);
+      path.node.setAttribute('class', className);
+    };
+
     return SVGMap;
 
   })();
@@ -451,7 +485,8 @@
       me = this;
       me.path = path = svgmap.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
-      me.svgPath.node.setAttribute('class', 'polygon ' + layer_id);
+      me.baseClass = 'polygon ' + layer_id;
+      me.svgPath.node.setAttribute('class', me.baseClass);
       me.svgPath.node.path = me;
       data = {};
       for (i = 0, _ref2 = svg_path.attributes.length - 1; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {

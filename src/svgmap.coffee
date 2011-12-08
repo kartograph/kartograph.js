@@ -155,7 +155,12 @@ class SVGMap
 					v = pathData[id]
 					col = colorscale.getColor(v)
 					
-					path.svgPath.node.setAttribute('style', 'fill:'+col)
+					if ''+col.substr(0,1) == '#'
+						path.svgPath.node.setAttribute('style', 'fill:'+col)
+						path.svgPath.node.setAttribute 'class', path.baseClass
+					else
+						path.svgPath.node.setAttribute 'class', path.baseClass + ' ' + col
+						path.svgPath.node.setAttribute 'style', ''
 				else
 					path.svgPath.node.setAttribute('style', 'fill:'+no_data_color)
 		return
@@ -345,6 +350,33 @@ class SVGMap
 		$('.polygon.'+layer_id, me.paper.canvas).attr
 			filter: 'url(#'+filter_id+')'
 		
+	lonlat2xy: (lonlat) ->
+		me = @
+		lonlat = new svgmap.LonLat(lonlat[0], lonlat[1]) if lonlat.length == 2
+		lonlat = new svgmap.LonLat(lonlat[0], lonlat[1], lonlat[2]) if lonlat.length == 3
+		a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt)
+		me.viewBC.project(me.viewAB.project(a))
+		
+		
+	addGeoPath: (points, cmds=[], className = '') ->
+		me = @
+		if cmds.length == 0
+			cmds.push 'M'
+		
+		path_str = ''
+		for i of points
+			pt = points[i]
+			cmd = cmds[i] ? 'L'
+			xy = me.lonlat2xy pt
+			path_str += cmd+xy[0]+','+xy[1]
+			
+		path = me.paper.path path_str
+		path.node.setAttribute 'class', className
+		return
+		
+		
+	
+		
 		
 svgmap.SVGMap = SVGMap
 
@@ -387,7 +419,8 @@ class MapLayerPath
 		
 		me.path = path = svgmap.geom.Path.fromSVG(svg_path)	
 		me.svgPath = view.projectPath(path).toSVG(paper)
-		me.svgPath.node.setAttribute('class', 'polygon '+layer_id)
+		me.baseClass = 'polygon '+layer_id
+		me.svgPath.node.setAttribute('class', me.baseClass)
 		me.svgPath.node.path = me # store reference to this path
 		
 		data = {}

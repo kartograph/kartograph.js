@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Categories, Color, ColorBrewerCategories, ColorBrewerDiverging, ColorBrewerRamp, ColorScale, Diverging, Ramp, cb, root, svgmap, _base, _base2, _ref, _ref2, _ref3, _ref4;
+  var CSSColors, Categories, Color, ColorScale, Diverging, Ramp, root, svgmap, _base, _ref, _ref2, _ref3;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -356,6 +356,7 @@
       me.pos = positions;
       me.mode = mode;
       me.nacol = nacol;
+      me;
     }
 
     ColorScale.prototype.getColor = function(value) {
@@ -385,7 +386,7 @@
     };
 
     ColorScale.prototype.setClasses = function(numClasses, method, limits) {
-      var self;
+      var me;
       if (numClasses == null) numClasses = 5;
       if (method == null) method = 'equalinterval';
       if (limits == null) limits = [];
@@ -393,10 +394,11 @@
       		# use this if you want to display a limited number of data classes
       		# possible methods are "equalinterval", "quantiles", "custom"
       */
-      self = this;
-      self.classMethod = method;
-      self.numClasses = numClasses;
-      self.classLimits = limits;
+      me = this;
+      me.classMethod = method;
+      me.numClasses = numClasses;
+      me.classLimits = limits;
+      return me;
     };
 
     ColorScale.prototype.parseData = function(data, data_col) {
@@ -583,68 +585,29 @@
 
   svgmap.color.scale.GWP = new Diverging(Color.hsl(120, .8, .4), '#ffffff', new Color(280, .8, .4));
 
-  ColorBrewerRamp = (function() {
+  CSSColors = (function() {
 
-    __extends(ColorBrewerRamp, ColorScale);
+    __extends(CSSColors, ColorScale);
 
-    function ColorBrewerRamp(name, colors) {
-      var cols, me, _i, _len;
+    function CSSColors(name) {
+      var me;
       me = this;
       me.name = name;
-      me.cbcc = {};
-      for (_i = 0, _len = colors.length; _i < _len; _i++) {
-        cols = colors[_i];
-        me.cbcc[cols.length] = cols;
-      }
       me.setClasses(7);
+      me;
     }
 
-    ColorBrewerRamp.prototype.setClasses = function(numClasses, method, limits) {
-      var me;
-      if (numClasses == null) numClasses = 5;
-      if (method == null) method = 'equalinterval';
-      if (limits == null) limits = [];
-      me = this;
-      if (me.cbcc.hasOwnProperty(numClasses)) {
-        return ColorBrewerRamp.__super__.setClasses.call(this, numClasses, method, limits);
-      } else {
-        throw 'number of colors is not supported by color scale ' + me.name;
-      }
-    };
-
-    ColorBrewerRamp.prototype.getColor = function(value) {
+    CSSColors.prototype.getColor = function(value) {
       var c, me;
       me = this;
       c = me.getClass(value);
-      return me.cbcc[me.numClasses][c];
+      return me.name + ' l' + me.numClasses + ' c' + c;
     };
 
-    return ColorBrewerRamp;
+    return CSSColors;
 
   })();
 
-  ColorBrewerDiverging = (function() {
-
-    function ColorBrewerDiverging() {}
-
-    return ColorBrewerDiverging;
-
-  })();
-
-  ColorBrewerCategories = (function() {
-
-    function ColorBrewerCategories() {}
-
-    return ColorBrewerCategories;
-
-  })();
-
-  cb = (_ref4 = (_base2 = svgmap.color.scale).colorbrewer) != null ? _ref4 : _base2.colorbrewer = {};
-
-  cb.PuRd = new ColorBrewerRamp("PuRd", [['#e7e1ef', '#c994c7', '#dd1c77'], ['#f1eef6', '#d7b5d8', '#df65b0', '#ce1256'], ['#f1eef6', '#d7b5d8', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#dd1c77', '#980043'], ['#f1eef6', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#91003f'], ['#f7f4f9', '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0', '#e7298a', '#ce1256', '#980043', '#67001f']]);
-
-  cb.Blues = new ColorBrewerRamp("Blues", [['#deebf7', '#9ecae1', '#3182bd'], ['#eff3ff', '#bdd7e7', '#6baed6', '#2171b5'], ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'], ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'], ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b']]);
-
-  cb.PuBuGn = new ColorBrewerRamp("PuBuGn", [['#ece2f0', '#a6bddb', '#1c9099'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#02818a'], ['#f6eff7', '#bdc9e1', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#1c9099', '#016c59'], ['#f6eff7', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016450'], ['#fff7fb', '#ece2f0', '#d0d1e6', '#a6bddb', '#67a9cf', '#3690c0', '#02818a', '#016c59', '#014636']]);
+  svgmap.color.scale.CSSColors = CSSColors;
 
 }).call(this);

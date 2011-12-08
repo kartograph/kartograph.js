@@ -887,25 +887,26 @@
     }
 
     Satellite.prototype.project = function(lon, lat, alt) {
-      var A, H, cos, cos_c, cos_tilt, cos_up, k, lam, math, phi, r, sin, sin_tilt, sin_up, x, xo, xt, y, yo, yt;
+      var A, H, cos, cos_c, cos_tilt, cos_up, k, lam, math, phi, r, ra, sin, sin_tilt, sin_up, x, xo, xt, y, yo, yt;
       if (alt == null) alt = 0;
       phi = this.rad(lat);
       lam = this.rad(lon);
       math = Math;
       sin = math.sin;
       cos = math.cos;
-      r = this.r * (1 + alt);
+      r = this.r;
+      ra = r * (alt + 6371) / 3671;
       cos_c = sin(this.phi0) * sin(phi) + cos(this.phi0) * cos(phi) * cos(lam - this.lam0);
       k = (this.dist - 1) / (this.dist - cos_c);
       k = (this.dist - 1) / (this.dist - cos_c);
       k *= this.scale;
-      xo = r * k * cos(phi) * sin(lam - this.lam0);
-      yo = -r * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      xo = ra * k * cos(phi) * sin(lam - this.lam0);
+      yo = -ra * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
       cos_up = cos(this.up);
       sin_up = sin(this.up);
       cos_tilt = cos(this.tilt);
       sin_tilt = sin(this.tilt);
-      H = r * (this.dist - 1);
+      H = ra * (this.dist - 1);
       A = ((yo * cos_up + xo * sin_up) * sin(this.tilt / H)) + cos_tilt;
       xt = (xo * cos_up - yo * sin_up) * cos(this.tilt / A);
       yt = (yo * cos_up + xo * sin_up) / A;

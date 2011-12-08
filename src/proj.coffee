@@ -640,7 +640,8 @@ class Satellite extends Azimuthal
 		math = Math
 		sin = math.sin
 		cos = math.cos
-		r = @r * (1+alt)
+		r = @r
+		ra = r * (alt+6371)/3671
 
 		cos_c = sin(@phi0) * sin(phi) + cos(@phi0) * cos(phi) * cos(lam - @lam0)
 		k = (@dist - 1) / (@dist - cos_c)
@@ -648,8 +649,8 @@ class Satellite extends Azimuthal
 		
 		k *= @scale
 		
-		xo = r * k * cos(phi) * sin(lam - @lam0)
-		yo = -r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
+		xo = ra * k * cos(phi) * sin(lam - @lam0)
+		yo = -ra * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
 		
 		# tilt
 		cos_up = cos(@up)
@@ -657,7 +658,7 @@ class Satellite extends Azimuthal
 		cos_tilt = cos(@tilt)
 		sin_tilt = sin(@tilt)
 		
-		H = r * (@dist - 1)
+		H = ra * (@dist - 1)
 		A = ((yo * cos_up + xo * sin_up) * sin(@tilt/H)) + cos_tilt
 		xt = (xo * cos_up - yo * sin_up) * cos(@tilt/A)
 		yt = (yo * cos_up + xo * sin_up) / A
