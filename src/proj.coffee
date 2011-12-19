@@ -214,6 +214,7 @@ class Mercator extends Cylindrical
 __proj['mercator'] = Mercator
 
 
+
 # ----------------------------------------
 # Family of Pseudo-Cylindrical Projecitons
 # ----------------------------------------
@@ -686,6 +687,38 @@ class Satellite extends Azimuthal
 
 __proj['satellite'] = Satellite
 
+
+
+class EquidistantAzimuthal extends Azimuthal
+	###
+	Equidistant projection
+	
+	implementation taken from 
+	Snyder, Map projections - A working manual
+	###
+		
+	project: (lon, lat) ->
+		phi = @rad(lat)
+		lam = @rad(lon)
+		math = Math
+		sin = math.sin
+		cos = math.cos
+
+		cos_c = sin(@phi0) * sin(phi) + cos(@phi0) * cos(phi) * cos(lam - @lam0)
+		c = math.acos(cos_c)
+		k = 0.325 * c/sin(c)
+		
+		xo = @r * k * cos(phi) * sin(lam - @lam0)
+		yo = -@r * k * ( cos(@phi0)*sin(phi) - sin(@phi0)*cos(phi)*cos(lam - @lam0) )
+		
+		x = @r + xo
+		y = @r + yo
+		[x,y]
+		
+	_visible: (lon, lat) ->
+		true
+
+__proj['equi'] = EquidistantAzimuthal
 
 # -------------------------------
 # Family of Conic Projecitons

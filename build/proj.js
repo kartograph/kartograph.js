@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -940,6 +940,48 @@
   })();
 
   __proj['satellite'] = Satellite;
+
+  EquidistantAzimuthal = (function() {
+
+    __extends(EquidistantAzimuthal, Azimuthal);
+
+    function EquidistantAzimuthal() {
+      EquidistantAzimuthal.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Equidistant projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    */
+
+    EquidistantAzimuthal.prototype.project = function(lon, lat) {
+      var c, cos, cos_c, k, lam, math, phi, sin, x, xo, y, yo;
+      phi = this.rad(lat);
+      lam = this.rad(lon);
+      math = Math;
+      sin = math.sin;
+      cos = math.cos;
+      cos_c = sin(this.phi0) * sin(phi) + cos(this.phi0) * cos(phi) * cos(lam - this.lam0);
+      c = math.acos(cos_c);
+      k = 0.325 * c / sin(c);
+      xo = this.r * k * cos(phi) * sin(lam - this.lam0);
+      yo = -this.r * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      x = this.r + xo;
+      y = this.r + yo;
+      return [x, y];
+    };
+
+    EquidistantAzimuthal.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    return EquidistantAzimuthal;
+
+  })();
+
+  __proj['equi'] = EquidistantAzimuthal;
 
   Conic = (function() {
 

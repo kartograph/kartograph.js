@@ -40,8 +40,8 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, BubbleMarker, CEA, CSSColors, CanvasLayer, Categories, Circle, CohenSutherland, Color, ColorScale, Conic, Cylindrical, Diverging, DotMarker, EckertIV, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, Path, Proj, PseudoCylindrical, Ramp, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -247,614 +247,7 @@
 
   svgmap = (_ref5 = root.svgmap) != null ? _ref5 : root.svgmap = {};
 
-  if ((_ref6 = svgmap.color) == null) svgmap.color = {};
-
-  Color = (function() {
-
-    /*
-    	data type for colors
-    	
-    	eg.
-    	new Color() // white
-    	new Color(120,.8,.5) // defaults to hsl color
-    	new Color([120,.8,.5]) // this also works
-    	new Color(255,100,50,'rgb') //  color using RGB
-    	new Color('#ff0000') // or hex value
-    */
-
-    function Color(x, y, z, m) {
-      var me, _ref7;
-      me = this;
-      if (!(x != null) && !(y != null) && !(z != null) && !(m != null)) {
-        x = [0, 1, 1];
-      }
-      if (typeof x === "object" && x.length === 3) {
-        m = y;
-        _ref7 = x, x = _ref7[0], y = _ref7[1], z = _ref7[2];
-      }
-      if (typeof x === "string" && x.length === 7) {
-        m = 'hex';
-      } else {
-        if (m == null) m = 'hsl';
-      }
-      if (m === 'rgb') {
-        me.rgb = [x, y, z];
-      } else if (m === 'hsl') {
-        me.rgb = Color.hsl2rgb(x, y, z);
-      } else if (m === 'hsv') {
-        me.rgb = Color.hsv2rgb(x, y, z);
-      } else if (m === 'hex') {
-        me.rgb = Color.hex2rgb(x);
-      }
-    }
-
-    Color.prototype.hex = function() {
-      return Color.rgb2hex(this.rgb);
-    };
-
-    Color.prototype.toString = function() {
-      return this.hex();
-    };
-
-    Color.prototype.hsl = function() {
-      return Color.rgb2hsl(this.rgb);
-    };
-
-    Color.prototype.hsv = function() {
-      return Color.rgb2hsv(this.rgb);
-    };
-
-    Color.prototype.interpolate = function(f, col, m) {
-      /*
-      		interpolates between two colors
-      		eg
-      		new Color('#ff0000').interpolate(0.5, new Color('#0000ff')) == '0xffff00'
-      */
-      var dh, hue, hue0, hue1, lbv, lbv0, lbv1, me, sat, sat0, sat1, xyz0, xyz1;
-      me = this;
-      if (m == null) m = 'hsl';
-      if (m === 'hsl' || m === 'hsv') {
-        if (m === 'hsl') {
-          xyz0 = me.hsl();
-          xyz1 = col.hsl();
-        } else if (m === 'hsv') {
-          xyz0 = me.hsv();
-          xyz1 = col.hsv();
-        }
-        hue0 = xyz0[0], sat0 = xyz0[1], lbv0 = xyz0[2];
-        hue1 = xyz1[0], sat1 = xyz1[1], lbv1 = xyz1[2];
-        if (!isNaN(hue0) && !isNaN(hue1)) {
-          if (hue1 > hue0 && hue1 - hue0 > 180) {
-            dh = hue1 - (hue0 + 360);
-          } else if (hue1 < hue0 && hue0 - hue1 > 180) {
-            dh = hue1 + 360 - hue0;
-          } else {
-            dh = hue1 - hue0;
-          }
-          hue = hue0 + f * dh;
-        } else if (!isNaN(hue0)) {
-          hue = hue0;
-          if (lbv1 === 1 || lbv1 === 0) sat = sat0;
-        } else if (!isNaN(hue1)) {
-          hue = hue1;
-          if (lbv0 === 1 || lbv0 === 0) sat = sat1;
-        } else {
-          hue = void 0;
-        }
-        if (sat == null) sat = sat0 + f * (sat1 - sat0);
-        lbv = lbv0 + f * (lbv1 - lbv0);
-        return new Color(hue, sat, lbv, m);
-      } else if (m === 'rgb') {
-        xyz0 = me.rgb;
-        xyz1 = col.rgb;
-        return new Color(xyz0[0] + f * (xyz1[0] - xyz0[0]), xyz0[1] + f * (xyz1[1] - xyz0[1]), xyz0[2] + f * (xyz1[2] - xyz0[2]), m);
-      } else {
-        throw "color mode " + m + " is not supported";
-      }
-    };
-
-    return Color;
-
-  })();
-
-  Color.hex2rgb = function(hex) {
-    var b, g, r, u;
-    u = parseInt(hex.substr(1), 16);
-    r = u >> 16;
-    g = u >> 8 & 0xFF;
-    b = u & 0xFF;
-    return [r, g, b];
-  };
-
-  Color.rgb2hex = function(r, g, b) {
-    var str, u, _ref7;
-    if (r !== void 0 && r.length === 3) {
-      _ref7 = r, r = _ref7[0], g = _ref7[1], b = _ref7[2];
-    }
-    u = r << 16 | g << 8 | b;
-    str = "000000" + u.toString(16).toUpperCase();
-    return "#" + str.substr(str.length - 6);
-  };
-
-  Color.hsv2rgb = function(h, s, v) {
-    var b, f, g, i, l, p, q, r, t, _ref10, _ref11, _ref12, _ref13, _ref7, _ref8, _ref9;
-    if (h !== void 0 && h.length === 3) {
-      _ref7 = h, h = _ref7[0], s = _ref7[1], l = _ref7[2];
-    }
-    v *= 255;
-    if (s === 0 && isNaN(h)) {
-      r = g = b = v;
-    } else {
-      if (h === 360) h = 0;
-      h /= 60;
-      i = Math.floor(h);
-      f = h - i;
-      p = v * (1 - s);
-      q = v * (1 - s * f);
-      t = v * (1 - s * (1 - f));
-      switch (i) {
-        case 0:
-          _ref8 = [v, t, p], r = _ref8[0], g = _ref8[1], b = _ref8[2];
-          break;
-        case 1:
-          _ref9 = [q, v, p], r = _ref9[0], g = _ref9[1], b = _ref9[2];
-          break;
-        case 2:
-          _ref10 = [p, v, t], r = _ref10[0], g = _ref10[1], b = _ref10[2];
-          break;
-        case 3:
-          _ref11 = [p, q, v], r = _ref11[0], g = _ref11[1], b = _ref11[2];
-          break;
-        case 4:
-          _ref12 = [t, p, v], r = _ref12[0], g = _ref12[1], b = _ref12[2];
-          break;
-        case 5:
-          _ref13 = [v, p, q], r = _ref13[0], g = _ref13[1], b = _ref13[2];
-      }
-    }
-    return [r, g, b];
-  };
-
-  /*
-  	this.hsv2rgb = function() {
-  		var h = this.h, s = this.s, _rgb = this._rgb, v = this.v*255, i, f, p, q, t;
-  		
-  		if (this.s === 0 && isNaN(h)) {
-  			this.r = this.g = this.b = v;
-  		} else {
-  			if (h == 360) h = 0;
-  			h /= 60;
-  			i = Math.floor(h);
-  			f = h - i;
-  			p = v * (1 - s);
-  			q = v * (1 - s * f);
-  			t = v * (1 - s * (1 - f));
-  			
-  			switch (i) {
-  				case 0: _rgb(v, t, p); break;
-  				case 1: _rgb(q, v, p); break;
-  				case 2: _rgb(p, v, t); break;
-  				case 3: _rgb(p, q, v); break;
-  				case 4: _rgb(t, p, v); break;
-  				case 5: _rgb(v, p, q); 
-  			}
-  		}			
-  	};
-  	
-  this.rgb2hsv = function() {
-  		var min = Math.min(Math.min(this.r, this.g), this.b),
-  			max = Math.max(Math.max(this.r, this.g), this.b),
-  			delta = max - min;
-  		
-  		this.v = max/255;
-  		this.s = delta / max;
-  		if (this.s === 0) {
-  			this.h = undefined;
-  		} else {
-  			if (this.r == max) this.h = (this.g - this.b) / delta;
-  			if (this.g == max) this.h = 2+(this.b - this.r) / delta;
-  			if (this.b == max) this.h = 4+(this.r - this.g) / delta;
-  			this.h *= 60;
-  			if (this.h < 0) this.h += 360;
-  		}
-  	};
-  */
-
-  Color.rgb2hsv = function(r, g, b) {
-    var delta, h, max, min, s, v, _ref7;
-    if (r !== void 0 && r.length === 3) {
-      _ref7 = r, r = _ref7[0], g = _ref7[1], b = _ref7[2];
-    }
-    min = Math.min(r, g, b);
-    max = Math.max(r, g, b);
-    delta = max - min;
-    console.log(r, g, b, min, max, delta);
-    v = max / 255.0;
-    s = delta / max;
-    if (s === 0) {
-      h = void 0;
-      s = 0;
-    } else {
-      if (r === max) h = (g - b) / delta;
-      if (g === max) h = 2 + (b - r) / delta;
-      if (b === max) h = 4 + (r - g) / delta;
-      h *= 60;
-      if (h < 0) h += 360;
-    }
-    return [h, s, v];
-  };
-
-  Color.hsl2rgb = function(h, s, l) {
-    var b, c, g, i, r, t1, t2, t3, _ref7, _ref8;
-    if (h !== void 0 && h.length === 3) {
-      _ref7 = h, h = _ref7[0], s = _ref7[1], l = _ref7[2];
-    }
-    if (s === 0) {
-      r = g = b = l * 255;
-    } else {
-      t3 = [0, 0, 0];
-      c = [0, 0, 0];
-      t2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      t1 = 2 * l - t2;
-      h /= 360;
-      t3[0] = h + 1 / 3;
-      t3[1] = h;
-      t3[2] = h - 1 / 3;
-      for (i = 0; i <= 2; i++) {
-        if (t3[i] < 0) t3[i] += 1;
-        if (t3[i] > 1) t3[i] -= 1;
-        if (6 * t3[i] < 1) {
-          c[i] = t1 + (t2 - t1) * 6 * t3[i];
-        } else if (2 * t3[i] < 1) {
-          c[i] = t2;
-        } else if (3 * t3[i] < 2) {
-          c[i] = t1 + (t2 - t1) * ((2 / 3) - t3[i]) * 6;
-        } else {
-          c[i] = t1;
-        }
-      }
-      _ref8 = [Math.round(c[0] * 255), Math.round(c[1] * 255), Math.round(c[2] * 255)], r = _ref8[0], g = _ref8[1], b = _ref8[2];
-    }
-    return [r, g, b];
-  };
-
-  Color.rgb2hsl = function(r, g, b) {
-    var h, l, max, min, s, _ref7;
-    if (r !== void 0 && r.length === 3) {
-      _ref7 = r, r = _ref7[0], g = _ref7[1], b = _ref7[2];
-    }
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    min = Math.min(r, g, b);
-    max = Math.max(r, g, b);
-    l = (max + min) / 2;
-    if (max === min) {
-      s = 0;
-      h = void 0;
-    } else {
-      s = l < 0.5 ? (max - min) / (max + min) : (max - min) / (2 - max - min);
-    }
-    if (r === max) {
-      h = (g - b) / (max - min);
-    } else if (g === max) {
-      h = 2 + (b - r) / (max - min);
-    } else if (b === max) {
-      h = 4 + (r - g) / (max - min);
-    }
-    h *= 60;
-    if (h < 0) h += 360;
-    return [h, s, l];
-  };
-
-  Color.hsl = function(h, s, l) {
-    return new Color(h, s, l, 'hsl');
-  };
-
-  Color.rgb = function(r, g, b) {
-    return new Color(r, g, b, 'rgb');
-  };
-
-  Color.hex = function(x) {
-    return new Color(x);
-  };
-
-  svgmap.color.Color = Color;
-
-  ColorScale = (function() {
-
-    /*
-    	base class for color scales
-    */
-
-    function ColorScale(colors, positions, mode, nacol) {
-      var c, me, _ref7;
-      if (nacol == null) nacol = '#cccccc';
-      me = this;
-      for (c = 0, _ref7 = colors.length - 1; 0 <= _ref7 ? c <= _ref7 : c >= _ref7; 0 <= _ref7 ? c++ : c--) {
-        if (typeof colors[c] === "string") colors[c] = new Color(colors[c]);
-      }
-      me.colors = colors;
-      me.pos = positions;
-      me.mode = mode;
-      me.nacol = nacol;
-      me;
-    }
-
-    ColorScale.prototype.getColor = function(value) {
-      var col, f, f0, i, me, p, _ref7;
-      me = this;
-      if (isNaN(value)) return me.nacol;
-      value = me.classifyValue(value);
-      f = f0 = (value - me.min) / (me.max - me.min);
-      f = Math.min(1, Math.max(0, f));
-      for (i = 0, _ref7 = me.pos.length - 1; 0 <= _ref7 ? i <= _ref7 : i >= _ref7; 0 <= _ref7 ? i++ : i--) {
-        p = me.pos[i];
-        if (f <= p) {
-          col = me.colors[i];
-          break;
-        }
-        if (f >= p && i === me.pos.length - 1) {
-          col = me.colors[i];
-          break;
-        }
-        if (f > p && f < me.pos[i + 1]) {
-          f = (f - p) / (me.pos[i + 1] - p);
-          col = me.colors[i].interpolate(f, me.colors[i + 1], me.mode);
-          break;
-        }
-      }
-      return col;
-    };
-
-    ColorScale.prototype.setClasses = function(numClasses, method, limits) {
-      var me;
-      if (numClasses == null) numClasses = 5;
-      if (method == null) method = 'equalinterval';
-      if (limits == null) limits = [];
-      /*
-      		# use this if you want to display a limited number of data classes
-      		# possible methods are "equalinterval", "quantiles", "custom"
-      */
-      me = this;
-      me.classMethod = method;
-      me.numClasses = numClasses;
-      me.classLimits = limits;
-      return me;
-    };
-
-    ColorScale.prototype.parseData = function(data, data_col) {
-      var h, i, id, limits, max, method, min, num, p, pb, pr, row, self, sum, val, values, _ref7, _ref8;
-      self = this;
-      min = Number.MAX_VALUE;
-      max = Number.MAX_VALUE * -1;
-      sum = 0;
-      values = [];
-      for (id in data) {
-        row = data[id];
-        val = data_col != null ? row[data_col] : row;
-        if (!self.validValue(val)) continue;
-        min = Math.min(min, val);
-        max = Math.max(max, val);
-        values.push(val);
-        sum += val;
-      }
-      values = values.sort();
-      if (values.length % 2 === 1) {
-        self.median = values[Math.floor(values.length * 0.5)];
-      } else {
-        h = values.length * 0.5;
-        self.median = values[h - 1] * 0.5 + values[h] * 0.5;
-      }
-      self.values = values;
-      self.mean = sum / values.length;
-      self.min = min;
-      self.max = max;
-      method = self.classMethod;
-      num = self.numClasses;
-      limits = self.classLimits;
-      if (method != null) {
-        if (method === "equalinterval") {
-          for (i = 1, _ref7 = num - 1; 1 <= _ref7 ? i <= _ref7 : i >= _ref7; 1 <= _ref7 ? i++ : i--) {
-            limits.push(min + (i / num) * (max - min));
-          }
-        } else if (method === "quantiles") {
-          for (i = 1, _ref8 = num - 1; 1 <= _ref8 ? i <= _ref8 : i >= _ref8; 1 <= _ref8 ? i++ : i--) {
-            p = values.length * i / num;
-            pb = Math.floor(p);
-            if (pb === p) {
-              limits.push(values[pb]);
-            } else {
-              pr = p - pb;
-              limits.push(values[pb] * pr + values[pb + 1] * (1 - pr));
-            }
-          }
-        }
-        limits.unshift(min);
-        limits.push(max);
-      }
-    };
-
-    ColorScale.prototype.classifyValue = function(value) {
-      var i, limits, maxc, minc, n, self;
-      self = this;
-      limits = self.classLimits;
-      if (limits != null) {
-        n = limits.length(-1);
-        i = self.getClass(value);
-        value = limits[i] + (limits[i + 1] - limits[i]) * 0.5;
-        minc = limits[0] + (limits[1] - limits[0]) * 0.3;
-        maxc = limits[n - 1] + (limits[n] - limits[n - 1]) * 0.7;
-        value = self.min + ((value - minc) / (maxc - minc)) * (self.max - self.min);
-      }
-      return value;
-    };
-
-    ColorScale.prototype.getClass = function(value) {
-      var i, limits, n, self;
-      self = this;
-      limits = self.classLimits;
-      if (limits != null) {
-        n = limits.length - 1;
-        i = 0;
-        while (i < n && value >= limits[i]) {
-          i++;
-        }
-        return i - 1;
-      }
-    };
-
-    ColorScale.prototype.validValue = function(value) {
-      return !isNaN(value);
-    };
-
-    return ColorScale;
-
-  })();
-
-  if ((_ref7 = (_base2 = svgmap.color).scale) == null) _base2.scale = {};
-
-  Ramp = (function() {
-
-    __extends(Ramp, ColorScale);
-
-    function Ramp(col0, col1, mode) {
-      if (col0 == null) col0 = '#fe0000';
-      if (col1 == null) col1 = '#feeeee';
-      if (mode == null) mode = 'hsl';
-      Ramp.__super__.constructor.call(this, [col0, col1], [0, 1], mode);
-    }
-
-    return Ramp;
-
-  })();
-
-  svgmap.color.scale.Ramp = Ramp;
-
-  Diverging = (function() {
-
-    __extends(Diverging, ColorScale);
-
-    function Diverging(col0, col1, col2, center, mode) {
-      var me;
-      if (col0 == null) col0 = '#d73027';
-      if (col1 == null) col1 = '#ffffbf';
-      if (col2 == null) col2 = '#1E6189';
-      if (center == null) center = 'mean';
-      if (mode == null) mode = 'hsl';
-      me = this;
-      me.mode = mode;
-      me.center = center;
-      Diverging.__super__.constructor.call(this, [col0, col1, col2], [0, .5, 1], mode);
-    }
-
-    Diverging.prototype.parseData = function(data, data_col) {
-      var c, me;
-      Diverging.__super__.parseData.call(this, data, data_col);
-      me = this;
-      c = me.center;
-      if (c === 'median') {
-        c = me.median;
-      } else if (c === 'mean') {
-        c = me.mean;
-      }
-      return me.pos[1] = (c - me.min) / (me.max - me.min);
-    };
-
-    return Diverging;
-
-  })();
-
-  svgmap.color.scale.Diverging = Diverging;
-
-  Categories = (function() {
-
-    __extends(Categories, ColorScale);
-
-    function Categories(colors) {
-      var me;
-      me = this;
-      me.colors = colors;
-    }
-
-    Categories.prototype.parseData = function(data, data_col) {};
-
-    Categories.prototype.getColor = function(value) {
-      var me;
-      me = this;
-      if (me.colors.hasOwnProperty(value)) {
-        return me.colors[value];
-      } else {
-        return '#cccccc';
-      }
-    };
-
-    Categories.prototype.validValue = function(value) {
-      return this.colors.hasOwnProperty(value);
-    };
-
-    return Categories;
-
-  })();
-
-  svgmap.color.scale.Categories = Categories;
-
-  svgmap.color.scale.COOL = new Ramp(Color.hsl(180, 1, .9), Color.hsl(250, .7, .4));
-
-  svgmap.color.scale.HOT = new ColorScale(['#000000', '#ff0000', '#ffff00', '#ffffff'], [0, .25, .75, 1], 'rgb');
-
-  svgmap.color.scale.BWO = new Diverging(Color.hsl(30, 1, .55), '#ffffff', new Color(220, 1, .55));
-
-  svgmap.color.scale.GWP = new Diverging(Color.hsl(120, .8, .4), '#ffffff', new Color(280, .8, .4));
-
-  CSSColors = (function() {
-
-    __extends(CSSColors, ColorScale);
-
-    function CSSColors(name) {
-      var me;
-      me = this;
-      me.name = name;
-      me.setClasses(7);
-      me;
-    }
-
-    CSSColors.prototype.getColor = function(value) {
-      var c, me;
-      me = this;
-      c = me.getClass(value);
-      return me.name + ' l' + me.numClasses + ' c' + c;
-    };
-
-    return CSSColors;
-
-  })();
-
-  svgmap.color.scale.CSSColors = CSSColors;
-
-  /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
-      Copyright (C) 2011  Gregor Aisch
-  
-      This program is free software: you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation, either version 3 of the License, or
-      (at your option) any later version.
-  
-      This program is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
-  
-      You should have received a copy of the GNU General Public License
-      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
-
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  svgmap = (_ref8 = root.svgmap) != null ? _ref8 : root.svgmap = {};
-
-  filter = (_ref9 = svgmap.filter) != null ? _ref9 : svgmap.filter = {};
+  filter = (_ref6 = svgmap.filter) != null ? _ref6 : svgmap.filter = {};
 
   Filter = (function() {
 
@@ -1005,7 +398,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref10 = root.svgmap) != null ? _ref10 : root.svgmap = {};
+  svgmap = (_ref7 = root.svgmap) != null ? _ref7 : root.svgmap = {};
 
   LonLat = (function() {
 
@@ -1075,9 +468,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref11 = root.svgmap) != null ? _ref11 : root.svgmap = {};
+  svgmap = (_ref8 = root.svgmap) != null ? _ref8 : root.svgmap = {};
 
-  if ((_ref12 = svgmap.marker) == null) svgmap.marker = {};
+  if ((_ref9 = svgmap.marker) == null) svgmap.marker = {};
 
   /*
   Marker concept:
@@ -1175,14 +568,14 @@
     __extends(LabeledIconMarker, MapMarker);
 
     function LabeledIconMarker(params) {
-      var me, _ref13, _ref14, _ref15;
+      var me, _ref10, _ref11, _ref12;
       me = this;
       LabeledIconMarker.__super__.constructor.call(this, params.ll);
       me.icon_src = params.icon;
       me.label_txt = params.label;
-      me.className = (_ref13 = params.className) != null ? _ref13 : 'marker';
-      me.dx = (_ref14 = params.dx) != null ? _ref14 : 0;
-      me.dy = (_ref15 = params.dy) != null ? _ref15 : 0;
+      me.className = (_ref10 = params.className) != null ? _ref10 : 'marker';
+      me.dx = (_ref11 = params.dx) != null ? _ref11 : 0;
+      me.dy = (_ref12 = params.dy) != null ? _ref12 : 0;
     }
 
     LabeledIconMarker.prototype.render = function(x, y, cont, paper) {
@@ -1245,9 +638,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref13 = root.svgmap) != null ? _ref13 : root.svgmap = {};
+  svgmap = (_ref10 = root.svgmap) != null ? _ref10 : root.svgmap = {};
 
-  if ((_ref14 = svgmap.geom) == null) svgmap.geom = {};
+  if ((_ref11 = svgmap.geom) == null) svgmap.geom = {};
 
   Path = (function() {
 
@@ -1278,17 +671,17 @@
     };
 
     Path.prototype.svgString = function() {
-      var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref15, _ref16;
+      var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref12, _ref13;
       me = this;
       str = "";
       glue = me.closed ? "Z M" : "M";
-      _ref15 = me.contours;
-      for (_i = 0, _len = _ref15.length; _i < _len; _i++) {
-        contour = _ref15[_i];
+      _ref12 = me.contours;
+      for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+        contour = _ref12[_i];
         fst = true;
         str += str === "" ? "M" : glue;
         for (_j = 0, _len2 = contour.length; _j < _len2; _j++) {
-          _ref16 = contour[_j], x = _ref16[0], y = _ref16[1];
+          _ref13 = contour[_j], x = _ref13[0], y = _ref13[1];
           if (!fst) str += "L";
           str += x + ',' + y;
           fst = false;
@@ -1331,7 +724,7 @@
     /*
     	loads a path from a SVG path string
     */
-    var closed, contour, contour_str, contours, cx, cy, path_str, pt_str, r, res, sep, type, x, y, _i, _j, _len, _len2, _ref15, _ref16, _ref17;
+    var closed, contour, contour_str, contours, cx, cy, path_str, pt_str, r, res, sep, type, x, y, _i, _j, _len, _len2, _ref12, _ref13, _ref14;
     contours = [];
     type = path.nodeName;
     res = null;
@@ -1340,15 +733,15 @@
       closed = path_str[path_str.length - 1] === "Z";
       sep = closed ? "Z M" : "M";
       path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
-      _ref15 = path_str.split(sep);
-      for (_i = 0, _len = _ref15.length; _i < _len; _i++) {
-        contour_str = _ref15[_i];
+      _ref12 = path_str.split(sep);
+      for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+        contour_str = _ref12[_i];
         contour = [];
         if (contour_str !== "") {
-          _ref16 = contour_str.split('L');
-          for (_j = 0, _len2 = _ref16.length; _j < _len2; _j++) {
-            pt_str = _ref16[_j];
-            _ref17 = pt_str.split(','), x = _ref17[0], y = _ref17[1];
+          _ref13 = contour_str.split('L');
+          for (_j = 0, _len2 = _ref13.length; _j < _len2; _j++) {
+            pt_str = _ref13[_j];
+            _ref14 = pt_str.split(','), x = _ref14[0], y = _ref14[1];
             contour.push([Number(x), Number(y)]);
           }
           contours.push(contour);
@@ -1375,17 +768,17 @@
     }
 
     Line.prototype.clipToBBox = function(bbox) {
-      var clip, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _ref15, _ref16, _ref17, _ref18;
+      var clip, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _ref12, _ref13, _ref14, _ref15;
       self = this;
       clip = new svgmap.geom.clipping.CohenSutherland().clip;
       pts = [];
       lines = [];
       last_in = false;
-      for (i = 0, _ref15 = self.points.length - 2; 0 <= _ref15 ? i <= _ref15 : i >= _ref15; 0 <= _ref15 ? i++ : i--) {
-        _ref16 = self.points[i], p0x = _ref16[0], p0y = _ref16[1];
-        _ref17 = self.points[i + 1], p1x = _ref17[0], p1y = _ref17[1];
+      for (i = 0, _ref12 = self.points.length - 2; 0 <= _ref12 ? i <= _ref12 : i >= _ref12; 0 <= _ref12 ? i++ : i--) {
+        _ref13 = self.points[i], p0x = _ref13[0], p0y = _ref13[1];
+        _ref14 = self.points[i + 1], p1x = _ref14[0], p1y = _ref14[1];
         try {
-          _ref18 = clip(bbox, p0x, p0y, p1x, p1y), x0 = _ref18[0], y0 = _ref18[1], x1 = _ref18[2], y1 = _ref18[3];
+          _ref15 = clip(bbox, p0x, p0y, p1x, p1y), x0 = _ref15[0], y0 = _ref15[1], x1 = _ref15[2], y1 = _ref15[3];
           last_in = true;
           pts.push([x0, y0]);
           if (p1x !== x1 || p1y !== y0 || i === len(self.points) - 2) {
@@ -1404,12 +797,12 @@
     };
 
     Line.prototype.toSVG = function() {
-      var pts, self, x, y, _i, _len, _ref15, _ref16;
+      var pts, self, x, y, _i, _len, _ref12, _ref13;
       self = this;
       pts = [];
-      _ref15 = self.points;
-      for (_i = 0, _len = _ref15.length; _i < _len; _i++) {
-        _ref16 = _ref15[_i], x = _ref16[0], y = _ref16[1];
+      _ref12 = self.points;
+      for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+        _ref13 = _ref12[_i], x = _ref13[0], y = _ref13[1];
         pts.push(x + ',' + y);
       }
       return 'M' + pts.join('L');
@@ -1441,7 +834,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref15 = root.svgmap) != null ? _ref15 : root.svgmap = {};
+  svgmap = (_ref12 = root.svgmap) != null ? _ref12 : root.svgmap = {};
 
   __proj = svgmap.proj = {};
 
@@ -1456,10 +849,10 @@
   Proj = (function() {
 
     function Proj(opts) {
-      var me, _ref16, _ref17;
+      var me, _ref13, _ref14;
       me = this;
-      me.lon0 = (_ref16 = opts.lon0) != null ? _ref16 : 0;
-      me.lat0 = (_ref17 = opts.lat0) != null ? _ref17 : 0;
+      me.lon0 = (_ref13 = opts.lon0) != null ? _ref13 : 0;
+      me.lat0 = (_ref14 = opts.lat0) != null ? _ref14 : 0;
       me.PI = Math.PI;
       me.HALFPI = me.PI * .5;
       me.QUARTERPI = me.PI * .25;
@@ -1480,15 +873,15 @@
     };
 
     Proj.prototype.plot = function(polygon, truncate) {
-      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref16, _ref17;
+      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref13, _ref14;
       if (truncate == null) truncate = true;
       points = [];
       ignore = true;
       for (_i = 0, _len = polygon.length; _i < _len; _i++) {
-        _ref16 = polygon[_i], lon = _ref16[0], lat = _ref16[1];
+        _ref13 = polygon[_i], lon = _ref13[0], lat = _ref13[1];
         vis = this._visible(lon, lat);
         if (vis) ignore = false;
-        _ref17 = this.project(lon, lat), x = _ref17[0], y = _ref17[1];
+        _ref14 = this.project(lon, lat), x = _ref14[0], y = _ref14[1];
         if (!vis && truncate) {
           points.push(this._truncate(x, y));
         } else {
@@ -1503,7 +896,7 @@
     };
 
     Proj.prototype.sea = function() {
-      var l0, lat, lon, o, p, s, _ref16, _ref17, _ref18, _ref19;
+      var l0, lat, lon, o, p, s, _ref13, _ref14, _ref15, _ref16;
       s = this;
       p = s.project.bind(this);
       o = [];
@@ -1512,13 +905,13 @@
       for (lon = -180; lon <= 180; lon++) {
         o.push(p(lon, s.maxLat));
       }
-      for (lat = _ref16 = s.maxLat, _ref17 = s.minLat; _ref16 <= _ref17 ? lat <= _ref17 : lat >= _ref17; _ref16 <= _ref17 ? lat++ : lat--) {
+      for (lat = _ref13 = s.maxLat, _ref14 = s.minLat; _ref13 <= _ref14 ? lat <= _ref14 : lat >= _ref14; _ref13 <= _ref14 ? lat++ : lat--) {
         o.push(p(180, lat));
       }
       for (lon = 180; lon >= -180; lon--) {
         o.push(p(lon, s.minLat));
       }
-      for (lat = _ref18 = s.minLat, _ref19 = s.maxLat; _ref18 <= _ref19 ? lat <= _ref19 : lat >= _ref19; _ref18 <= _ref19 ? lat++ : lat--) {
+      for (lat = _ref15 = s.minLat, _ref16 = s.maxLat; _ref15 <= _ref16 ? lat <= _ref16 : lat >= _ref16; _ref15 <= _ref16 ? lat++ : lat--) {
         o.push(p(-180, lat));
       }
       s.lon0 = l0;
@@ -1545,10 +938,10 @@
     /*
     	reconstructs a projection from xml description
     */
-    var attr, i, id, opts, _ref16;
+    var attr, i, id, opts, _ref13;
     id = xml.getAttribute('id');
     opts = {};
-    for (i = 0, _ref16 = xml.attributes.length - 1; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
+    for (i = 0, _ref13 = xml.attributes.length - 1; 0 <= _ref13 ? i <= _ref13 : i >= _ref13; 0 <= _ref13 ? i++ : i--) {
       attr = xml.attributes[i];
       if (attr.name !== "id") opts[attr.name] = attr.value;
     }
@@ -1615,9 +1008,9 @@
     __extends(CEA, Cylindrical);
 
     function CEA(opts) {
-      var _ref16;
+      var _ref13;
       CEA.__super__.constructor.call(this, opts);
-      this.lat1 = (_ref16 = opts.lat1) != null ? _ref16 : 0;
+      this.lat1 = (_ref13 = opts.lat1) != null ? _ref13 : 0;
       this.phi1 = this.rad(this.lat1);
     }
 
@@ -2281,14 +1674,14 @@
     */
 
     function Satellite(opts) {
-      var lat, lon, xmax, xmin, xy, _ref16, _ref17, _ref18;
+      var lat, lon, xmax, xmin, xy, _ref13, _ref14, _ref15;
       Satellite.__super__.constructor.call(this, {
         lon0: 0,
         lat0: 0
       });
-      this.dist = (_ref16 = opts.dist) != null ? _ref16 : 3;
-      this.up = this.rad((_ref17 = opts.up) != null ? _ref17 : 0);
-      this.tilt = this.rad((_ref18 = opts.tilt) != null ? _ref18 : 0);
+      this.dist = (_ref13 = opts.dist) != null ? _ref13 : 3;
+      this.up = this.rad((_ref14 = opts.up) != null ? _ref14 : 0);
+      this.tilt = this.rad((_ref15 = opts.tilt) != null ? _ref15 : 0);
       this.scale = 1;
       xmin = Number.MAX_VALUE;
       xmax = Number.MAX_VALUE * -1;
@@ -2359,17 +1752,59 @@
 
   __proj['satellite'] = Satellite;
 
+  EquidistantAzimuthal = (function() {
+
+    __extends(EquidistantAzimuthal, Azimuthal);
+
+    function EquidistantAzimuthal() {
+      EquidistantAzimuthal.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Equidistant projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    */
+
+    EquidistantAzimuthal.prototype.project = function(lon, lat) {
+      var c, cos, cos_c, k, lam, math, phi, sin, x, xo, y, yo;
+      phi = this.rad(lat);
+      lam = this.rad(lon);
+      math = Math;
+      sin = math.sin;
+      cos = math.cos;
+      cos_c = sin(this.phi0) * sin(phi) + cos(this.phi0) * cos(phi) * cos(lam - this.lam0);
+      c = math.acos(cos_c);
+      k = 0.325 * c / sin(c);
+      xo = this.r * k * cos(phi) * sin(lam - this.lam0);
+      yo = -this.r * k * (cos(this.phi0) * sin(phi) - sin(this.phi0) * cos(phi) * cos(lam - this.lam0));
+      x = this.r + xo;
+      y = this.r + yo;
+      return [x, y];
+    };
+
+    EquidistantAzimuthal.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    return EquidistantAzimuthal;
+
+  })();
+
+  __proj['equi'] = EquidistantAzimuthal;
+
   Conic = (function() {
 
     __extends(Conic, Proj);
 
     function Conic(opts) {
-      var self, _ref16, _ref17;
+      var self, _ref13, _ref14;
       self = this;
       Conic.__super__.constructor.call(this, opts);
-      self.lat1 = (_ref16 = opts.lat1) != null ? _ref16 : 30;
+      self.lat1 = (_ref13 = opts.lat1) != null ? _ref13 : 30;
       self.phi1 = self.rad(self.lat1);
-      self.lat2 = (_ref17 = opts.lat2) != null ? _ref17 : 50;
+      self.lat2 = (_ref14 = opts.lat2) != null ? _ref14 : 50;
       self.phi2 = self.rad(self.lat2);
     }
 
@@ -2402,11 +1837,11 @@
     "Lambert Conformal Conic Projection (spherical)";
 
     function LCC(opts) {
-      var abs, c, cos, cosphi, log, m, n, pow, secant, self, sin, sinphi, tan, _ref16;
+      var abs, c, cos, cosphi, log, m, n, pow, secant, self, sin, sinphi, tan, _ref13;
       self = this;
       LCC.__super__.constructor.call(this, opts);
       m = Math;
-      _ref16 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref16[0], cos = _ref16[1], abs = _ref16[2], log = _ref16[3], tan = _ref16[4], pow = _ref16[5];
+      _ref13 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref13[0], cos = _ref13[1], abs = _ref13[2], log = _ref13[3], tan = _ref13[4], pow = _ref13[5];
       self.n = n = sinphi = sin(self.phi1);
       cosphi = cos(self.phi1);
       secant = abs(self.phi1 - self.phi2) >= 1e-10;
@@ -2424,12 +1859,12 @@
     }
 
     LCC.prototype.project = function(lon, lat) {
-      var abs, cos, lam, lam_, log, m, n, phi, pow, rho, self, sin, tan, x, y, _ref16;
+      var abs, cos, lam, lam_, log, m, n, phi, pow, rho, self, sin, tan, x, y, _ref13;
       self = this;
       phi = self.rad(lat);
       lam = self.rad(self.clon(lon));
       m = Math;
-      _ref16 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref16[0], cos = _ref16[1], abs = _ref16[2], log = _ref16[3], tan = _ref16[4], pow = _ref16[5];
+      _ref13 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref13[0], cos = _ref13[1], abs = _ref13[2], log = _ref13[3], tan = _ref13[4], pow = _ref13[5];
       n = self.n;
       if (abs(abs(phi) - self.HALFPI) < 1e-10) {
         rho = 0.0;
@@ -2468,7 +1903,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref16 = root.svgmap) != null ? _ref16 : root.svgmap = {};
+  svgmap = (_ref13 = root.svgmap) != null ? _ref13 : root.svgmap = {};
 
   svgmap.version = "0.1.0";
 
@@ -2491,12 +1926,14 @@
       about = $('desc', cnt).text();
       $('desc', cnt).text(about.replace('with ', 'with svgmap ' + svgmap.version + ' and '));
       me.markers = [];
+      me.container.addClass('svgmap');
     }
 
     SVGMap.prototype.loadMap = function(mapurl, callback, opts) {
-      var me;
+      var me, _base2, _ref14;
       me = this;
       me.opts = opts != null ? opts : {};
+      if ((_ref14 = (_base2 = me.opts).zoom) == null) _base2.zoom = 1;
       me.mapLoadCallback = callback;
       $.ajax({
         url: mapurl,
@@ -2509,10 +1946,10 @@
       /*
       		add new layer
       */
-      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref17, _ref18;
+      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref14, _ref15;
       me = this;
-      if ((_ref17 = me.layerIds) == null) me.layerIds = [];
-      if ((_ref18 = me.layers) == null) me.layers = {};
+      if ((_ref14 = me.layerIds) == null) me.layerIds = [];
+      if ((_ref15 = me.layers) == null) me.layers = {};
       if (layer_id == null) layer_id = src_id;
       svgLayer = $('g#' + src_id, me.svgSrc);
       if (svgLayer.length === 0) {
@@ -2586,38 +2023,31 @@
     };
 
     SVGMap.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref17, _ref18, _ref19, _ref20;
+      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref14, _ref15, _ref16;
       me = this;
-      layer_id = (_ref17 = opts.layer) != null ? _ref17 : me.layerIds[me.layerIds.length - 1];
+      layer_id = (_ref14 = opts.layer) != null ? _ref14 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
         warn('choropleth error: layer "' + layer_id + '" not found');
         return;
       }
       data = opts.data;
       data_col = opts.key;
-      no_data_color = (_ref18 = opts.noDataColor) != null ? _ref18 : '#ccc';
-      colorscale = (_ref19 = opts.colorscale) != null ? _ref19 : svgmap.color.scale.COOL;
-      colorscale.parseData(data, data_col);
+      no_data_color = (_ref15 = opts.noDataColor) != null ? _ref15 : '#ccc';
+      colorscale = opts.colorscale;
       pathData = {};
       for (id in data) {
         row = data[id];
         pathData[id] = row[data_col];
       }
-      _ref20 = me.layers[layer_id].pathsById;
-      for (id in _ref20) {
-        paths = _ref20[id];
+      _ref16 = me.layers[layer_id].pathsById;
+      for (id in _ref16) {
+        paths = _ref16[id];
         for (_i = 0, _len = paths.length; _i < _len; _i++) {
           path = paths[_i];
           if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
             v = pathData[id];
             col = colorscale.getColor(v);
-            if ('' + col.substr(0, 1) === '#') {
-              path.svgPath.node.setAttribute('style', 'fill:' + col);
-              path.svgPath.node.setAttribute('class', path.baseClass);
-            } else {
-              path.svgPath.node.setAttribute('class', path.baseClass + ' ' + col);
-              path.svgPath.node.setAttribute('style', '');
-            }
+            path.svgPath.node.setAttribute('style', 'fill:' + col);
           } else {
             path.svgPath.node.setAttribute('style', 'fill:' + no_data_color);
           }
@@ -2626,18 +2056,18 @@
     };
 
     SVGMap.prototype.tooltips = function(opts) {
-      var cfg, id, layer_id, me, path, paths, tooltips, tt, _ref17, _ref18, _results;
+      var cfg, id, layer_id, me, path, paths, tooltips, tt, _ref14, _ref15, _results;
       me = this;
       tooltips = opts.content;
-      layer_id = (_ref17 = opts.layer) != null ? _ref17 : me.layerIds[me.layerIds.length - 1];
+      layer_id = (_ref14 = opts.layer) != null ? _ref14 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
         warn('tooltips error: layer "' + layer_id + '" not found');
         return;
       }
-      _ref18 = me.layers[layer_id].pathsById;
+      _ref15 = me.layers[layer_id].pathsById;
       _results = [];
-      for (id in _ref18) {
-        paths = _ref18[id];
+      for (id in _ref15) {
+        paths = _ref15[id];
         _results.push((function() {
           var _i, _len, _results2;
           _results2 = [];
@@ -2734,15 +2164,15 @@
     */
 
     SVGMap.prototype.mapLoaded = function(xml) {
-      var $view, AB, halign, me, padding, valign, vp, _ref17, _ref18, _ref19;
+      var $view, AB, halign, me, padding, valign, vp, _ref14, _ref15, _ref16;
       me = this;
       me.svgSrc = xml;
       vp = me.viewport;
       $view = $('view', xml)[0];
       me.viewAB = AB = svgmap.View.fromXML($view);
-      padding = (_ref17 = me.opts.padding) != null ? _ref17 : 0;
-      halign = (_ref18 = me.opts.halign) != null ? _ref18 : 'center';
-      valign = (_ref19 = me.opts.valign) != null ? _ref19 : 'center';
+      padding = (_ref14 = me.opts.padding) != null ? _ref14 : 0;
+      halign = (_ref15 = me.opts.halign) != null ? _ref15 : 'center';
+      valign = (_ref16 = me.opts.valign) != null ? _ref16 : 'center';
       me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
       me.proj = svgmap.Proj.fromXML($('proj', $view)[0]);
       return me.mapLoadCallback(me);
@@ -2759,7 +2189,7 @@
     };
 
     SVGMap.prototype.renderCoastline = function(coastlines) {
-      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref17, _results;
+      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref14, _results;
       me = this;
       P = me.proj;
       vp = me.viewport;
@@ -2769,7 +2199,7 @@
       for (_i = 0, _len = coastlines.length; _i < _len; _i++) {
         line = coastlines[_i];
         pathstr = '';
-        for (i = 0, _ref17 = line.length - 2; 0 <= _ref17 ? i <= _ref17 : i >= _ref17; 0 <= _ref17 ? i++ : i--) {
+        for (i = 0, _ref14 = line.length - 2; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
           p0 = line[i];
           p1 = line[i + 1];
           d = 0;
@@ -2805,20 +2235,21 @@
       /*
       		forces redraw of every layer
       */
-      var cnt, halign, id, layer, me, padding, valign, vp, _ref17, _ref18, _ref19, _ref20, _results;
+      var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref14, _ref15, _ref16, _ref17, _results;
       me = this;
       cnt = me.container;
       me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
       me.paper.setSize(vp.width, vp.height);
       vp = me.viewport;
-      padding = (_ref17 = me.opts.padding) != null ? _ref17 : 0;
-      halign = (_ref18 = me.opts.halign) != null ? _ref18 : 'center';
-      valign = (_ref19 = me.opts.valign) != null ? _ref19 : 'center';
-      me.viewBC = new svgmap.View(me.viewAB.asBBox(), vp.width, vp.height, padding, halign, valign);
-      _ref20 = me.layers;
+      padding = (_ref14 = me.opts.padding) != null ? _ref14 : 0;
+      halign = (_ref15 = me.opts.halign) != null ? _ref15 : 'center';
+      valign = (_ref16 = me.opts.valign) != null ? _ref16 : 'center';
+      zoom = me.opts.zoom;
+      me.viewBC = new svgmap.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
+      _ref17 = me.layers;
       _results = [];
-      for (id in _ref20) {
-        layer = _ref20[id];
+      for (id in _ref17) {
+        layer = _ref17[id];
         _results.push(layer.setView(me.viewBC));
       }
       return _results;
@@ -2857,7 +2288,7 @@
     };
 
     SVGMap.prototype.addGeoPath = function(points, cmds, className) {
-      var cmd, i, me, path, path_str, pt, xy, _ref17;
+      var cmd, i, me, path, path_str, pt, xy, _ref14;
       if (cmds == null) cmds = [];
       if (className == null) className = '';
       me = this;
@@ -2865,12 +2296,19 @@
       path_str = '';
       for (i in points) {
         pt = points[i];
-        cmd = (_ref17 = cmds[i]) != null ? _ref17 : 'L';
+        cmd = (_ref14 = cmds[i]) != null ? _ref14 : 'L';
         xy = me.lonlat2xy(pt);
         path_str += cmd + xy[0] + ',' + xy[1];
       }
       path = me.paper.path(path_str);
       path.node.setAttribute('class', className);
+    };
+
+    SVGMap.prototype.showZoomControls = function() {
+      var me;
+      me = this;
+      me.zc = new PanAndZoomControl(me);
+      return me;
     };
 
     return SVGMap;
@@ -2891,15 +2329,15 @@
     }
 
     MapLayer.prototype.addPath = function(svg_path) {
-      var layerPath, me, _base3, _name, _ref17, _ref18, _ref19;
+      var layerPath, me, _base2, _name, _ref14, _ref15, _ref16;
       me = this;
-      if ((_ref17 = me.paths) == null) me.paths = [];
+      if ((_ref14 = me.paths) == null) me.paths = [];
       layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view);
       me.paths.push(layerPath);
       if (me.path_id != null) {
-        if ((_ref18 = me.pathsById) == null) me.pathsById = {};
-        if ((_ref19 = (_base3 = me.pathsById)[_name = layerPath.data[me.path_id]]) == null) {
-          _base3[_name] = [];
+        if ((_ref15 = me.pathsById) == null) me.pathsById = {};
+        if ((_ref16 = (_base2 = me.pathsById)[_name = layerPath.data[me.path_id]]) == null) {
+          _base2[_name] = [];
         }
         return me.pathsById[layerPath.data[me.path_id]].push(layerPath);
       }
@@ -2909,12 +2347,12 @@
       /*
       		# after resizing of the map, each layer gets a new view
       */
-      var me, path, _i, _len, _ref17, _results;
+      var me, path, _i, _len, _ref14, _results;
       me = this;
-      _ref17 = me.paths;
+      _ref14 = me.paths;
       _results = [];
-      for (_i = 0, _len = _ref17.length; _i < _len; _i++) {
-        path = _ref17[_i];
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        path = _ref14[_i];
         _results.push(path.setView(view));
       }
       return _results;
@@ -2927,7 +2365,7 @@
   MapLayerPath = (function() {
 
     function MapLayerPath(svg_path, layer_id, paper, view) {
-      var attr, data, i, me, path, _ref17;
+      var attr, data, i, me, path, _ref14;
       me = this;
       me.path = path = svgmap.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
@@ -2935,7 +2373,7 @@
       me.svgPath.node.setAttribute('class', me.baseClass);
       me.svgPath.node.path = me;
       data = {};
-      for (i = 0, _ref17 = svg_path.attributes.length - 1; 0 <= _ref17 ? i <= _ref17 : i >= _ref17; 0 <= _ref17 ? i++ : i--) {
+      for (i = 0, _ref14 = svg_path.attributes.length - 1; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
         attr = svg_path.attributes[i];
         if (attr.name.substr(0, 5) === "data-") {
           data[attr.name.substr(5)] = attr.value;
@@ -2978,40 +2416,40 @@
     }
 
     CanvasLayer.prototype.addPath = function(svg_path) {
-      var me, path, _ref17;
+      var me, path, _ref14;
       me = this;
-      if ((_ref17 = me.paths) == null) me.paths = [];
+      if ((_ref14 = me.paths) == null) me.paths = [];
       path = svgmap.geom.Path.fromSVG(svg_path);
       return me.paths.push(path);
     };
 
     CanvasLayer.prototype.render = function() {
-      var me, path, paths, _i, _len, _ref17;
+      var me, path, paths, _i, _len, _ref14;
       me = this;
       paths = [];
-      _ref17 = me.paths;
-      for (_i = 0, _len = _ref17.length; _i < _len; _i++) {
-        path = _ref17[_i];
+      _ref14 = me.paths;
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        path = _ref14[_i];
         paths.push(me.view.projectPath(path));
       }
       return me.renderCallback(me, paths);
     };
 
     CanvasLayer.prototype.drawPaths = function() {
-      var c, contour, me, path, pt, _i, _len, _ref17, _results;
+      var c, contour, me, path, pt, _i, _len, _ref14, _results;
       me = this;
       c = me.canvas.getContext('2d');
-      _ref17 = me.paths;
+      _ref14 = me.paths;
       _results = [];
-      for (_i = 0, _len = _ref17.length; _i < _len; _i++) {
-        path = _ref17[_i];
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        path = _ref14[_i];
         path = me.view.projectPath(path);
         _results.push((function() {
-          var _j, _len2, _ref18, _results2;
-          _ref18 = path.contours;
+          var _j, _len2, _ref15, _results2;
+          _ref15 = path.contours;
           _results2 = [];
-          for (_j = 0, _len2 = _ref18.length; _j < _len2; _j++) {
-            contour = _ref18[_j];
+          for (_j = 0, _len2 = _ref15.length; _j < _len2; _j++) {
+            contour = _ref15[_j];
             contour.reverse();
             _results2.push((function() {
               var _k, _len3, _results3;
@@ -3034,6 +2472,62 @@
     };
 
     return CanvasLayer;
+
+  })();
+
+  PanAndZoomControl = (function() {
+
+    function PanAndZoomControl(map) {
+      this.zoomOut = __bind(this.zoomOut, this);
+      this.zoomIn = __bind(this.zoomIn, this);
+      var c, div, mdown, me, mup, zc, zcm, zcp;
+      me = this;
+      me.map = map;
+      c = map.container;
+      div = function(className, childNodes) {
+        var child, d, _i, _len;
+        if (childNodes == null) childNodes = [];
+        d = $('<div class="' + className + '" />');
+        for (_i = 0, _len = childNodes.length; _i < _len; _i++) {
+          child = childNodes[_i];
+          d.append(child);
+        }
+        return d;
+      };
+      mdown = function(evt) {
+        return $(evt.target).addClass('md');
+      };
+      mup = function(evt) {
+        return $(evt.target).removeClass('md');
+      };
+      zcp = div('plus');
+      zcp.mousedown(mdown);
+      zcp.mouseup(mup);
+      zcp.click(me.zoomIn);
+      zcm = div('minus');
+      zcm.mousedown(mdown);
+      zcm.mouseup(mup);
+      zcm.click(me.zoomOut);
+      zc = div('zoom-control', [zcp, zcm]);
+      c.append(zc);
+    }
+
+    PanAndZoomControl.prototype.zoomIn = function(evt) {
+      var me;
+      me = this;
+      me.map.opts.zoom += 1;
+      return me.map.resize();
+    };
+
+    PanAndZoomControl.prototype.zoomOut = function(evt) {
+      var me;
+      me = this;
+      me.map.opts.zoom -= 1;
+      if (me.map.opts.zoom < 1) me.map.opts.zoom = 1;
+      return me.map.resize();
+    };
+
+    return PanAndZoomControl;
 
   })();
 
@@ -3092,24 +2586,24 @@
     };
 
     View.prototype.projectPath = function(path) {
-      var cont, contours, me, pcont, r, x, y, _i, _j, _len, _len2, _ref17, _ref18, _ref19, _ref20;
+      var cont, contours, me, pcont, r, x, y, _i, _j, _len, _len2, _ref14, _ref15, _ref16, _ref17;
       me = this;
       if (path.type === "path") {
         contours = [];
-        _ref17 = path.contours;
-        for (_i = 0, _len = _ref17.length; _i < _len; _i++) {
-          pcont = _ref17[_i];
+        _ref14 = path.contours;
+        for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+          pcont = _ref14[_i];
           cont = [];
           for (_j = 0, _len2 = pcont.length; _j < _len2; _j++) {
-            _ref18 = pcont[_j], x = _ref18[0], y = _ref18[1];
-            _ref19 = me.project(x, y), x = _ref19[0], y = _ref19[1];
+            _ref15 = pcont[_j], x = _ref15[0], y = _ref15[1];
+            _ref16 = me.project(x, y), x = _ref16[0], y = _ref16[1];
             cont.push([x, y]);
           }
           contours.push(cont);
         }
         return new svgmap.geom.Path(path.type, contours, path.closed);
       } else if (path.type === "circle") {
-        _ref20 = me.project(path.x, path.y), x = _ref20[0], y = _ref20[1];
+        _ref17 = me.project(path.x, path.y), x = _ref17[0], y = _ref17[1];
         r = path.r * me.scale;
         return new svgmap.geom.Circle(x, y, r);
       }
@@ -3140,7 +2634,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  if ((_ref17 = root.svgmap) == null) root.svgmap = {};
+  if ((_ref14 = root.svgmap) == null) root.svgmap = {};
 
   root.svgmap.View = View;
 
