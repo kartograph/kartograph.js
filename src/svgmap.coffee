@@ -41,12 +41,14 @@ class SVGMap
 		about = $('desc', cnt).text()
 		$('desc', cnt).text(about.replace('with ', 'with svgmap '+svgmap.version+' and '))
 		me.markers = []
+		me.container.addClass 'svgmap'
 		
 		
 	loadMap: (mapurl, callback, opts) ->
 		# load svg map
 		me = @
 		me.opts = opts ? {}
+		me.opts.zoom ?= 1
 		me.mapLoadCallback = callback
 		$.ajax 
 			url: mapurl
@@ -140,9 +142,7 @@ class SVGMap
 		data = opts.data
 		data_col = opts.key
 		no_data_color = opts.noDataColor ? '#ccc'
-		colorscale = opts.colorscale ? svgmap.color.scale.COOL
-		
-		colorscale.parseData(data, data_col)
+		colorscale = opts.colorscale
 		
 		pathData = {}
 		
@@ -155,12 +155,7 @@ class SVGMap
 					v = pathData[id]
 					col = colorscale.getColor(v)
 					
-					if ''+col.substr(0,1) == '#'
-						path.svgPath.node.setAttribute('style', 'fill:'+col)
-						path.svgPath.node.setAttribute 'class', path.baseClass
-					else
-						path.svgPath.node.setAttribute 'class', path.baseClass + ' ' + col
-						path.svgPath.node.setAttribute 'style', ''
+					path.svgPath.node.setAttribute('style', 'fill:'+col)
 				else
 					path.svgPath.node.setAttribute('style', 'fill:'+no_data_color)
 		return
@@ -328,7 +323,8 @@ class SVGMap
 		padding = me.opts.padding ? 0
 		halign = me.opts.halign ? 'center'
 		valign = me.opts.valign ? 'center'
-		me.viewBC = new svgmap.View me.viewAB.asBBox(),vp.width,vp.height, padding,halign,valign
+		zoom = me.opts.zoom
+		me.viewBC = new svgmap.View me.viewAB.asBBox(),vp.width*zoom,vp.height*zoom, padding,halign,valign
 		for id,layer of me.layers
 			layer.setView(me.viewBC)
 		
@@ -374,9 +370,13 @@ class SVGMap
 		path.node.setAttribute 'class', className
 		return
 		
+	showZoomControls: () ->
+		me = @
+		me.zc = new PanAndZoomControl me
+		me
+		
 		
 	
-		
 		
 svgmap.SVGMap = SVGMap
 
@@ -483,3 +483,41 @@ class CanvasLayer
 		
 
 
+class PanAndZoomControl
+	
+	constructor: (map) ->
+		me = @
+		me.map = map
+		c = map.container
+		div = (className, childNodes = []) ->
+			d = $('<div class="'+className+'" />')
+			for child in childNodes
+				d.append child
+			d
+		mdown = (evt) ->
+			$(evt.target).addClass 'md'
+		mup = (evt) ->
+			$(evt.target).removeClass 'md'
+			
+		zcp = div 'plus'
+		zcp.mousedown mdown
+		zcp.mouseup mup
+		zcp.click me.zoomIn
+		zcm = div 'minus'
+		zcm.mousedown mdown
+		zcm.mouseup mup
+		zcm.click me.zoomOut
+		zc = div 'zoom-control', [zcp, zcm]
+		c.append zc
+		
+	zoomIn: (evt) =>
+		me = @ 
+		me.map.opts.zoom += 1
+		me.map.resize()
+		
+	zoomOut: (evt) =>
+		me = @ 
+		me.map.opts.zoom -= 1
+		me.map.opts.zoom = 1 if me.map.opts.zoom < 1
+		me.map.resize()
+	

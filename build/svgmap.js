@@ -18,7 +18,8 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var CanvasLayer, MapLayer, MapLayerPath, SVGMap, log, root, svgmap, warn, _ref;
+  var CanvasLayer, MapLayer, MapLayerPath, PanAndZoomControl, SVGMap, log, root, svgmap, warn, _ref;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -45,12 +46,14 @@
       about = $('desc', cnt).text();
       $('desc', cnt).text(about.replace('with ', 'with svgmap ' + svgmap.version + ' and '));
       me.markers = [];
+      me.container.addClass('svgmap');
     }
 
     SVGMap.prototype.loadMap = function(mapurl, callback, opts) {
-      var me;
+      var me, _base, _ref2;
       me = this;
       me.opts = opts != null ? opts : {};
+      if ((_ref2 = (_base = me.opts).zoom) == null) _base.zoom = 1;
       me.mapLoadCallback = callback;
       $.ajax({
         url: mapurl,
@@ -140,7 +143,7 @@
     };
 
     SVGMap.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref2, _ref3, _ref4, _ref5;
+      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref2, _ref3, _ref4;
       me = this;
       layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
@@ -150,28 +153,21 @@
       data = opts.data;
       data_col = opts.key;
       no_data_color = (_ref3 = opts.noDataColor) != null ? _ref3 : '#ccc';
-      colorscale = (_ref4 = opts.colorscale) != null ? _ref4 : svgmap.color.scale.COOL;
-      colorscale.parseData(data, data_col);
+      colorscale = opts.colorscale;
       pathData = {};
       for (id in data) {
         row = data[id];
         pathData[id] = row[data_col];
       }
-      _ref5 = me.layers[layer_id].pathsById;
-      for (id in _ref5) {
-        paths = _ref5[id];
+      _ref4 = me.layers[layer_id].pathsById;
+      for (id in _ref4) {
+        paths = _ref4[id];
         for (_i = 0, _len = paths.length; _i < _len; _i++) {
           path = paths[_i];
           if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
             v = pathData[id];
             col = colorscale.getColor(v);
-            if ('' + col.substr(0, 1) === '#') {
-              path.svgPath.node.setAttribute('style', 'fill:' + col);
-              path.svgPath.node.setAttribute('class', path.baseClass);
-            } else {
-              path.svgPath.node.setAttribute('class', path.baseClass + ' ' + col);
-              path.svgPath.node.setAttribute('style', '');
-            }
+            path.svgPath.node.setAttribute('style', 'fill:' + col);
           } else {
             path.svgPath.node.setAttribute('style', 'fill:' + no_data_color);
           }
@@ -359,7 +355,7 @@
       /*
       		forces redraw of every layer
       */
-      var cnt, halign, id, layer, me, padding, valign, vp, _ref2, _ref3, _ref4, _ref5, _results;
+      var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref2, _ref3, _ref4, _ref5, _results;
       me = this;
       cnt = me.container;
       me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
@@ -368,7 +364,8 @@
       padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
       halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
       valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
-      me.viewBC = new svgmap.View(me.viewAB.asBBox(), vp.width, vp.height, padding, halign, valign);
+      zoom = me.opts.zoom;
+      me.viewBC = new svgmap.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
       _ref5 = me.layers;
       _results = [];
       for (id in _ref5) {
@@ -425,6 +422,13 @@
       }
       path = me.paper.path(path_str);
       path.node.setAttribute('class', className);
+    };
+
+    SVGMap.prototype.showZoomControls = function() {
+      var me;
+      me = this;
+      me.zc = new PanAndZoomControl(me);
+      return me;
     };
 
     return SVGMap;
@@ -588,6 +592,62 @@
     };
 
     return CanvasLayer;
+
+  })();
+
+  PanAndZoomControl = (function() {
+
+    function PanAndZoomControl(map) {
+      this.zoomOut = __bind(this.zoomOut, this);
+      this.zoomIn = __bind(this.zoomIn, this);
+      var c, div, mdown, me, mup, zc, zcm, zcp;
+      me = this;
+      me.map = map;
+      c = map.container;
+      div = function(className, childNodes) {
+        var child, d, _i, _len;
+        if (childNodes == null) childNodes = [];
+        d = $('<div class="' + className + '" />');
+        for (_i = 0, _len = childNodes.length; _i < _len; _i++) {
+          child = childNodes[_i];
+          d.append(child);
+        }
+        return d;
+      };
+      mdown = function(evt) {
+        return $(evt.target).addClass('md');
+      };
+      mup = function(evt) {
+        return $(evt.target).removeClass('md');
+      };
+      zcp = div('plus');
+      zcp.mousedown(mdown);
+      zcp.mouseup(mup);
+      zcp.click(me.zoomIn);
+      zcm = div('minus');
+      zcm.mousedown(mdown);
+      zcm.mouseup(mup);
+      zcm.click(me.zoomOut);
+      zc = div('zoom-control', [zcp, zcm]);
+      c.append(zc);
+    }
+
+    PanAndZoomControl.prototype.zoomIn = function(evt) {
+      var me;
+      me = this;
+      me.map.opts.zoom += 1;
+      return me.map.resize();
+    };
+
+    PanAndZoomControl.prototype.zoomOut = function(evt) {
+      var me;
+      me = this;
+      me.map.opts.zoom -= 1;
+      if (me.map.opts.zoom < 1) me.map.opts.zoom = 1;
+      return me.map.resize();
+    };
+
+    return PanAndZoomControl;
 
   })();
 
