@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoConic, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -1071,5 +1071,17 @@
   })();
 
   __proj['lcc'] = LCC;
+
+  PseudoConic = (function() {
+
+    __extends(PseudoConic, Conic);
+
+    function PseudoConic() {
+      PseudoConic.__super__.constructor.apply(this, arguments);
+    }
+
+    return PseudoConic;
+
+  })();
 
 }).call(this);

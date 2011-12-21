@@ -332,7 +332,6 @@ class SVGMap
 	addFilter: (id, type, params = {}) ->
 		me = @
 		doc = window.document
-		
 		if svgmap.filter[type]?
 			fltr = new svgmap.filter[type](params).getFilter(id)
 		else

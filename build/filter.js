@@ -99,13 +99,27 @@
     }
 
     GlowFilter.prototype.buildFilter = function(fltr) {
-      var SVG, blur, color, comp, mat, me, merge, morph, rgb, size;
+      var alpha, blur, color, inner, knockout, me, rgb, strength, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+      me = this;
+      blur = (_ref3 = me.params.blur) != null ? _ref3 : 8;
+      strength = (_ref4 = me.params.strength) != null ? _ref4 : 2;
+      color = (_ref5 = me.params.color) != null ? _ref5 : '#D1BEB0';
+      if (typeof color === 'string') color = chroma.hex(color);
+      rgb = color.rgb;
+      inner = (_ref6 = me.params.inner) != null ? _ref6 : false;
+      knockout = (_ref7 = me.params.knockout) != null ? _ref7 : false;
+      alpha = (_ref8 = me.params.alpha) != null ? _ref8 : 1;
+      if (inner) {
+        me.innerGlow(fltr, blur, strength, rgb, alpha, knockout);
+      } else {
+        me.outerGlow(fltr, blur, strength, rgb, alpha, knockout);
+      }
+    };
+
+    GlowFilter.prototype.outerGlow = function(fltr, _blur, _strength, rgb, alpha, knockout) {
+      var SVG, blur, comp, mat, me, merge, morph;
       me = this;
       SVG = me.SVG;
-      size = me.params.size || 8;
-      color = me.params.color || '#D1BEB0';
-      if (typeof color === 'string') color = new svgmap.color.Color(color);
-      rgb = color.rgb;
       mat = SVG('feColorMatrix', {
         "in": 'SourceGraphic',
         type: 'matrix',
@@ -115,21 +129,72 @@
       fltr.appendChild(mat);
       morph = SVG('feMorphology', {
         "in": 'mask',
-        radius: size,
+        radius: _strength,
+        operator: 'dilate',
+        result: 'mask2'
+      });
+      fltr.appendChild(morph);
+      mat = SVG('feColorMatrix', {
+        "in": 'mask2',
+        type: 'matrix',
+        values: '0 0 0 0 ' + (rgb[0] / 255) + ' 0 0 0 0 ' + (rgb[1] / 255) + ' 0 0 0 0 ' + (rgb[2] / 255) + '  0 0 0 500 0',
+        result: 'r0'
+      });
+      fltr.appendChild(mat);
+      blur = SVG('feGaussianBlur', {
+        "in": 'r0',
+        stdDeviation: _blur,
+        result: 'r1'
+      });
+      fltr.appendChild(blur);
+      comp = SVG('feComposite', {
+        operator: 'out',
+        "in": 'r1',
+        in2: 'mask',
+        result: 'comp'
+      });
+      fltr.appendChild(comp);
+      merge = SVG('feMerge');
+      if (!knockout) {
+        merge.appendChild(SVG('feMergeNode', {
+          'in': 'SourceGraphic'
+        }));
+      }
+      merge.appendChild(SVG('feMergeNode', {
+        'in': 'comp'
+      }));
+      return fltr.appendChild(merge);
+    };
+
+    GlowFilter.prototype.innerGlow = function(fltr, _blur, _strength, rgb, alpha, knockout) {
+      var SVG, blur, comp, mat, me, merge, morph;
+      me = this;
+      SVG = me.SVG;
+      console.log('innerglow');
+      mat = SVG('feColorMatrix', {
+        "in": 'SourceGraphic',
+        type: 'matrix',
+        values: '0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 500 0',
+        result: 'mask'
+      });
+      fltr.appendChild(mat);
+      morph = SVG('feMorphology', {
+        "in": 'mask',
+        radius: _strength,
         operator: 'erode',
         result: 'r1'
       });
       fltr.appendChild(morph);
       blur = SVG('feGaussianBlur', {
         "in": 'r1',
-        stdDeviation: size,
+        stdDeviation: _blur,
         result: 'r2'
       });
       fltr.appendChild(blur);
       mat = SVG('feColorMatrix', {
         type: 'matrix',
         "in": 'r2',
-        values: '1 0 0 0 ' + (rgb[0] / 255) + ' 0 1 0 0 ' + (rgb[1] / 255) + ' 0 0 1 0 ' + (rgb[2] / 255) + ' 0 0 0 -1 1',
+        values: '1 0 0 0 ' + (rgb[0] / 255) + ' 0 1 0 0 ' + (rgb[1] / 255) + ' 0 0 1 0 ' + (rgb[2] / 255) + ' 0 0 0 -1 ' + alpha,
         result: 'r3'
       });
       fltr.appendChild(mat);
@@ -141,9 +206,11 @@
       });
       fltr.appendChild(comp);
       merge = SVG('feMerge');
-      merge.appendChild(SVG('feMergeNode', {
-        'in': 'SourceGraphic'
-      }));
+      if (!knockout) {
+        merge.appendChild(SVG('feMergeNode', {
+          'in': 'SourceGraphic'
+        }));
+      }
       merge.appendChild(SVG('feMergeNode', {
         'in': 'comp'
       }));

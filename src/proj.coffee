@@ -796,3 +796,12 @@ class LCC extends Conic
 __proj['lcc'] = LCC
 
 
+
+class PseudoConic extends Conic
+
+	
+
+
+
+
+
