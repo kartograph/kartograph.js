@@ -55,7 +55,6 @@ class SVGMap
 			left: '0px'
 			'z-index': lid+5
 
-		console.log cnt.css('position')
 		if cnt.css('position') == 'static'
 			cnt.css 'position','relative'
 
@@ -91,7 +90,7 @@ class SVGMap
 	
 	addLayer: (src_id, layer_id, path_id) ->
 		###
-		add new layer
+		add new layer 
 		###
 		me = @		
 		me.layerIds ?= []
