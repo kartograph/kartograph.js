@@ -62,7 +62,6 @@
         left: '0px',
         'z-index': lid + 5
       });
-      console.log(cnt.css('position'));
       if (cnt.css('position') === 'static') cnt.css('position', 'relative');
       svg.addClass(id);
       about = $('desc', paper.canvas).text();
