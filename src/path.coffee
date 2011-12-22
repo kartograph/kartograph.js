@@ -55,6 +55,47 @@ class Path
 		str += "Z" if me.closed
 		str
 		
+	area: ->
+		me = @
+		if me.areas?
+			return me._area
+		me.areas = []
+		me._area = 0
+		for cnt in me.contours
+			area = 0
+			for i in [0..cnt.length-2]
+				area += cnt[i][0]*cnt[i+1][1] - cnt[i+1][0]*cnt[i][1]
+			area *= .5
+			area = area
+			me.areas.push area
+			me._area += area
+		me._area
+		
+	centroid: ->
+		me = @
+		if me._centroid?
+			return me._centroid
+		area = me.area()
+		cx = cy = 0
+		for i in [0..me.contours.length-1]
+			cnt = me.contours[i]
+			a = me.areas[i]
+			x = y = 0
+			for j in [0..cnt.length-2]
+				k = (cnt[j][0]*cnt[j+1][1] - cnt[j+1][0]*cnt[j][1])
+				x += (cnt[j][0]+cnt[j+1][0]) * k
+				y += (cnt[j][1]+cnt[j+1][1]) * k
+			k = 1/(6*a)
+			x *= k
+			y *= k
+			k = a/area
+			cx += x * k
+			cy += y * k
+		me._centroid = [cx,cy]
+		me._centroid
+			
+				
+				
 
 svgmap.geom.Path = Path
 
@@ -66,6 +107,14 @@ class Circle extends Path
 	toSVG: (paper) ->
 		me = @
 		paper.circle(me.x, me.y, me.r)
+		
+	centroid: ->
+		me = @
+		[me.x, me.y]
+	
+	area: ->
+		me = @
+		Math.PI * me.r*m.r
 
 svgmap.geom.Circle = Circle
 

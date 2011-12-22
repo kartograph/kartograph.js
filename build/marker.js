@@ -68,10 +68,10 @@
   SymbolGroup = (function() {
 
     function SymbolGroup(opts) {
-      var SymbolType, d, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref3, _ref4, _ref5, _ref6;
+      var SymbolType, d, i, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _m, _ref3, _ref4, _ref5;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltips', 'layout', 'group'];
+      optional = ['filter', 'tooltip', 'layout', 'group'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -103,9 +103,8 @@
         }
         me.layers[l.id] = layer;
       }
-      _ref5 = me.data;
-      for (_m = 0, _len5 = _ref5.length; _m < _len5; _m++) {
-        d = _ref5[_m];
+      for (i in me.data) {
+        d = me.data[i];
         if (type(me.filter) === "function") {
           if (me.filter(d)) me.addSymbol(d);
         } else {
@@ -113,11 +112,12 @@
         }
       }
       me.layoutSymbols();
-      _ref6 = me.symbols;
-      for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
-        s = _ref6[_n];
+      _ref5 = me.symbols;
+      for (_m = 0, _len5 = _ref5.length; _m < _len5; _m++) {
+        s = _ref5[_m];
         s.render();
       }
+      if (type(me.tooltip) === "function") me.initTooltips();
     }
 
     SymbolGroup.prototype.addSymbol = function(data) {
@@ -132,7 +132,8 @@
       if (type(ll) === 'array') ll = new svgmap.LonLat(ll[0], ll[1]);
       sprops = {
         layers: me.layers,
-        location: ll
+        location: ll,
+        data: data
       };
       _ref4 = SymbolType.props;
       for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
@@ -157,13 +158,23 @@
     };
 
     SymbolGroup.prototype.layoutSymbols = function() {
-      var ll, me, s, xy, _i, _len, _ref3;
+      var layer_id, ll, me, path, path_id, s, xy, _i, _len, _ref3, _ref4;
       me = this;
       _ref3 = me.symbols;
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
         s = _ref3[_i];
         ll = s.location;
-        xy = me.map.lonlat2xy(ll);
+        if (type(ll) === 'string') {
+          _ref4 = ll.split('.'), layer_id = _ref4[0], path_id = _ref4[1];
+          path = me.map.getLayerPath(layer_id, path_id);
+          if (path != null) {
+            xy = me.map.viewBC.project(path.path.centroid());
+          } else {
+            continue;
+          }
+        } else {
+          xy = me.map.lonlat2xy(ll);
+        }
         s.x = xy[0];
         s.y = xy[1];
       }
@@ -178,6 +189,43 @@
       me = this;
       if ((_ref3 = me.gsymbols) == null) me.gsymbols = [];
       return overlap = true;
+    };
+
+    SymbolGroup.prototype.initTooltips = function() {
+      var cfg, me, node, s, tooltips, tt, _i, _j, _len, _len2, _ref3, _ref4;
+      me = this;
+      tooltips = me.tooltip;
+      _ref3 = me.symbols;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        cfg = {
+          position: {
+            target: 'mouse',
+            viewport: $(window),
+            adjust: {
+              x: 7,
+              y: 7
+            }
+          },
+          show: {
+            delay: 20
+          },
+          content: {}
+        };
+        console.log(s, s.data);
+        tt = tooltips(s.data);
+        if (type(tt) === "string") {
+          cfg.content.text = tt;
+        } else if (type(tt) === "array") {
+          cfg.content.title = tt[0];
+          cfg.content.text = tt[1];
+        }
+        _ref4 = s.nodes();
+        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+          node = _ref4[_j];
+          $(node).qtip(cfg);
+        }
+      }
     };
 
     return SymbolGroup;
@@ -204,6 +252,10 @@
 
     Symbol.prototype.overlaps = function(symbol) {
       return false;
+    };
+
+    Symbol.prototype.nodes = function() {
+      return [];
     };
 
     return Symbol;
@@ -264,6 +316,12 @@
       me = this;
       me.path.remove();
       return me;
+    };
+
+    Bubble.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.path.node];
     };
 
     return Bubble;

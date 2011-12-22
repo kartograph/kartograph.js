@@ -116,7 +116,12 @@ class SVGMap
 		
 		return
 
-
+	getLayerPath: (layer_id, path_id) ->
+		me = @
+		if me.layers[layer_id]? and me.layers[layer_id].hasPath(path_id)
+			return me.layers[layer_id].getPath(path_id)
+		null
+			
 	
 	addCanvasLayer: (src_id, drawCallback) ->
 		me = @
@@ -174,7 +179,7 @@ class SVGMap
 		me = @	
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
 		if not me.layers.hasOwnProperty layer_id
-			warn 'choropleth error: layer "'+layer_id+'" not found'
+			warn 'choropleth error: layer "'+layer_ihad+'" not found'
 			return
 
 		data = opts.data
@@ -208,7 +213,6 @@ class SVGMap
 			return
 			
 		for id, paths of me.layers[layer_id].pathsById
-			
 			for path in paths			
 				if $.isFunction tooltips
 					tt = tooltips(id, path)
@@ -439,6 +443,18 @@ class MapLayer
 			me.pathsById ?= {}
 			me.pathsById[layerPath.data[me.path_id]] ?= []
 			me.pathsById[layerPath.data[me.path_id]].push(layerPath)
+			
+	
+	hasPath: (id) ->
+		me = @
+		me.pathsById? and me.pathsById[id]?
+		 
+	getPath: (id) ->
+		me = @
+		if me.hasPath id
+			return me.pathsById[id][0]
+		throw 'path '+id+' not found'
+		
 
 	setView: (view) ->
 		###
@@ -452,8 +468,7 @@ class MapLayer
 class MapLayerPath
 
 	constructor: (svg_path, layer_id, paper, view) ->
-		me = @
-		
+		me = @		
 		me.path = path = svgmap.geom.Path.fromSVG(svg_path)	
 		me.svgPath = view.projectPath(path).toSVG(paper)
 		me.baseClass = 'polygon '+layer_id
@@ -558,3 +573,9 @@ class PanAndZoomControl
 		me.map.opts.zoom = 1 if me.map.opts.zoom < 1
 		me.map.resize()
 	
+
+Function::bind = (scope) ->
+	_func = @
+	return () ->
+		_func.apply scope,arguments
+

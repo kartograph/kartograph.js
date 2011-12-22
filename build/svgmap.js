@@ -124,6 +124,15 @@
       }
     };
 
+    SVGMap.prototype.getLayerPath = function(layer_id, path_id) {
+      var me;
+      me = this;
+      if ((me.layers[layer_id] != null) && me.layers[layer_id].hasPath(path_id)) {
+        return me.layers[layer_id].getPath(path_id);
+      }
+      return null;
+    };
+
     SVGMap.prototype.addCanvasLayer = function(src_id, drawCallback) {
       var $paths, canvas, layer, me, svgLayer, svg_path, _i, _len;
       me = this;
@@ -192,7 +201,7 @@
       me = this;
       layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
-        warn('choropleth error: layer "' + layer_id + '" not found');
+        warn('choropleth error: layer "' + layer_ihad + '" not found');
         return;
       }
       data = opts.data;
@@ -508,6 +517,19 @@
       }
     };
 
+    MapLayer.prototype.hasPath = function(id) {
+      var me;
+      me = this;
+      return (me.pathsById != null) && (me.pathsById[id] != null);
+    };
+
+    MapLayer.prototype.getPath = function(id) {
+      var me;
+      me = this;
+      if (me.hasPath(id)) return me.pathsById[id][0];
+      throw 'path ' + id + ' not found';
+    };
+
     MapLayer.prototype.setView = function(view) {
       /*
       		# after resizing of the map, each layer gets a new view
@@ -695,5 +717,13 @@
     return PanAndZoomControl;
 
   })();
+
+  Function.prototype.bind = function(scope) {
+    var _func;
+    _func = this;
+    return function() {
+      return _func.apply(scope, arguments);
+    };
+  };
 
 }).call(this);

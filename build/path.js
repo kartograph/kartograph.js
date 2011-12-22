@@ -76,6 +76,53 @@
       return str;
     };
 
+    Path.prototype.area = function() {
+      var area, cnt, i, me, _i, _len, _ref3, _ref4;
+      me = this;
+      if (me.areas != null) return me._area;
+      me.areas = [];
+      me._area = 0;
+      _ref3 = me.contours;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        cnt = _ref3[_i];
+        area = 0;
+        for (i = 0, _ref4 = cnt.length - 2; 0 <= _ref4 ? i <= _ref4 : i >= _ref4; 0 <= _ref4 ? i++ : i--) {
+          area += cnt[i][0] * cnt[i + 1][1] - cnt[i + 1][0] * cnt[i][1];
+        }
+        area *= .5;
+        area = area;
+        me.areas.push(area);
+        me._area += area;
+      }
+      return me._area;
+    };
+
+    Path.prototype.centroid = function() {
+      var a, area, cnt, cx, cy, i, j, k, me, x, y, _ref3, _ref4;
+      me = this;
+      if (me._centroid != null) return me._centroid;
+      area = me.area();
+      cx = cy = 0;
+      for (i = 0, _ref3 = me.contours.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
+        cnt = me.contours[i];
+        a = me.areas[i];
+        x = y = 0;
+        for (j = 0, _ref4 = cnt.length - 2; 0 <= _ref4 ? j <= _ref4 : j >= _ref4; 0 <= _ref4 ? j++ : j--) {
+          k = cnt[j][0] * cnt[j + 1][1] - cnt[j + 1][0] * cnt[j][1];
+          x += (cnt[j][0] + cnt[j + 1][0]) * k;
+          y += (cnt[j][1] + cnt[j + 1][1]) * k;
+        }
+        k = 1 / (6 * a);
+        x *= k;
+        y *= k;
+        k = a / area;
+        cx += x * k;
+        cy += y * k;
+      }
+      me._centroid = [cx, cy];
+      return me._centroid;
+    };
+
     return Path;
 
   })();
@@ -97,6 +144,18 @@
       var me;
       me = this;
       return paper.circle(me.x, me.y, me.r);
+    };
+
+    Circle.prototype.centroid = function() {
+      var me;
+      me = this;
+      return [me.x, me.y];
+    };
+
+    Circle.prototype.area = function() {
+      var me;
+      me = this;
+      return Math.PI * me.r * m.r;
     };
 
     return Circle;

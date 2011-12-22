@@ -580,10 +580,10 @@
   SymbolGroup = (function() {
 
     function SymbolGroup(opts) {
-      var SymbolType, d, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref10, _ref11, _ref12, _ref13;
+      var SymbolType, d, i, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _m, _ref10, _ref11, _ref12;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltips', 'layout', 'group'];
+      optional = ['filter', 'tooltip', 'layout', 'group'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -615,9 +615,8 @@
         }
         me.layers[l.id] = layer;
       }
-      _ref12 = me.data;
-      for (_m = 0, _len5 = _ref12.length; _m < _len5; _m++) {
-        d = _ref12[_m];
+      for (i in me.data) {
+        d = me.data[i];
         if (type(me.filter) === "function") {
           if (me.filter(d)) me.addSymbol(d);
         } else {
@@ -625,11 +624,12 @@
         }
       }
       me.layoutSymbols();
-      _ref13 = me.symbols;
-      for (_n = 0, _len6 = _ref13.length; _n < _len6; _n++) {
-        s = _ref13[_n];
+      _ref12 = me.symbols;
+      for (_m = 0, _len5 = _ref12.length; _m < _len5; _m++) {
+        s = _ref12[_m];
         s.render();
       }
+      if (type(me.tooltip) === "function") me.initTooltips();
     }
 
     SymbolGroup.prototype.addSymbol = function(data) {
@@ -644,7 +644,8 @@
       if (type(ll) === 'array') ll = new svgmap.LonLat(ll[0], ll[1]);
       sprops = {
         layers: me.layers,
-        location: ll
+        location: ll,
+        data: data
       };
       _ref11 = SymbolType.props;
       for (_i = 0, _len = _ref11.length; _i < _len; _i++) {
@@ -669,13 +670,23 @@
     };
 
     SymbolGroup.prototype.layoutSymbols = function() {
-      var ll, me, s, xy, _i, _len, _ref10;
+      var layer_id, ll, me, path, path_id, s, xy, _i, _len, _ref10, _ref11;
       me = this;
       _ref10 = me.symbols;
       for (_i = 0, _len = _ref10.length; _i < _len; _i++) {
         s = _ref10[_i];
         ll = s.location;
-        xy = me.map.lonlat2xy(ll);
+        if (type(ll) === 'string') {
+          _ref11 = ll.split('.'), layer_id = _ref11[0], path_id = _ref11[1];
+          path = me.map.getLayerPath(layer_id, path_id);
+          if (path != null) {
+            xy = me.map.viewBC.project(path.path.centroid());
+          } else {
+            continue;
+          }
+        } else {
+          xy = me.map.lonlat2xy(ll);
+        }
         s.x = xy[0];
         s.y = xy[1];
       }
@@ -690,6 +701,43 @@
       me = this;
       if ((_ref10 = me.gsymbols) == null) me.gsymbols = [];
       return overlap = true;
+    };
+
+    SymbolGroup.prototype.initTooltips = function() {
+      var cfg, me, node, s, tooltips, tt, _i, _j, _len, _len2, _ref10, _ref11;
+      me = this;
+      tooltips = me.tooltip;
+      _ref10 = me.symbols;
+      for (_i = 0, _len = _ref10.length; _i < _len; _i++) {
+        s = _ref10[_i];
+        cfg = {
+          position: {
+            target: 'mouse',
+            viewport: $(window),
+            adjust: {
+              x: 7,
+              y: 7
+            }
+          },
+          show: {
+            delay: 20
+          },
+          content: {}
+        };
+        console.log(s, s.data);
+        tt = tooltips(s.data);
+        if (type(tt) === "string") {
+          cfg.content.text = tt;
+        } else if (type(tt) === "array") {
+          cfg.content.title = tt[0];
+          cfg.content.text = tt[1];
+        }
+        _ref11 = s.nodes();
+        for (_j = 0, _len2 = _ref11.length; _j < _len2; _j++) {
+          node = _ref11[_j];
+          $(node).qtip(cfg);
+        }
+      }
     };
 
     return SymbolGroup;
@@ -716,6 +764,10 @@
 
     Symbol.prototype.overlaps = function(symbol) {
       return false;
+    };
+
+    Symbol.prototype.nodes = function() {
+      return [];
     };
 
     return Symbol;
@@ -776,6 +828,12 @@
       me = this;
       me.path.remove();
       return me;
+    };
+
+    Bubble.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.path.node];
     };
 
     return Bubble;
@@ -1031,6 +1089,53 @@
       return str;
     };
 
+    Path.prototype.area = function() {
+      var area, cnt, i, me, _i, _len, _ref12, _ref13;
+      me = this;
+      if (me.areas != null) return me._area;
+      me.areas = [];
+      me._area = 0;
+      _ref12 = me.contours;
+      for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+        cnt = _ref12[_i];
+        area = 0;
+        for (i = 0, _ref13 = cnt.length - 2; 0 <= _ref13 ? i <= _ref13 : i >= _ref13; 0 <= _ref13 ? i++ : i--) {
+          area += cnt[i][0] * cnt[i + 1][1] - cnt[i + 1][0] * cnt[i][1];
+        }
+        area *= .5;
+        area = area;
+        me.areas.push(area);
+        me._area += area;
+      }
+      return me._area;
+    };
+
+    Path.prototype.centroid = function() {
+      var a, area, cnt, cx, cy, i, j, k, me, x, y, _ref12, _ref13;
+      me = this;
+      if (me._centroid != null) return me._centroid;
+      area = me.area();
+      cx = cy = 0;
+      for (i = 0, _ref12 = me.contours.length - 1; 0 <= _ref12 ? i <= _ref12 : i >= _ref12; 0 <= _ref12 ? i++ : i--) {
+        cnt = me.contours[i];
+        a = me.areas[i];
+        x = y = 0;
+        for (j = 0, _ref13 = cnt.length - 2; 0 <= _ref13 ? j <= _ref13 : j >= _ref13; 0 <= _ref13 ? j++ : j--) {
+          k = cnt[j][0] * cnt[j + 1][1] - cnt[j + 1][0] * cnt[j][1];
+          x += (cnt[j][0] + cnt[j + 1][0]) * k;
+          y += (cnt[j][1] + cnt[j + 1][1]) * k;
+        }
+        k = 1 / (6 * a);
+        x *= k;
+        y *= k;
+        k = a / area;
+        cx += x * k;
+        cy += y * k;
+      }
+      me._centroid = [cx, cy];
+      return me._centroid;
+    };
+
     return Path;
 
   })();
@@ -1052,6 +1157,18 @@
       var me;
       me = this;
       return paper.circle(me.x, me.y, me.r);
+    };
+
+    Circle.prototype.centroid = function() {
+      var me;
+      me = this;
+      return [me.x, me.y];
+    };
+
+    Circle.prototype.area = function() {
+      var me;
+      me = this;
+      return Math.PI * me.r * m.r;
     };
 
     return Circle;
@@ -1294,13 +1411,16 @@
 
     __extends(Cylindrical, Proj);
 
-    function Cylindrical() {
-      Cylindrical.__super__.constructor.apply(this, arguments);
-    }
-
     /*
     	Base class for cylindrical projections
     */
+
+    function Cylindrical(opts) {
+      var me;
+      Cylindrical.__super__.constructor.call(this, opts);
+      me = this;
+      me.flip = opts.flip || 0;
+    }
 
     Cylindrical.prototype._visible = function(lon, lat) {
       return true;
@@ -1314,6 +1434,14 @@
         lon -= 360;
       }
       return lon;
+    };
+
+    Cylindrical.prototype.ll = function(lon, lat) {
+      if (Number(this.flip) === 1) {
+        return [-lon, -lat];
+      } else {
+        return [lon, lat];
+      }
     };
 
     return Cylindrical;
@@ -1333,6 +1461,8 @@
     */
 
     Equirectangular.prototype.project = function(lon, lat) {
+      var _ref13;
+      _ref13 = this.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       lon = this.clon(lon);
       return [lon * Math.cos(this.phi0) * 1000, lat * -1 * 1000];
     };
@@ -1359,7 +1489,8 @@
     */
 
     CEA.prototype.project = function(lon, lat) {
-      var lam, phi, x, y;
+      var lam, phi, x, y, _ref13;
+      _ref13 = this.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       lam = this.rad(this.clon(lon));
       phi = this.rad(lat * -1);
       x = lam * Math.cos(this.phi1);
@@ -1463,8 +1594,9 @@
     }
 
     Mercator.prototype.project = function(lon, lat) {
-      var lam, math, phi, s, x, y;
+      var lam, math, phi, s, x, y, _ref13;
       s = this;
+      _ref13 = s.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       math = Math;
       lam = s.rad(s.clon(lon));
       phi = s.rad(lat * -1);
@@ -1529,8 +1661,9 @@
     }
 
     NaturalEarth.prototype.project = function(lon, lat) {
-      var lplam, lpphi, phi2, phi4, s, x, y;
+      var lplam, lpphi, phi2, phi4, s, x, y, _ref13;
       s = this;
+      _ref13 = s.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       lplam = s.rad(s.clon(lon));
       lpphi = s.rad(lat * -1);
       phi2 = lpphi * lpphi;
@@ -1575,8 +1708,9 @@
     };
 
     Robinson.prototype.project = function(lon, lat) {
-      var i, lplam, lpphi, phi, s, x, y;
+      var i, lplam, lpphi, phi, s, x, y, _ref13;
       s = this;
+      _ref13 = s.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       lon = s.clon(lon);
       lplam = s.rad(lon);
       lpphi = s.rad(lat * -1);
@@ -1619,8 +1753,9 @@
     }
 
     EckertIV.prototype.project = function(lon, lat) {
-      var V, c, i, lplam, lpphi, me, p, s, x, y;
+      var V, c, i, lplam, lpphi, me, p, s, x, y, _ref13;
       me = this;
+      _ref13 = me.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       lplam = me.rad(me.clon(lon));
       lpphi = me.rad(lat * -1);
       p = me.C_p * Math.sin(lpphi);
@@ -1664,8 +1799,9 @@
     */
 
     Sinusoidal.prototype.project = function(lon, lat) {
-      var lam, me, phi, x, y;
+      var lam, me, phi, x, y, _ref13;
       me = this;
+      _ref13 = me.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat * -1);
       x = lam * Math.cos(phi);
@@ -1714,8 +1850,9 @@
     }
 
     Mollweide.prototype.project = function(lon, lat) {
-      var abs, i, k, lam, math, me, phi, v, x, y;
+      var abs, i, k, lam, math, me, phi, v, x, y, _ref13;
       me = this;
+      _ref13 = me.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       math = Math;
       abs = math.abs;
       lam = me.rad(me.clon(lon));
@@ -1794,8 +1931,9 @@
     maxLat = 89;
 
     Loximuthal.prototype.project = function(lon, lat) {
-      var lam, math, me, phi, x, y;
+      var lam, math, me, phi, x, y, _ref13;
       me = this;
+      _ref13 = me.ll(lon, lat), lon = _ref13[0], lat = _ref13[1];
       math = Math;
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat);
@@ -2356,6 +2494,15 @@
       }
     };
 
+    SVGMap.prototype.getLayerPath = function(layer_id, path_id) {
+      var me;
+      me = this;
+      if ((me.layers[layer_id] != null) && me.layers[layer_id].hasPath(path_id)) {
+        return me.layers[layer_id].getPath(path_id);
+      }
+      return null;
+    };
+
     SVGMap.prototype.addCanvasLayer = function(src_id, drawCallback) {
       var $paths, canvas, layer, me, svgLayer, svg_path, _i, _len;
       me = this;
@@ -2424,7 +2571,7 @@
       me = this;
       layer_id = (_ref14 = opts.layer) != null ? _ref14 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
-        warn('choropleth error: layer "' + layer_id + '" not found');
+        warn('choropleth error: layer "' + layer_ihad + '" not found');
         return;
       }
       data = opts.data;
@@ -2740,6 +2887,19 @@
       }
     };
 
+    MapLayer.prototype.hasPath = function(id) {
+      var me;
+      me = this;
+      return (me.pathsById != null) && (me.pathsById[id] != null);
+    };
+
+    MapLayer.prototype.getPath = function(id) {
+      var me;
+      me = this;
+      if (me.hasPath(id)) return me.pathsById[id][0];
+      throw 'path ' + id + ' not found';
+    };
+
     MapLayer.prototype.setView = function(view) {
       /*
       		# after resizing of the map, each layer gets a new view
@@ -2927,6 +3087,14 @@
     return PanAndZoomControl;
 
   })();
+
+  Function.prototype.bind = function(scope) {
+    var _func;
+    _func = this;
+    return function() {
+      return _func.apply(scope, arguments);
+    };
+  };
 
   /*
       svgmap - a simple toolset that helps creating interactive thematic maps

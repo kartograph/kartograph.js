@@ -64,7 +64,7 @@ class SymbolGroup
 	constructor: (opts) ->
 		me = @
 		required = ['data','location','type','map']
-		optional = ['filter', 'tooltips', 'layout', 'group']
+		optional = ['filter', 'tooltip', 'layout', 'group']
 		
 		for p in required
 			if opts[p]?
@@ -95,7 +95,8 @@ class SymbolGroup
 			me.layers[l.id] = layer
 		
 		# add symbols
-		for d in me.data
+		for i of me.data
+			d = me.data[i]
 			if type(me.filter) == "function"
 				me.addSymbol d if me.filter d
 			else
@@ -107,6 +108,9 @@ class SymbolGroup
 		# render symbols
 		for s in me.symbols
 			s.render()
+			
+		if type(me.tooltip) == "function"
+			me.initTooltips()
 		
 	addSymbol: (data) ->
 		###
@@ -122,10 +126,12 @@ class SymbolGroup
 		sprops = 
 			layers: me.layers
 			location: ll
+			data: data
 			
 		for p in SymbolType.props
 			if me[p]?
 				sprops[p] = me.evaluate me[p],data
+				
 		symbol = new SymbolType sprops
 		me.symbols.push(symbol)
 		symbol
@@ -143,7 +149,15 @@ class SymbolGroup
 		me = @
 		for s in me.symbols
 			ll = s.location
-			xy = me.map.lonlat2xy ll
+			if type(ll) == 'string'
+				[layer_id, path_id] = ll.split('.')
+				path = me.map.getLayerPath(layer_id, path_id)
+				if path?
+					xy = me.map.viewBC.project path.path.centroid()
+				else
+					continue
+			else
+				xy = me.map.lonlat2xy ll
 			s.x = xy[0]
 			s.y = xy[1]
 		if me.layout == 'group'
@@ -156,6 +170,32 @@ class SymbolGroup
 		me = @
 		me.gsymbols ?= []
 		overlap = true
+		
+	initTooltips: () ->
+		me = @
+		tooltips = me.tooltip	
+		for s in me.symbols
+			cfg = 
+				position:
+					target: 'mouse'
+					viewport: $(window)
+					adjust: 
+						x:7
+						y:7
+				show: 
+					delay: 20 
+				content: {}
+			console.log s, s.data
+			tt = tooltips(s.data)
+			if type(tt) == "string"
+				cfg.content.text = tt
+			else if type(tt) == "array"
+				cfg.content.title = tt[0]
+				cfg.content.text = tt[1]
+			
+			for node in s.nodes()
+				$(node).qtip(cfg)
+		return
 				
 	
 		
@@ -177,6 +217,9 @@ class Symbol
 		
 	overlaps: (symbol) ->
 		false
+		
+	nodes: () ->
+		[]
 
 	
 class Bubble extends Symbol
@@ -221,6 +264,12 @@ class Bubble extends Symbol
 		me = @
 		me.path.remove()
 		me
+		
+	nodes: () ->
+		me = @
+		[me.path.node]
+		
+	
 
 Bubble.props = ['radius','style','class']
 Bubble.layers = [{ id:'a', type: 'svg' }]
