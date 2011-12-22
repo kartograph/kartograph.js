@@ -19,7 +19,7 @@
 root = (exports ? this)	
 svgmap = root.svgmap ?= {}
 
-svgmap.version = "0.1.0"
+svgmap.version = "0.4.2"
 
 
 warn = (s) ->
@@ -36,14 +36,46 @@ class SVGMap
 		#
 		me = @
 		me.container = cnt = $(container)
-		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
-		me.paper = Raphael(cnt[0], vp.width, vp.height)
-		about = $('desc', cnt).text()
-		$('desc', cnt).text(about.replace('with ', 'with svgmap '+svgmap.version+' and '))
+		me.viewport = new svgmap.BBox 0,0,cnt.width(),cnt.height()
+		me.paper = me.createSVGLayer()
 		me.markers = []
 		me.container.addClass 'svgmap'
 		
+	createSVGLayer: (id) ->
+		me = @
+		me._layerCnt ?= 0
+		lid = me._layerCnt++
+		vp = me.viewport
+		cnt = me.container
+		paper = Raphael cnt[0],vp.width,vp.height
+		svg = $ paper.canvas
+		svg.css
+			position: 'absolute'
+			top: '0px'
+			left: '0px'
+			'z-index': lid+5
+
+		console.log cnt.css('position')
+		if cnt.css('position') == 'static'
+			cnt.css 'position','relative'
+
+		svg.addClass id			
+		about = $('desc', paper.canvas).text()
+		$('desc', paper.canvas).text(about.replace('with ', 'with svgmap '+svgmap.version+' and '))
 		
+		paper
+		
+	createHTMLLayer: (id) ->
+		me = @
+		vp = me.viewport
+		cnt = me.container
+		div = $ '<div class="layer '+id+'" />'
+		div.css
+			width: vp.width()+'px'
+			height: vp.height()+'px'
+		cnt.append div	
+		div	
+
 	loadMap: (mapurl, callback, opts) ->
 		# load svg map
 		me = @
@@ -130,6 +162,13 @@ class SVGMap
 		me.markers.push(marker)
 		xy = me.viewBC.project me.viewAB.project me.proj.project marker.lonlat.lon, marker.lonlat.lat
 		marker.render(xy[0],xy[1],me.container, me.paper)
+		
+	
+	clearMarkers: () ->
+		me = @
+		for marker in me.markers
+			marker.clear()
+		me.markers = []
 		
 	
 	choropleth: (opts) ->

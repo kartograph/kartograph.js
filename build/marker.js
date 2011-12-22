@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var BubbleMarker, DotMarker, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, root, svgmap, _ref, _ref2;
+  var Bubble, BubbleMarker, DotMarker, Icon, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, Symbol, SymbolGroup, root, svgmap, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -28,12 +28,229 @@
   if ((_ref2 = svgmap.marker) == null) svgmap.marker = {};
 
   /*
-  Marker concept:
-  - markers have to be registered in SVGMap instance
-  - markers render their own content (output html code)
-  - SVGMap will position marker div over map
-  - marker will handle events
+  New API
+  
+  sg = new SymbolGroup({
+  	data: crimeRatesPerCity,
+  	location: function(d) {
+  		return [d.lon, d.lat]];
+  	},
+  	filter: function(d) {
+  		return !isNaN(d.pop);
+  	},
+  	layout: 'merge'
+  	// type specific options
+  	type: 'Bubble',
+  	radius: function(d) {
+  		return Math.sqrt(d.murder/d.pop)*5;
+  	},
+  	color: '#c00'
+  })
   */
+
+  SymbolGroup = (function() {
+
+    function SymbolGroup(opts) {
+      var SymbolType, d, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref3, _ref4, _ref5, _ref6;
+      me = this;
+      required = ['data', 'location', 'type', 'map'];
+      optional = ['filter', 'tooltips', 'layout'];
+      for (_i = 0, _len = required.length; _i < _len; _i++) {
+        p = required[_i];
+        if (opts[p] != null) {
+          me[p] = opts[p];
+        } else {
+          throw "SymbolGroup: missing argument " + p;
+        }
+      }
+      for (_j = 0, _len2 = optional.length; _j < _len2; _j++) {
+        p = optional[_j];
+        if (opts[p] != null) me[p] = opts[p];
+      }
+      SymbolType = me.type;
+      _ref3 = SymbolType.props;
+      for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
+        p = _ref3[_k];
+        if (opts[p] != null) me[p] = opts[p];
+      }
+      me.layers = {};
+      _ref4 = SymbolType.layers;
+      for (_l = 0, _len4 = _ref4.length; _l < _len4; _l++) {
+        l = _ref4[_l];
+        nid = SymbolGroup._layerid++;
+        id = 'sl_' + nid;
+        if (l.type === 'svg') {
+          layer = me.map.createSVGLayer(id);
+        } else if (l.type === 'html') {
+          layer = me.map.createHTMLLayer(id);
+        }
+        me.layers[l.id] = layer;
+      }
+      _ref5 = me.data;
+      for (_m = 0, _len5 = _ref5.length; _m < _len5; _m++) {
+        d = _ref5[_m];
+        if (type(me.filter) === "function") {
+          if (me.filter(d)) me.addSymbol(d);
+        } else {
+          me.addSymbol(d);
+        }
+      }
+      _ref6 = me.symbols;
+      for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
+        s = _ref6[_n];
+        s.render();
+      }
+    }
+
+    SymbolGroup.prototype.addSymbol = function(data) {
+      var SymbolType, ll, me, p, sprops, symbol, xy, _i, _len, _ref3, _ref4;
+      me = this;
+      if ((_ref3 = me.symbols) == null) me.symbols = [];
+      SymbolType = me.type;
+      ll = me.evaluate(me.location, data);
+      if (type(ll) === 'array') ll = new svgmap.LonLat(ll[0], ll[1]);
+      xy = me.map.lonlat2xy(ll);
+      sprops = {
+        layers: me.layers,
+        location: ll,
+        x: xy[0],
+        y: xy[1]
+      };
+      _ref4 = SymbolType.props;
+      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+        p = _ref4[_i];
+        if (me[p] != null) sprops[p] = me.evaluate(me[p], data);
+      }
+      symbol = new SymbolType(sprops);
+      me.symbols.push(symbol);
+      return symbol;
+    };
+
+    SymbolGroup.prototype.evaluate = function(prop, data) {
+      var val;
+      if (type(prop) === 'function') {
+        return val = prop(data);
+      } else {
+        return val = prop;
+      }
+    };
+
+    return SymbolGroup;
+
+  })();
+
+  SymbolGroup._layerid = 0;
+
+  svgmap.SymbolGroup = SymbolGroup;
+
+  Symbol = (function() {
+
+    function Symbol(opts) {
+      var me;
+      me = this;
+      me.location = opts.location;
+      me.data = opts.data;
+      me.layers = opts.layers;
+      me.x = opts.x;
+      me.y = opts.y;
+    }
+
+    Symbol.prototype.init = function() {};
+
+    Symbol.prototype.overlaps = function(symbol) {
+      return false;
+    };
+
+    return Symbol;
+
+  })();
+
+  Bubble = (function() {
+
+    __extends(Bubble, Symbol);
+
+    function Bubble(opts) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      Bubble.__super__.constructor.call(this, opts);
+      me.radius = (_ref3 = opts.radius) != null ? _ref3 : 4;
+      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+    }
+
+    Bubble.prototype.overlaps = function(bubble) {
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref3, _ref4;
+      me = this;
+      _ref3 = [me.x, me.y, me.radius], x1 = _ref3[0], y1 = _ref3[1], r1 = _ref3[2];
+      _ref4 = [bubble.x, bubble.y, bubble.radius], x2 = _ref4[0], y2 = _ref4[1], r2 = _ref4[2];
+      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
+        return false;
+      }
+      dx = x1 - x2;
+      dy = y1 - y2;
+      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
+      return true;
+    };
+
+    Bubble.prototype.render = function(layers) {
+      var me;
+      me = this;
+      me.path = me.layers.a.circle(me.x, me.y, me.radius);
+      me.update();
+      return me;
+    };
+
+    Bubble.prototype.update = function() {
+      var me, path;
+      me = this;
+      me.path.attr({
+        x: me.x,
+        y: me.y,
+        r: me.radius
+      });
+      path = me.path;
+      path.node.setAttribute('style', me.style);
+      path.node.setAttribute('class', me["class"]);
+      return me;
+    };
+
+    Bubble.prototype.clear = function() {
+      var me;
+      me = this;
+      me.path.remove();
+      return me;
+    };
+
+    return Bubble;
+
+  })();
+
+  Bubble.props = ['radius', 'style', 'class'];
+
+  Bubble.layers = [
+    {
+      id: 'a',
+      type: 'svg'
+    }
+  ];
+
+  svgmap.Bubble = Bubble;
+
+  Icon = (function() {
+
+    __extends(Icon, Symbol);
+
+    function Icon() {
+      Icon.__super__.constructor.apply(this, arguments);
+    }
+
+    return Icon;
+
+  })();
+
+  Icon.props = ['icon'];
+
+  Icon.layer = ['html'];
 
   MapMarker = (function() {
 
@@ -85,16 +302,27 @@
 
     __extends(DotMarker, LabelMarker);
 
-    function DotMarker(ll, label, rad) {
+    function DotMarker(ll, label, rad, color) {
+      if (color == null) color = null;
       DotMarker.__super__.constructor.call(this, ll, label);
       this.rad = rad;
+      this.color = color;
     }
 
     DotMarker.prototype.render = function(x, y, cont, paper) {
-      var node;
-      node = paper.circle(x, y, this.rad).node;
+      var me, node;
+      me = this;
+      me.path = paper.circle(x, y, this.rad);
+      node = me.path.node;
       node.setAttribute('class', 'dotMarker');
-      return node.setAttribute('title', this.label);
+      node.setAttribute('title', this.label);
+      if (this.color != null) {
+        return node.setAttribute('style', 'fill:' + this.color);
+      }
+    };
+
+    DotMarker.prototype.clear = function() {
+      return this.path.remove();
     };
 
     return DotMarker;

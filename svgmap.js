@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, Icon, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -540,12 +540,229 @@
   if ((_ref9 = svgmap.marker) == null) svgmap.marker = {};
 
   /*
-  Marker concept:
-  - markers have to be registered in SVGMap instance
-  - markers render their own content (output html code)
-  - SVGMap will position marker div over map
-  - marker will handle events
+  New API
+  
+  sg = new SymbolGroup({
+  	data: crimeRatesPerCity,
+  	location: function(d) {
+  		return [d.lon, d.lat]];
+  	},
+  	filter: function(d) {
+  		return !isNaN(d.pop);
+  	},
+  	layout: 'merge'
+  	// type specific options
+  	type: 'Bubble',
+  	radius: function(d) {
+  		return Math.sqrt(d.murder/d.pop)*5;
+  	},
+  	color: '#c00'
+  })
   */
+
+  SymbolGroup = (function() {
+
+    function SymbolGroup(opts) {
+      var SymbolType, d, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref10, _ref11, _ref12, _ref13;
+      me = this;
+      required = ['data', 'location', 'type', 'map'];
+      optional = ['filter', 'tooltips', 'layout'];
+      for (_i = 0, _len = required.length; _i < _len; _i++) {
+        p = required[_i];
+        if (opts[p] != null) {
+          me[p] = opts[p];
+        } else {
+          throw "SymbolGroup: missing argument " + p;
+        }
+      }
+      for (_j = 0, _len2 = optional.length; _j < _len2; _j++) {
+        p = optional[_j];
+        if (opts[p] != null) me[p] = opts[p];
+      }
+      SymbolType = me.type;
+      _ref10 = SymbolType.props;
+      for (_k = 0, _len3 = _ref10.length; _k < _len3; _k++) {
+        p = _ref10[_k];
+        if (opts[p] != null) me[p] = opts[p];
+      }
+      me.layers = {};
+      _ref11 = SymbolType.layers;
+      for (_l = 0, _len4 = _ref11.length; _l < _len4; _l++) {
+        l = _ref11[_l];
+        nid = SymbolGroup._layerid++;
+        id = 'sl_' + nid;
+        if (l.type === 'svg') {
+          layer = me.map.createSVGLayer(id);
+        } else if (l.type === 'html') {
+          layer = me.map.createHTMLLayer(id);
+        }
+        me.layers[l.id] = layer;
+      }
+      _ref12 = me.data;
+      for (_m = 0, _len5 = _ref12.length; _m < _len5; _m++) {
+        d = _ref12[_m];
+        if (type(me.filter) === "function") {
+          if (me.filter(d)) me.addSymbol(d);
+        } else {
+          me.addSymbol(d);
+        }
+      }
+      _ref13 = me.symbols;
+      for (_n = 0, _len6 = _ref13.length; _n < _len6; _n++) {
+        s = _ref13[_n];
+        s.render();
+      }
+    }
+
+    SymbolGroup.prototype.addSymbol = function(data) {
+      var SymbolType, ll, me, p, sprops, symbol, xy, _i, _len, _ref10, _ref11;
+      me = this;
+      if ((_ref10 = me.symbols) == null) me.symbols = [];
+      SymbolType = me.type;
+      ll = me.evaluate(me.location, data);
+      if (type(ll) === 'array') ll = new svgmap.LonLat(ll[0], ll[1]);
+      xy = me.map.lonlat2xy(ll);
+      sprops = {
+        layers: me.layers,
+        location: ll,
+        x: xy[0],
+        y: xy[1]
+      };
+      _ref11 = SymbolType.props;
+      for (_i = 0, _len = _ref11.length; _i < _len; _i++) {
+        p = _ref11[_i];
+        if (me[p] != null) sprops[p] = me.evaluate(me[p], data);
+      }
+      symbol = new SymbolType(sprops);
+      me.symbols.push(symbol);
+      return symbol;
+    };
+
+    SymbolGroup.prototype.evaluate = function(prop, data) {
+      var val;
+      if (type(prop) === 'function') {
+        return val = prop(data);
+      } else {
+        return val = prop;
+      }
+    };
+
+    return SymbolGroup;
+
+  })();
+
+  SymbolGroup._layerid = 0;
+
+  svgmap.SymbolGroup = SymbolGroup;
+
+  Symbol = (function() {
+
+    function Symbol(opts) {
+      var me;
+      me = this;
+      me.location = opts.location;
+      me.data = opts.data;
+      me.layers = opts.layers;
+      me.x = opts.x;
+      me.y = opts.y;
+    }
+
+    Symbol.prototype.init = function() {};
+
+    Symbol.prototype.overlaps = function(symbol) {
+      return false;
+    };
+
+    return Symbol;
+
+  })();
+
+  Bubble = (function() {
+
+    __extends(Bubble, Symbol);
+
+    function Bubble(opts) {
+      var me, _ref10, _ref11, _ref12;
+      me = this;
+      Bubble.__super__.constructor.call(this, opts);
+      me.radius = (_ref10 = opts.radius) != null ? _ref10 : 4;
+      me.style = (_ref11 = opts.style) != null ? _ref11 : '';
+      me["class"] = (_ref12 = opts["class"]) != null ? _ref12 : '';
+    }
+
+    Bubble.prototype.overlaps = function(bubble) {
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref10, _ref11;
+      me = this;
+      _ref10 = [me.x, me.y, me.radius], x1 = _ref10[0], y1 = _ref10[1], r1 = _ref10[2];
+      _ref11 = [bubble.x, bubble.y, bubble.radius], x2 = _ref11[0], y2 = _ref11[1], r2 = _ref11[2];
+      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
+        return false;
+      }
+      dx = x1 - x2;
+      dy = y1 - y2;
+      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
+      return true;
+    };
+
+    Bubble.prototype.render = function(layers) {
+      var me;
+      me = this;
+      me.path = me.layers.a.circle(me.x, me.y, me.radius);
+      me.update();
+      return me;
+    };
+
+    Bubble.prototype.update = function() {
+      var me, path;
+      me = this;
+      me.path.attr({
+        x: me.x,
+        y: me.y,
+        r: me.radius
+      });
+      path = me.path;
+      path.node.setAttribute('style', me.style);
+      path.node.setAttribute('class', me["class"]);
+      return me;
+    };
+
+    Bubble.prototype.clear = function() {
+      var me;
+      me = this;
+      me.path.remove();
+      return me;
+    };
+
+    return Bubble;
+
+  })();
+
+  Bubble.props = ['radius', 'style', 'class'];
+
+  Bubble.layers = [
+    {
+      id: 'a',
+      type: 'svg'
+    }
+  ];
+
+  svgmap.Bubble = Bubble;
+
+  Icon = (function() {
+
+    __extends(Icon, Symbol);
+
+    function Icon() {
+      Icon.__super__.constructor.apply(this, arguments);
+    }
+
+    return Icon;
+
+  })();
+
+  Icon.props = ['icon'];
+
+  Icon.layer = ['html'];
 
   MapMarker = (function() {
 
@@ -605,13 +822,19 @@
     }
 
     DotMarker.prototype.render = function(x, y, cont, paper) {
-      var node;
-      node = paper.circle(x, y, this.rad).node;
+      var me, node;
+      me = this;
+      me.path = paper.circle(x, y, this.rad);
+      node = me.path.node;
       node.setAttribute('class', 'dotMarker');
       node.setAttribute('title', this.label);
       if (this.color != null) {
         return node.setAttribute('style', 'fill:' + this.color);
       }
+    };
+
+    DotMarker.prototype.clear = function() {
+      return this.path.remove();
     };
 
     return DotMarker;
@@ -1989,7 +2212,7 @@
 
   svgmap = (_ref13 = root.svgmap) != null ? _ref13 : root.svgmap = {};
 
-  svgmap.version = "0.1.0";
+  svgmap.version = "0.4.2";
 
   warn = function(s) {
     return console.warn('svgmap (' + svgmap.version + '): ' + s);
@@ -2002,16 +2225,51 @@
   SVGMap = (function() {
 
     function SVGMap(container) {
-      var about, cnt, me, vp;
+      var cnt, me;
       me = this;
       me.container = cnt = $(container);
-      me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
-      me.paper = Raphael(cnt[0], vp.width, vp.height);
-      about = $('desc', cnt).text();
-      $('desc', cnt).text(about.replace('with ', 'with svgmap ' + svgmap.version + ' and '));
+      me.viewport = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
+      me.paper = me.createSVGLayer();
       me.markers = [];
       me.container.addClass('svgmap');
     }
+
+    SVGMap.prototype.createSVGLayer = function(id) {
+      var about, cnt, lid, me, paper, svg, vp, _ref14;
+      me = this;
+      if ((_ref14 = me._layerCnt) == null) me._layerCnt = 0;
+      lid = me._layerCnt++;
+      vp = me.viewport;
+      cnt = me.container;
+      paper = Raphael(cnt[0], vp.width, vp.height);
+      svg = $(paper.canvas);
+      svg.css({
+        position: 'absolute',
+        top: '0px',
+        left: '0px',
+        'z-index': lid + 5
+      });
+      console.log(cnt.css('position'));
+      if (cnt.css('position') === 'static') cnt.css('position', 'relative');
+      svg.addClass(id);
+      about = $('desc', paper.canvas).text();
+      $('desc', paper.canvas).text(about.replace('with ', 'with svgmap ' + svgmap.version + ' and '));
+      return paper;
+    };
+
+    SVGMap.prototype.createHTMLLayer = function(id) {
+      var cnt, div, me, vp;
+      me = this;
+      vp = me.viewport;
+      cnt = me.container;
+      div = $('<div class="layer ' + id + '" />');
+      div.css({
+        width: vp.width() + 'px',
+        height: vp.height() + 'px'
+      });
+      cnt.append(div);
+      return div;
+    };
 
     SVGMap.prototype.loadMap = function(mapurl, callback, opts) {
       var me, _base2, _ref14;
@@ -2104,6 +2362,17 @@
       me.markers.push(marker);
       xy = me.viewBC.project(me.viewAB.project(me.proj.project(marker.lonlat.lon, marker.lonlat.lat)));
       return marker.render(xy[0], xy[1], me.container, me.paper);
+    };
+
+    SVGMap.prototype.clearMarkers = function() {
+      var marker, me, _i, _len, _ref14;
+      me = this;
+      _ref14 = me.markers;
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        marker = _ref14[_i];
+        marker.clear();
+      }
+      return me.markers = [];
     };
 
     SVGMap.prototype.choropleth = function(opts) {
