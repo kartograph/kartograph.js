@@ -38,7 +38,24 @@
   	filter: function(d) {
   		return !isNaN(d.pop);
   	},
-  	layout: 'merge'
+  	layout: 'group',
+  	group: function(list) {
+  		var s=0,p=0,i,d,g = {},lat=0,lon=0;
+  		for (i in list) {
+  			d = list[i];
+  			s += d.murder;
+  			p += d.pop;
+  		}
+  		for (i in list) {
+  			d = list[i];
+  			lon += d.ll[0] * d.pop/p;
+  			lat += d.ll[1] * d.pop/p;
+  		}
+  		g.murder = s;
+  		g.pop = p;
+  		g.ll = [lon,lat];
+  		return g;
+  	},
   	// type specific options
   	type: 'Bubble',
   	radius: function(d) {
@@ -54,7 +71,7 @@
       var SymbolType, d, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref3, _ref4, _ref5, _ref6;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltips', 'layout'];
+      optional = ['filter', 'tooltips', 'layout', 'group'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -95,6 +112,7 @@
           me.addSymbol(d);
         }
       }
+      me.layoutSymbols();
       _ref6 = me.symbols;
       for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
         s = _ref6[_n];
@@ -103,18 +121,18 @@
     }
 
     SymbolGroup.prototype.addSymbol = function(data) {
-      var SymbolType, ll, me, p, sprops, symbol, xy, _i, _len, _ref3, _ref4;
+      /*
+      		adds a new symbol to this group
+      */
+      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref3, _ref4;
       me = this;
       if ((_ref3 = me.symbols) == null) me.symbols = [];
       SymbolType = me.type;
       ll = me.evaluate(me.location, data);
       if (type(ll) === 'array') ll = new svgmap.LonLat(ll[0], ll[1]);
-      xy = me.map.lonlat2xy(ll);
       sprops = {
         layers: me.layers,
-        location: ll,
-        x: xy[0],
-        y: xy[1]
+        location: ll
       };
       _ref4 = SymbolType.props;
       for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
@@ -127,12 +145,39 @@
     };
 
     SymbolGroup.prototype.evaluate = function(prop, data) {
+      /*
+      		evaluates a property function or returns a static value
+      */
       var val;
       if (type(prop) === 'function') {
         return val = prop(data);
       } else {
         return val = prop;
       }
+    };
+
+    SymbolGroup.prototype.layoutSymbols = function() {
+      var ll, me, s, xy, _i, _len, _ref3;
+      me = this;
+      _ref3 = me.symbols;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        ll = s.location;
+        xy = me.map.lonlat2xy(ll);
+        s.x = xy[0];
+        s.y = xy[1];
+      }
+      if (me.layout === 'group') return me.groupLayout();
+    };
+
+    SymbolGroup.prototype.groupLayout = function() {
+      /*
+      		layouts symbols in this group, eventually adds new 'grouped' symbols
+      */
+      var me, overlap, _ref3;
+      me = this;
+      if ((_ref3 = me.gsymbols) == null) me.gsymbols = [];
+      return overlap = true;
     };
 
     return SymbolGroup;

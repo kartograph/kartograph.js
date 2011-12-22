@@ -31,7 +31,24 @@ sg = new SymbolGroup({
 	filter: function(d) {
 		return !isNaN(d.pop);
 	},
-	layout: 'merge'
+	layout: 'group',
+	group: function(list) {
+		var s=0,p=0,i,d,g = {},lat=0,lon=0;
+		for (i in list) {
+			d = list[i];
+			s += d.murder;
+			p += d.pop;
+		}
+		for (i in list) {
+			d = list[i];
+			lon += d.ll[0] * d.pop/p;
+			lat += d.ll[1] * d.pop/p;
+		}
+		g.murder = s;
+		g.pop = p;
+		g.ll = [lon,lat];
+		return g;
+	},
 	// type specific options
 	type: 'Bubble',
 	radius: function(d) {
@@ -47,7 +64,7 @@ class SymbolGroup
 	constructor: (opts) ->
 		me = @
 		required = ['data','location','type','map']
-		optional = ['filter', 'tooltips', 'layout']
+		optional = ['filter', 'tooltips', 'layout', 'group']
 		
 		for p in required
 			if opts[p]?
@@ -85,25 +102,26 @@ class SymbolGroup
 				me.addSymbol d
 				
 		# layout symbols
+		me.layoutSymbols()
 		
 		# render symbols
 		for s in me.symbols
 			s.render()
 		
 	addSymbol: (data) ->
+		###
+		adds a new symbol to this group
+		###
 		me = @
 		me.symbols ?= [] 
 		SymbolType = me.type
 		ll = me.evaluate me.location,data
 		if type(ll) == 'array'
 			ll = new svgmap.LonLat ll[0],ll[1]
-		xy = me.map.lonlat2xy ll
 		
 		sprops = 
 			layers: me.layers
 			location: ll
-			x: xy[0]
-			y: xy[1]
 			
 		for p in SymbolType.props
 			if me[p]?
@@ -111,14 +129,35 @@ class SymbolGroup
 		symbol = new SymbolType sprops
 		me.symbols.push(symbol)
 		symbol
-		
 			
 	evaluate: (prop, data) ->
+		###
+		evaluates a property function or returns a static value
+		###
 		if type(prop) == 'function'
 			val = prop(data)
 		else
 			val = prop
-		
+	
+	layoutSymbols: () ->
+		me = @
+		for s in me.symbols
+			ll = s.location
+			xy = me.map.lonlat2xy ll
+			s.x = xy[0]
+			s.y = xy[1]
+		if me.layout == 'group'
+			me.groupLayout()
+	
+	groupLayout: () ->
+		###
+		layouts symbols in this group, eventually adds new 'grouped' symbols
+		###
+		me = @
+		me.gsymbols ?= []
+		overlap = true
+				
+	
 		
 SymbolGroup._layerid = 0
 svgmap.SymbolGroup = SymbolGroup		
