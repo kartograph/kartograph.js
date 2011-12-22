@@ -54,6 +54,7 @@ var GlobeOpt = function() {
 	this.up = 0;
 	this.tilt = 0;
 	this.proj = 'ortho';
+	this.flip = 0;
 };
 
 var globeopt = new GlobeOpt();
@@ -205,6 +206,7 @@ $(function() {
 	for (var p in svgmap.proj) proj.push(p);
 	
 	gui.add(globeopt, 'proj', proj).onChange(renderFrame);
+	gui.add(globeopt, 'flip', [0,1]).onChange(renderFrame);
 	gui.add(globeopt, 'lon0',-180,180).step(1).onChange(renderFrame);
 	gui.add(globeopt, 'lat0', -90,90).onChange(renderFrame);
 	gui.add(globeopt, 'lat1', -90,90).onChange(renderFrame);

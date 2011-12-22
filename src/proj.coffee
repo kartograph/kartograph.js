@@ -107,6 +107,11 @@ class Cylindrical extends Proj
 	###
 	Base class for cylindrical projections
 	###
+	constructor: (opts) ->
+		super opts
+		me = @
+		me.flip = opts.flip || 0
+		
 	_visible: (lon, lat) ->
 		true
 		
@@ -118,12 +123,19 @@ class Cylindrical extends Proj
 			lon -= 360
 		lon
 		
+	ll: (lon, lat) ->
+		if Number(@flip) == 1
+			return [-lon,-lat]
+		else
+			return [lon, lat]
+		
 	
 class Equirectangular extends Cylindrical
 	###
 	Equirectangular Projection aka Lonlat aka Plate Carree
 	###
 	project: (lon, lat) ->
+		[lon, lat] = @ll(lon,lat)
 		lon = @clon(lon)
 		[(lon) * Math.cos(@phi0) * 1000, lat*-1*1000]
 
@@ -141,6 +153,7 @@ class CEA extends Cylindrical
 	Cylindrical Equal Area Projection
 	###
 	project: (lon, lat) ->
+		[lon, lat] = @ll(lon,lat)
 		lam = @rad(@clon(lon))
 		phi = @rad(lat*-1)
 		x = (lam) * Math.cos(@phi1)
@@ -204,6 +217,7 @@ class Mercator extends Cylindrical
 	
 	project: (lon, lat) ->
 		s = @
+		[lon, lat] = s.ll(lon,lat)
 		math = Math
 		lam = s.rad(s.clon(lon))
 		phi = s.rad(lat*-1)
@@ -254,6 +268,7 @@ class NaturalEarth extends PseudoCylindrical
 		
 	project: (lon, lat) ->
 		s = @
+		[lon, lat] = s.ll(lon,lat)
 		lplam = s.rad(s.clon(lon))
 		lpphi = s.rad(lat*-1)
 		phi2 = lpphi * lpphi
@@ -290,6 +305,7 @@ class Robinson extends PseudoCylindrical
 
 	project: (lon, lat) ->
 		s = @
+		[lon, lat] = s.ll(lon,lat)
 		lon = s.clon(lon)
 		
 		lplam = s.rad lon
@@ -326,6 +342,7 @@ class EckertIV extends PseudoCylindrical
 	
 	project: (lon, lat) ->
 		me = @
+		[lon, lat] = me.ll(lon,lat)
 		lplam = me.rad(me.clon(lon))
 		lpphi = me.rad(lat*-1)
 		
@@ -360,6 +377,7 @@ class Sinusoidal extends PseudoCylindrical
 	###
 	project: (lon, lat) ->
 		me = @
+		[lon, lat] = me.ll(lon,lat)
 		lam = me.rad(me.clon(lon))
 		phi = me.rad(lat*-1)
 		x = lam * Math.cos(phi)
@@ -395,6 +413,7 @@ class Mollweide extends PseudoCylindrical
 		
 	project: (lon, lat) ->
 		me = @
+		[lon, lat] = me.ll(lon,lat)
 		math = Math
 		abs = math.abs
 		lam = me.rad(me.clon(lon))
@@ -450,6 +469,7 @@ class Loximuthal extends PseudoCylindrical
 
 	project: (lon, lat) ->
 		me = @
+		[lon, lat] = me.ll(lon,lat)
 		math = Math
 		lam = me.rad(me.clon(lon))
 		phi = me.rad(lat)

@@ -143,13 +143,16 @@
 
     __extends(Cylindrical, Proj);
 
-    function Cylindrical() {
-      Cylindrical.__super__.constructor.apply(this, arguments);
-    }
-
     /*
     	Base class for cylindrical projections
     */
+
+    function Cylindrical(opts) {
+      var me;
+      Cylindrical.__super__.constructor.call(this, opts);
+      me = this;
+      me.flip = opts.flip || 0;
+    }
 
     Cylindrical.prototype._visible = function(lon, lat) {
       return true;
@@ -163,6 +166,14 @@
         lon -= 360;
       }
       return lon;
+    };
+
+    Cylindrical.prototype.ll = function(lon, lat) {
+      if (Number(this.flip) === 1) {
+        return [-lon, -lat];
+      } else {
+        return [lon, lat];
+      }
     };
 
     return Cylindrical;
@@ -182,6 +193,8 @@
     */
 
     Equirectangular.prototype.project = function(lon, lat) {
+      var _ref2;
+      _ref2 = this.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       lon = this.clon(lon);
       return [lon * Math.cos(this.phi0) * 1000, lat * -1 * 1000];
     };
@@ -208,7 +221,8 @@
     */
 
     CEA.prototype.project = function(lon, lat) {
-      var lam, phi, x, y;
+      var lam, phi, x, y, _ref2;
+      _ref2 = this.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       lam = this.rad(this.clon(lon));
       phi = this.rad(lat * -1);
       x = lam * Math.cos(this.phi1);
@@ -312,8 +326,9 @@
     }
 
     Mercator.prototype.project = function(lon, lat) {
-      var lam, math, phi, s, x, y;
+      var lam, math, phi, s, x, y, _ref2;
       s = this;
+      _ref2 = s.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       math = Math;
       lam = s.rad(s.clon(lon));
       phi = s.rad(lat * -1);
@@ -378,8 +393,9 @@
     }
 
     NaturalEarth.prototype.project = function(lon, lat) {
-      var lplam, lpphi, phi2, phi4, s, x, y;
+      var lplam, lpphi, phi2, phi4, s, x, y, _ref2;
       s = this;
+      _ref2 = s.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       lplam = s.rad(s.clon(lon));
       lpphi = s.rad(lat * -1);
       phi2 = lpphi * lpphi;
@@ -424,8 +440,9 @@
     };
 
     Robinson.prototype.project = function(lon, lat) {
-      var i, lplam, lpphi, phi, s, x, y;
+      var i, lplam, lpphi, phi, s, x, y, _ref2;
       s = this;
+      _ref2 = s.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       lon = s.clon(lon);
       lplam = s.rad(lon);
       lpphi = s.rad(lat * -1);
@@ -468,8 +485,9 @@
     }
 
     EckertIV.prototype.project = function(lon, lat) {
-      var V, c, i, lplam, lpphi, me, p, s, x, y;
+      var V, c, i, lplam, lpphi, me, p, s, x, y, _ref2;
       me = this;
+      _ref2 = me.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       lplam = me.rad(me.clon(lon));
       lpphi = me.rad(lat * -1);
       p = me.C_p * Math.sin(lpphi);
@@ -513,8 +531,9 @@
     */
 
     Sinusoidal.prototype.project = function(lon, lat) {
-      var lam, me, phi, x, y;
+      var lam, me, phi, x, y, _ref2;
       me = this;
+      _ref2 = me.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat * -1);
       x = lam * Math.cos(phi);
@@ -563,8 +582,9 @@
     }
 
     Mollweide.prototype.project = function(lon, lat) {
-      var abs, i, k, lam, math, me, phi, v, x, y;
+      var abs, i, k, lam, math, me, phi, v, x, y, _ref2;
       me = this;
+      _ref2 = me.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       math = Math;
       abs = math.abs;
       lam = me.rad(me.clon(lon));
@@ -643,8 +663,9 @@
     maxLat = 89;
 
     Loximuthal.prototype.project = function(lon, lat) {
-      var lam, math, me, phi, x, y;
+      var lam, math, me, phi, x, y, _ref2;
       me = this;
+      _ref2 = me.ll(lon, lat), lon = _ref2[0], lat = _ref2[1];
       math = Math;
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat);
