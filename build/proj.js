@@ -148,10 +148,11 @@
     */
 
     function Cylindrical(opts) {
-      var me;
-      Cylindrical.__super__.constructor.call(this, opts);
+      var me, _ref2;
       me = this;
-      me.flip = opts.flip || 0;
+      me.flip = Number(opts.flip) || 0;
+      if (me.flip === 1) opts.lon0 = (_ref2 = -opts.lon0) != null ? _ref2 : 0;
+      Cylindrical.__super__.constructor.call(this, opts);
     }
 
     Cylindrical.prototype._visible = function(lon, lat) {
@@ -169,7 +170,7 @@
     };
 
     Cylindrical.prototype.ll = function(lon, lat) {
-      if (Number(this.flip) === 1) {
+      if (this.flip === 1) {
         return [-lon, -lat];
       } else {
         return [lon, lat];

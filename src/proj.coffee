@@ -108,9 +108,13 @@ class Cylindrical extends Proj
 	Base class for cylindrical projections
 	###
 	constructor: (opts) ->
-		super opts
 		me = @
-		me.flip = opts.flip || 0
+		me.flip = Number(opts.flip) || 0
+		if me.flip == 1
+			opts.lon0 = -opts.lon0 ? 0
+			
+			
+		super opts
 		
 	_visible: (lon, lat) ->
 		true
@@ -124,7 +128,7 @@ class Cylindrical extends Proj
 		lon
 		
 	ll: (lon, lat) ->
-		if Number(@flip) == 1
+		if @flip == 1
 			return [-lon,-lat]
 		else
 			return [lon, lat]
