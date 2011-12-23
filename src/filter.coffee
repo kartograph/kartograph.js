@@ -60,8 +60,8 @@ class GlowFilter extends Filter
 
 	buildFilter: (fltr) ->
 		me = @
-		blur = me.params.blur ? 8
-		strength = me.params.strength ? 2
+		blur = me.params.blur ? 4
+		strength = me.params.strength ? 1
 		color = me.params.color ? '#D1BEB0'
 		color = chroma.hex(color) if typeof color == 'string'
 		rgb = color.rgb
@@ -81,21 +81,22 @@ class GlowFilter extends Filter
 		mat = SVG 'feColorMatrix',
 			in: 'SourceGraphic'
 			type: 'matrix'
-			values: '0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 500 0'
+			values: '0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 1 0'
 			result: 'mask'
 		fltr.appendChild mat
 
-		morph = SVG 'feMorphology',
-			in: 'mask'
-			radius: _strength
-			operator: 'dilate'
-			result: 'mask2'
-		fltr.appendChild morph
+		if _strength > 0
+			morph = SVG 'feMorphology',
+				in: 'mask'
+				radius: _strength
+				operator: 'dilate'
+				result: 'mask'
+			fltr.appendChild morph
 		
 		mat = SVG 'feColorMatrix',
-			in: 'mask2'
+			in: 'mask'
 			type: 'matrix'
-			values: '0 0 0 0 '+(rgb[0]/255)+' 0 0 0 0 '+(rgb[1]/255)+' 0 0 0 0 '+(rgb[2]/255)+'  0 0 0 500 0'
+			values: '0 0 0 0 '+(rgb[0]/255)+' 0 0 0 0 '+(rgb[1]/255)+' 0 0 0 0 '+(rgb[2]/255)+'  0 0 0 1 0'
 			result: 'r0'
 		fltr.appendChild mat
 		
@@ -117,7 +118,7 @@ class GlowFilter extends Filter
 			merge.appendChild SVG 'feMergeNode',
 				'in': 'SourceGraphic'
 		merge.appendChild SVG 'feMergeNode',
-			'in': 'comp'
+			'in': 'r1'
 		fltr.appendChild merge
 		
 		

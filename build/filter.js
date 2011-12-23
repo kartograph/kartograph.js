@@ -101,8 +101,8 @@
     GlowFilter.prototype.buildFilter = function(fltr) {
       var alpha, blur, color, inner, knockout, me, rgb, strength, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
       me = this;
-      blur = (_ref3 = me.params.blur) != null ? _ref3 : 8;
-      strength = (_ref4 = me.params.strength) != null ? _ref4 : 2;
+      blur = (_ref3 = me.params.blur) != null ? _ref3 : 4;
+      strength = (_ref4 = me.params.strength) != null ? _ref4 : 1;
       color = (_ref5 = me.params.color) != null ? _ref5 : '#D1BEB0';
       if (typeof color === 'string') color = chroma.hex(color);
       rgb = color.rgb;
@@ -123,21 +123,23 @@
       mat = SVG('feColorMatrix', {
         "in": 'SourceGraphic',
         type: 'matrix',
-        values: '0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 500 0',
+        values: '0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 1 0',
         result: 'mask'
       });
       fltr.appendChild(mat);
-      morph = SVG('feMorphology', {
-        "in": 'mask',
-        radius: _strength,
-        operator: 'dilate',
-        result: 'mask2'
-      });
-      fltr.appendChild(morph);
+      if (_strength > 0) {
+        morph = SVG('feMorphology', {
+          "in": 'mask',
+          radius: _strength,
+          operator: 'dilate',
+          result: 'mask'
+        });
+        fltr.appendChild(morph);
+      }
       mat = SVG('feColorMatrix', {
-        "in": 'mask2',
+        "in": 'mask',
         type: 'matrix',
-        values: '0 0 0 0 ' + (rgb[0] / 255) + ' 0 0 0 0 ' + (rgb[1] / 255) + ' 0 0 0 0 ' + (rgb[2] / 255) + '  0 0 0 500 0',
+        values: '0 0 0 0 ' + (rgb[0] / 255) + ' 0 0 0 0 ' + (rgb[1] / 255) + ' 0 0 0 0 ' + (rgb[2] / 255) + '  0 0 0 1 0',
         result: 'r0'
       });
       fltr.appendChild(mat);
@@ -161,7 +163,7 @@
         }));
       }
       merge.appendChild(SVG('feMergeNode', {
-        'in': 'comp'
+        'in': 'r1'
       }));
       return fltr.appendChild(merge);
     };
