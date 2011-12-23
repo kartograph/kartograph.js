@@ -744,6 +744,25 @@ class EquidistantAzimuthal extends Azimuthal
 
 __proj['equi'] = EquidistantAzimuthal
 
+
+
+class Aitoff extends EquidistantAzimuthal
+	###
+	Aitoff projection
+	
+	implementation taken from 
+	Snyder, Map projections - A working manual
+	###
+		
+	project: (lon, lat) ->
+		
+		[x,y]
+		
+	_visible: (lon, lat) ->
+		true
+
+__proj['aitoff'] = Aitoff
+
 # -------------------------------
 # Family of Conic Projecitons
 # -------------------------------

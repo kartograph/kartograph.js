@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -2403,6 +2403,35 @@
   })();
 
   __proj['equi'] = EquidistantAzimuthal;
+
+  Aitoff = (function() {
+
+    __extends(Aitoff, EquidistantAzimuthal);
+
+    function Aitoff() {
+      Aitoff.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Aitoff projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    */
+
+    Aitoff.prototype.project = function(lon, lat) {
+      return [x, y];
+    };
+
+    Aitoff.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    return Aitoff;
+
+  })();
+
+  __proj['aitoff'] = Aitoff;
 
   Conic = (function() {
 

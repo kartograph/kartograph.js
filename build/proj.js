@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoConic, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Aitoff, Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoConic, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -1004,6 +1004,35 @@
   })();
 
   __proj['equi'] = EquidistantAzimuthal;
+
+  Aitoff = (function() {
+
+    __extends(Aitoff, EquidistantAzimuthal);
+
+    function Aitoff() {
+      Aitoff.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+    	Aitoff projection
+    	
+    	implementation taken from 
+    	Snyder, Map projections - A working manual
+    */
+
+    Aitoff.prototype.project = function(lon, lat) {
+      return [x, y];
+    };
+
+    Aitoff.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    return Aitoff;
+
+  })();
+
+  __proj['aitoff'] = Aitoff;
 
   Conic = (function() {
 
