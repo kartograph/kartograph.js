@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, Icon, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, IconMarker, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, Robinson, SVGMap, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, log, root, svgmap, warn, __proj, _base, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -602,7 +602,9 @@
         p = _ref10[_k];
         if (opts[p] != null) me[p] = opts[p];
       }
-      me.layers = {};
+      me.layers = {
+        mapcanvas: me.map.paper
+      };
       _ref11 = SymbolType.layers;
       for (_l = 0, _len4 = _ref11.length; _l < _len4; _l++) {
         l = _ref11[_l];
@@ -850,6 +852,133 @@
   ];
 
   svgmap.Bubble = Bubble;
+
+  HtmlLabel = (function() {
+
+    __extends(HtmlLabel, Symbol);
+
+    function HtmlLabel(opts) {
+      var me, _ref10, _ref11, _ref12;
+      me = this;
+      HtmlLabel.__super__.constructor.call(this, opts);
+      me.text = (_ref10 = opts.text) != null ? _ref10 : '';
+      me.style = (_ref11 = opts.style) != null ? _ref11 : '';
+      me["class"] = (_ref12 = opts["class"]) != null ? _ref12 : '';
+    }
+
+    HtmlLabel.prototype.render = function(layers) {
+      var l, lbl, me;
+      me = this;
+      l = $('<div>' + me.text + '</div>');
+      l.css({
+        width: '50px',
+        position: 'absolute',
+        left: '-25px',
+        'text-align': 'center'
+      });
+      me.lbl = lbl = $('<div class="label" />');
+      lbl.append(l);
+      me.layers.lbl.append(lbl);
+      l.css({
+        height: l.height() + 'px',
+        top: (l.height() * -.4) + 'px'
+      });
+      me.update();
+      return me;
+    };
+
+    HtmlLabel.prototype.update = function() {
+      var me;
+      me = this;
+      return me.lbl.css({
+        position: 'absolute',
+        left: me.x + 'px',
+        top: me.y + 'px'
+      });
+    };
+
+    HtmlLabel.prototype.clear = function() {
+      var me;
+      me = this;
+      me.lbl.remove();
+      return me;
+    };
+
+    HtmlLabel.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.lbl[0]];
+    };
+
+    return HtmlLabel;
+
+  })();
+
+  HtmlLabel.props = ['text', 'style', 'class'];
+
+  HtmlLabel.layers = [
+    {
+      id: 'lbl',
+      type: 'html'
+    }
+  ];
+
+  svgmap.HtmlLabel = HtmlLabel;
+
+  SvgLabel = (function() {
+
+    __extends(SvgLabel, Symbol);
+
+    function SvgLabel(opts) {
+      var me, _ref10, _ref11, _ref12;
+      me = this;
+      SvgLabel.__super__.constructor.call(this, opts);
+      me.text = (_ref10 = opts.text) != null ? _ref10 : '';
+      me.style = (_ref11 = opts.style) != null ? _ref11 : '';
+      me["class"] = (_ref12 = opts["class"]) != null ? _ref12 : '';
+    }
+
+    SvgLabel.prototype.render = function(layers) {
+      var lbl, me;
+      me = this;
+      me.lbl = lbl = me.layers.mapcanvas.text(me.x, me.y, me.text);
+      me.update();
+      return me;
+    };
+
+    SvgLabel.prototype.update = function() {
+      var me;
+      me = this;
+      me.lbl.attr({
+        x: me.x,
+        y: me.y
+      });
+      me.lbl.node.setAttribute('style', me.style);
+      return me.lbl.node.setAttribute('class', me["class"]);
+    };
+
+    SvgLabel.prototype.clear = function() {
+      var me;
+      me = this;
+      me.lbl.remove();
+      return me;
+    };
+
+    SvgLabel.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.lbl.node];
+    };
+
+    return SvgLabel;
+
+  })();
+
+  SvgLabel.props = ['text', 'style', 'class'];
+
+  SvgLabel.layers = [];
+
+  svgmap.Label = SvgLabel;
 
   Icon = (function() {
 
@@ -1416,10 +1545,11 @@
     */
 
     function Cylindrical(opts) {
-      var me;
-      Cylindrical.__super__.constructor.call(this, opts);
+      var me, _ref13;
       me = this;
-      me.flip = opts.flip || 0;
+      me.flip = Number(opts.flip) || 0;
+      if (me.flip === 1) opts.lon0 = (_ref13 = -opts.lon0) != null ? _ref13 : 0;
+      Cylindrical.__super__.constructor.call(this, opts);
     }
 
     Cylindrical.prototype._visible = function(lon, lat) {
@@ -1437,7 +1567,7 @@
     };
 
     Cylindrical.prototype.ll = function(lon, lat) {
-      if (Number(this.flip) === 1) {
+      if (this.flip === 1) {
         return [-lon, -lat];
       } else {
         return [lon, lat];
@@ -2440,14 +2570,20 @@
     };
 
     SVGMap.prototype.createHTMLLayer = function(id) {
-      var cnt, div, me, vp;
+      var cnt, div, lid, me, vp, _ref14;
       me = this;
       vp = me.viewport;
       cnt = me.container;
+      if ((_ref14 = me._layerCnt) == null) me._layerCnt = 0;
+      lid = me._layerCnt++;
       div = $('<div class="layer ' + id + '" />');
       div.css({
-        width: vp.width() + 'px',
-        height: vp.height() + 'px'
+        position: 'absolute',
+        top: '0px',
+        left: '0px',
+        width: vp.width + 'px',
+        height: vp.height + 'px',
+        'z-index': lid + 5
       });
       cnt.append(div);
       return div;

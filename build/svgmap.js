@@ -70,14 +70,20 @@
     };
 
     SVGMap.prototype.createHTMLLayer = function(id) {
-      var cnt, div, me, vp;
+      var cnt, div, lid, me, vp, _ref2;
       me = this;
       vp = me.viewport;
       cnt = me.container;
+      if ((_ref2 = me._layerCnt) == null) me._layerCnt = 0;
+      lid = me._layerCnt++;
       div = $('<div class="layer ' + id + '" />');
       div.css({
-        width: vp.width() + 'px',
-        height: vp.height() + 'px'
+        position: 'absolute',
+        top: '0px',
+        left: '0px',
+        width: vp.width + 'px',
+        height: vp.height + 'px',
+        'z-index': lid + 5
       });
       cnt.append(div);
       return div;
