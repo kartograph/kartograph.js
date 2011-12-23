@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Bubble, BubbleMarker, DotMarker, Icon, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, Symbol, SymbolGroup, root, svgmap, _ref, _ref2;
+  var Bubble, BubbleMarker, DotMarker, HtmlLabel, Icon, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, SvgLabel, Symbol, SymbolGroup, root, svgmap, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -90,7 +90,9 @@
         p = _ref3[_k];
         if (opts[p] != null) me[p] = opts[p];
       }
-      me.layers = {};
+      me.layers = {
+        mapcanvas: me.map.paper
+      };
       _ref4 = SymbolType.layers;
       for (_l = 0, _len4 = _ref4.length; _l < _len4; _l++) {
         l = _ref4[_l];
@@ -338,6 +340,133 @@
   ];
 
   svgmap.Bubble = Bubble;
+
+  HtmlLabel = (function() {
+
+    __extends(HtmlLabel, Symbol);
+
+    function HtmlLabel(opts) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      HtmlLabel.__super__.constructor.call(this, opts);
+      me.text = (_ref3 = opts.text) != null ? _ref3 : '';
+      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+    }
+
+    HtmlLabel.prototype.render = function(layers) {
+      var l, lbl, me;
+      me = this;
+      l = $('<div>' + me.text + '</div>');
+      l.css({
+        width: '50px',
+        position: 'absolute',
+        left: '-25px',
+        'text-align': 'center'
+      });
+      me.lbl = lbl = $('<div class="label" />');
+      lbl.append(l);
+      me.layers.lbl.append(lbl);
+      l.css({
+        height: l.height() + 'px',
+        top: (l.height() * -.4) + 'px'
+      });
+      me.update();
+      return me;
+    };
+
+    HtmlLabel.prototype.update = function() {
+      var me;
+      me = this;
+      return me.lbl.css({
+        position: 'absolute',
+        left: me.x + 'px',
+        top: me.y + 'px'
+      });
+    };
+
+    HtmlLabel.prototype.clear = function() {
+      var me;
+      me = this;
+      me.lbl.remove();
+      return me;
+    };
+
+    HtmlLabel.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.lbl[0]];
+    };
+
+    return HtmlLabel;
+
+  })();
+
+  HtmlLabel.props = ['text', 'style', 'class'];
+
+  HtmlLabel.layers = [
+    {
+      id: 'lbl',
+      type: 'html'
+    }
+  ];
+
+  svgmap.HtmlLabel = HtmlLabel;
+
+  SvgLabel = (function() {
+
+    __extends(SvgLabel, Symbol);
+
+    function SvgLabel(opts) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      SvgLabel.__super__.constructor.call(this, opts);
+      me.text = (_ref3 = opts.text) != null ? _ref3 : '';
+      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+    }
+
+    SvgLabel.prototype.render = function(layers) {
+      var lbl, me;
+      me = this;
+      me.lbl = lbl = me.layers.mapcanvas.text(me.x, me.y, me.text);
+      me.update();
+      return me;
+    };
+
+    SvgLabel.prototype.update = function() {
+      var me;
+      me = this;
+      me.lbl.attr({
+        x: me.x,
+        y: me.y
+      });
+      me.lbl.node.setAttribute('style', me.style);
+      return me.lbl.node.setAttribute('class', me["class"]);
+    };
+
+    SvgLabel.prototype.clear = function() {
+      var me;
+      me = this;
+      me.lbl.remove();
+      return me;
+    };
+
+    SvgLabel.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.lbl.node];
+    };
+
+    return SvgLabel;
+
+  })();
+
+  SvgLabel.props = ['text', 'style', 'class'];
+
+  SvgLabel.layers = [];
+
+  svgmap.Label = SvgLabel;
 
   Icon = (function() {
 

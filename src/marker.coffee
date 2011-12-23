@@ -84,7 +84,8 @@ class SymbolGroup
 				me[p] = opts[p]
 		
 		# init layer
-		me.layers = {}
+		me.layers = 
+			mapcanvas: me.map.paper
 		for l in SymbolType.layers
 			nid = SymbolGroup._layerid++
 			id = 'sl_'+nid
@@ -269,12 +270,102 @@ class Bubble extends Symbol
 		me = @
 		[me.path.node]
 		
-	
 
 Bubble.props = ['radius','style','class']
 Bubble.layers = [{ id:'a', type: 'svg' }]
 
 svgmap.Bubble = Bubble
+
+
+class HtmlLabel extends Symbol
+
+	constructor: (opts) ->
+		me = @
+		super opts
+		me.text = opts.text ? ''
+		me.style = opts.style ? ''
+		me.class = opts.class ? ''
+
+	render: (layers) ->
+		me = @
+		l = $ '<div>'+me.text+'</div>'
+		l.css
+			width: '50px'
+			position: 'absolute'
+			left: '-25px'
+			'text-align': 'center'
+		me.lbl = lbl = $ '<div class="label" />'
+		lbl.append l
+		me.layers.lbl.append lbl
+		
+		l.css
+			height: l.height()+'px'
+			top: (l.height()*-.4)+'px'
+		
+		me.update()
+		me
+
+	update: () ->
+		me = @
+		me.lbl.css
+			position: 'absolute'
+			left: me.x+'px'
+			top: me.y+'px'
+
+	clear: () ->
+		me = @
+		me.lbl.remove()
+		me
+		
+	nodes: () ->
+		me = @
+		[me.lbl[0]]
+
+HtmlLabel.props = ['text', 'style', 'class']
+HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
+
+svgmap.HtmlLabel = HtmlLabel
+
+
+class SvgLabel extends Symbol
+
+	constructor: (opts) ->
+		me = @
+		super opts
+		me.text = opts.text ? ''
+		me.style = opts.style ? ''
+		me.class = opts.class ? ''
+
+	render: (layers) ->
+		me = @
+		me.lbl = lbl = me.layers.mapcanvas.text me.x, me.y, me.text		
+		me.update()
+		me
+
+	update: () ->
+		me = @
+		me.lbl.attr
+			x: me.x
+			y: me.y
+		me.lbl.node.setAttribute 'style',me.style
+		me.lbl.node.setAttribute 'class',me.class
+
+	clear: () ->
+		me = @
+		me.lbl.remove()
+		me
+		
+	nodes: () ->
+		me = @
+		[me.lbl.node]
+
+SvgLabel.props = ['text', 'style', 'class']
+SvgLabel.layers = []
+
+svgmap.Label = SvgLabel
+
+
+
 
 class Icon extends Symbol
 
