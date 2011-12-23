@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
+kartograph = root.kartograph ?= {}
 
 class LonLat
 	###
@@ -46,7 +46,7 @@ class LatLon extends LonLat
 		super lon, lat, alt
 		
 		
-svgmap.LonLat = LonLat
-svgmap.LatLon = LatLon
+kartograph.LonLat = LonLat
+kartograph.LatLon = LatLon
 
 

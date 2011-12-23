@@ -6,10 +6,10 @@
 #
 coffee -o build/ src/*.coffee
 cat src/*.coffee | coffee -sp > tmp
-cat src/license tmp > svgmap.js
+cat src/license tmp > kartograph.js
 rm tmp
-uglifyjs svgmap.js > svgmap.min.js
-cat lib/chroma.js >> svgmap.js
-cat lib/chroma.js >> svgmap.min.js
+uglifyjs kartograph.js > kartograph.min.js
+cat lib/chroma.js >> kartograph.js
+cat lib/chroma.js >> kartograph.min.js
 echo "build complete"
 node tests/*.js

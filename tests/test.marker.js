@@ -1,13 +1,13 @@
 /*
- * test for svgmap projections
+ * test for kartograph projections
  */
  
-var svgmap = exports.svgmap = require('../svgmap.js').svgmap;
+var kartograph = exports.kartograph = require('../kartograph.js').kartograph;
 
 try {
-	var ll = new svgmap.LonLat(10.1, 52.0);
-	var mark = new svgmap.marker.MapMarker(ll, 'hello world');	
+	var ll = new kartograph.LonLat(10.1, 52.0);
+	var mark = new kartograph.marker.MapMarker(ll, 'hello world');	
 } catch (er) {
-	console.log('[svgmap.Marker] test failed: '+er)
+	console.log('[kartograph.Marker] test failed: '+er)
 }
 

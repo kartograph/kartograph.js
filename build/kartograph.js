@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,36 +18,36 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var CanvasLayer, MapLayer, MapLayerPath, PanAndZoomControl, SVGMap, log, root, svgmap, warn, _ref;
+  var CanvasLayer, Kartograph, MapLayer, MapLayerPath, PanAndZoomControl, kartograph, log, root, warn, _ref;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = root.K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  svgmap.version = "0.4.2";
+  kartograph.version = "0.4.2";
 
   warn = function(s) {
-    return console.warn('svgmap (' + svgmap.version + '): ' + s);
+    return console.warn('kartograph (' + kartograph.version + '): ' + s);
   };
 
   log = function(s) {
-    return console.log('svgmap (' + svgmap.version + '): ' + s);
+    return console.log('kartograph (' + kartograph.version + '): ' + s);
   };
 
-  SVGMap = (function() {
+  Kartograph = (function() {
 
-    function SVGMap(container) {
+    function Kartograph(container) {
       var cnt, me;
       me = this;
       me.container = cnt = $(container);
-      me.viewport = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
+      me.viewport = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
       me.paper = me.createSVGLayer();
       me.markers = [];
-      me.container.addClass('svgmap');
+      me.container.addClass('kartograph');
     }
 
-    SVGMap.prototype.createSVGLayer = function(id) {
+    Kartograph.prototype.createSVGLayer = function(id) {
       var about, cnt, lid, me, paper, svg, vp, _ref2;
       me = this;
       if ((_ref2 = me._layerCnt) == null) me._layerCnt = 0;
@@ -65,11 +65,11 @@
       if (cnt.css('position') === 'static') cnt.css('position', 'relative');
       svg.addClass(id);
       about = $('desc', paper.canvas).text();
-      $('desc', paper.canvas).text(about.replace('with ', 'with svgmap ' + svgmap.version + ' and '));
+      $('desc', paper.canvas).text(about.replace('with ', 'with kartograph ' + kartograph.version + ' and '));
       return paper;
     };
 
-    SVGMap.prototype.createHTMLLayer = function(id) {
+    Kartograph.prototype.createHTMLLayer = function(id) {
       var cnt, div, lid, me, vp, _ref2;
       me = this;
       vp = me.viewport;
@@ -89,7 +89,7 @@
       return div;
     };
 
-    SVGMap.prototype.loadMap = function(mapurl, callback, opts) {
+    Kartograph.prototype.loadMap = function(mapurl, callback, opts) {
       var me, _base, _ref2;
       me = this;
       me.opts = opts != null ? opts : {};
@@ -102,7 +102,7 @@
       });
     };
 
-    SVGMap.prototype.addLayer = function(src_id, layer_id, path_id) {
+    Kartograph.prototype.addLayer = function(src_id, layer_id, path_id) {
       /*
       		add new layer
       */
@@ -130,7 +130,7 @@
       }
     };
 
-    SVGMap.prototype.getLayerPath = function(layer_id, path_id) {
+    Kartograph.prototype.getLayerPath = function(layer_id, path_id) {
       var me;
       me = this;
       if ((me.layers[layer_id] != null) && me.layers[layer_id].hasPath(path_id)) {
@@ -139,7 +139,7 @@
       return null;
     };
 
-    SVGMap.prototype.addCanvasLayer = function(src_id, drawCallback) {
+    Kartograph.prototype.addCanvasLayer = function(src_id, drawCallback) {
       var $paths, canvas, layer, me, svgLayer, svg_path, _i, _len;
       me = this;
       if (!(me.canvas != null)) {
@@ -170,7 +170,7 @@
       return layer.render();
     };
 
-    SVGMap.prototype.addLayerEvent = function(event, callback, layerId) {
+    Kartograph.prototype.addLayerEvent = function(event, callback, layerId) {
       var me, path, paths, _i, _len, _results;
       me = this;
       if (layerId == null) layerId = me.layerIds[me.layerIds.length - 1];
@@ -183,7 +183,7 @@
       return _results;
     };
 
-    SVGMap.prototype.addMarker = function(marker) {
+    Kartograph.prototype.addMarker = function(marker) {
       var me, xy;
       me = this;
       me.markers.push(marker);
@@ -191,7 +191,7 @@
       return marker.render(xy[0], xy[1], me.container, me.paper);
     };
 
-    SVGMap.prototype.clearMarkers = function() {
+    Kartograph.prototype.clearMarkers = function() {
       var marker, me, _i, _len, _ref2;
       me = this;
       _ref2 = me.markers;
@@ -202,7 +202,7 @@
       return me.markers = [];
     };
 
-    SVGMap.prototype.choropleth = function(opts) {
+    Kartograph.prototype.choropleth = function(opts) {
       var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref2, _ref3, _ref4;
       me = this;
       layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
@@ -235,7 +235,7 @@
       }
     };
 
-    SVGMap.prototype.tooltips = function(opts) {
+    Kartograph.prototype.tooltips = function(opts) {
       var cfg, id, layer_id, me, path, paths, tooltips, tt, _ref2, _ref3, _results;
       me = this;
       tooltips = opts.content;
@@ -317,12 +317,12 @@
     						pts.push xy
     					else
     						if pts.length > 1
-    							line = new svgmap.geom.Line(pts)
+    							line = new kartograph.geom.Line(pts)
     							pts = []
     							lines = lines.concat(line.clipToBBox(viewbox))
     				
     				if pts.length > 1
-    					line = new svgmap.geom.Line(pts)
+    					line = new kartograph.geom.Line(pts)
     					pts = []
     					lines = lines.concat(line.clipToBBox(viewbox))
     					
@@ -332,9 +332,9 @@
     					grat_lines.push(path)
     */
 
-    SVGMap.prototype.display = function() {
+    Kartograph.prototype.display = function() {
       /*
-      		finally displays the svgmap, needs to be called after
+      		finally displays the kartograph, needs to be called after
       		layer and marker setup is finished
       */      return this.render();
     };
@@ -343,22 +343,22 @@
     	    end of public API
     */
 
-    SVGMap.prototype.mapLoaded = function(xml) {
+    Kartograph.prototype.mapLoaded = function(xml) {
       var $view, AB, halign, me, padding, valign, vp, _ref2, _ref3, _ref4;
       me = this;
       me.svgSrc = xml;
       vp = me.viewport;
       $view = $('view', xml)[0];
-      me.viewAB = AB = svgmap.View.fromXML($view);
+      me.viewAB = AB = kartograph.View.fromXML($view);
       padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
       halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
       valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
-      me.viewBC = new svgmap.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
-      me.proj = svgmap.Proj.fromXML($('proj', $view)[0]);
+      me.viewBC = new kartograph.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
+      me.proj = kartograph.Proj.fromXML($('proj', $view)[0]);
       return me.mapLoadCallback(me);
     };
 
-    SVGMap.prototype.loadCoastline = function() {
+    Kartograph.prototype.loadCoastline = function() {
       var me;
       me = this;
       return $.ajax({
@@ -368,7 +368,7 @@
       });
     };
 
-    SVGMap.prototype.renderCoastline = function(coastlines) {
+    Kartograph.prototype.renderCoastline = function(coastlines) {
       var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref2, _results;
       me = this;
       P = me.proj;
@@ -400,7 +400,7 @@
       return _results;
     };
 
-    SVGMap.prototype.onPathEvent = function(evt) {
+    Kartograph.prototype.onPathEvent = function(evt) {
       /*
       		forwards path events to their callbacks, but attaches the path to
       		the event object
@@ -411,21 +411,21 @@
       return me.layerEventCallbacks[path.layer][evt.type](path);
     };
 
-    SVGMap.prototype.resize = function() {
+    Kartograph.prototype.resize = function() {
       /*
       		forces redraw of every layer
       */
       var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref2, _ref3, _ref4, _ref5, _results;
       me = this;
       cnt = me.container;
-      me.viewport = vp = new svgmap.BBox(0, 0, cnt.width(), cnt.height());
+      me.viewport = vp = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
       me.paper.setSize(vp.width, vp.height);
       vp = me.viewport;
       padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
       halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
       valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
       zoom = me.opts.zoom;
-      me.viewBC = new svgmap.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
+      me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
       _ref5 = me.layers;
       _results = [];
       for (id in _ref5) {
@@ -435,20 +435,20 @@
       return _results;
     };
 
-    SVGMap.prototype.addFilter = function(id, type, params) {
+    Kartograph.prototype.addFilter = function(id, type, params) {
       var doc, fltr, me;
       if (params == null) params = {};
       me = this;
       doc = window.document;
-      if (svgmap.filter[type] != null) {
-        fltr = new svgmap.filter[type](params).getFilter(id);
+      if (kartograph.filter[type] != null) {
+        fltr = new kartograph.filter[type](params).getFilter(id);
       } else {
         throw 'unknown filter type ' + type;
       }
       return me.paper.defs.appendChild(fltr);
     };
 
-    SVGMap.prototype.applyFilter = function(layer_id, filter_id) {
+    Kartograph.prototype.applyFilter = function(layer_id, filter_id) {
       var me;
       me = this;
       return $('.polygon.' + layer_id, me.paper.canvas).attr({
@@ -456,18 +456,20 @@
       });
     };
 
-    SVGMap.prototype.lonlat2xy = function(lonlat) {
+    Kartograph.prototype.lonlat2xy = function(lonlat) {
       var a, me;
       me = this;
-      if (lonlat.length === 2) lonlat = new svgmap.LonLat(lonlat[0], lonlat[1]);
+      if (lonlat.length === 2) {
+        lonlat = new kartograph.LonLat(lonlat[0], lonlat[1]);
+      }
       if (lonlat.length === 3) {
-        lonlat = new svgmap.LonLat(lonlat[0], lonlat[1], lonlat[2]);
+        lonlat = new kartograph.LonLat(lonlat[0], lonlat[1], lonlat[2]);
       }
       a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt);
       return me.viewBC.project(me.viewAB.project(a));
     };
 
-    SVGMap.prototype.addGeoPath = function(points, cmds, className) {
+    Kartograph.prototype.addGeoPath = function(points, cmds, className) {
       var cmd, i, me, path, path_str, pt, xy, _ref2;
       if (cmds == null) cmds = [];
       if (className == null) className = '';
@@ -484,18 +486,18 @@
       path.node.setAttribute('class', className);
     };
 
-    SVGMap.prototype.showZoomControls = function() {
+    Kartograph.prototype.showZoomControls = function() {
       var me;
       me = this;
       me.zc = new PanAndZoomControl(me);
       return me;
     };
 
-    return SVGMap;
+    return Kartograph;
 
   })();
 
-  svgmap.SVGMap = SVGMap;
+  kartograph.Kartograph = Kartograph;
 
   MapLayer = (function() {
 
@@ -560,7 +562,7 @@
     function MapLayerPath(svg_path, layer_id, paper, view) {
       var attr, data, i, me, path, _ref2;
       me = this;
-      me.path = path = svgmap.geom.Path.fromSVG(svg_path);
+      me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
       me.baseClass = 'polygon ' + layer_id;
       me.svgPath.node.setAttribute('class', me.baseClass);
@@ -612,7 +614,7 @@
       var me, path, _ref2;
       me = this;
       if ((_ref2 = me.paths) == null) me.paths = [];
-      path = svgmap.geom.Path.fromSVG(svg_path);
+      path = kartograph.geom.Path.fromSVG(svg_path);
       return me.paths.push(path);
     };
 
@@ -723,13 +725,5 @@
     return PanAndZoomControl;
 
   })();
-
-  Function.prototype.bind = function(scope) {
-    var _func;
-    _func = this;
-    return function() {
-      return _func.apply(scope, arguments);
-    };
-  };
 
 }).call(this);

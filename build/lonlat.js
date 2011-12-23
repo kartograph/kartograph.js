@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var LatLon, LonLat, root, svgmap, _ref;
+  var LatLon, LonLat, kartograph, root, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
   LonLat = (function() {
 
@@ -69,8 +69,8 @@
 
   })();
 
-  svgmap.LonLat = LonLat;
+  kartograph.LonLat = LonLat;
 
-  svgmap.LatLon = LatLon;
+  kartograph.LatLon = LatLon;
 
 }).call(this);

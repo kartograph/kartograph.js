@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
-filter = svgmap.filter ?= {}
+kartograph = root.kartograph ?= {}
+filter = kartograph.filter ?= {}
 
 class Filter
 	

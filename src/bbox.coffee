@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
+kartograph = root.kartograph ?= {}
 
 class BBox
 	###
@@ -78,8 +78,8 @@ BBox.fromXML = (xml) ->
 	y = Number(xml.getAttribute('y'))
 	w = Number(xml.getAttribute('w'))
 	h = Number(xml.getAttribute('h'))
-	new svgmap.BBox x,y,w,h
+	new kartograph.BBox x,y,w,h
 
 		
-svgmap.BBox = BBox
+kartograph.BBox = BBox
 

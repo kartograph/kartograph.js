@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
-svgmap.marker ?= {}
+kartograph = root.kartograph ?= {}
+kartograph.marker ?= {}
 
 ###
 New API
@@ -122,7 +122,7 @@ class SymbolGroup
 		SymbolType = me.type
 		ll = me.evaluate me.location,data
 		if type(ll) == 'array'
-			ll = new svgmap.LonLat ll[0],ll[1]
+			ll = new kartograph.LonLat ll[0],ll[1]
 		
 		sprops = 
 			layers: me.layers
@@ -201,7 +201,7 @@ class SymbolGroup
 	
 		
 SymbolGroup._layerid = 0
-svgmap.SymbolGroup = SymbolGroup		
+kartograph.SymbolGroup = SymbolGroup		
 
 class Symbol
 
@@ -274,7 +274,7 @@ class Bubble extends Symbol
 Bubble.props = ['radius','style','class']
 Bubble.layers = [{ id:'a', type: 'svg' }]
 
-svgmap.Bubble = Bubble
+kartograph.Bubble = Bubble
 
 
 class HtmlLabel extends Symbol
@@ -324,7 +324,7 @@ class HtmlLabel extends Symbol
 HtmlLabel.props = ['text', 'style', 'class']
 HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
 
-svgmap.HtmlLabel = HtmlLabel
+kartograph.HtmlLabel = HtmlLabel
 
 
 class SvgLabel extends Symbol
@@ -362,7 +362,7 @@ class SvgLabel extends Symbol
 SvgLabel.props = ['text', 'style', 'class']
 SvgLabel.layers = []
 
-svgmap.Label = SvgLabel
+kartograph.Label = SvgLabel
 
 
 
@@ -384,16 +384,16 @@ class MapMarker
 		offset - x and y offset for the marker
 		###
 		me = @
-		ll = new svgmap.LonLat(ll[0], ll[1]) if ll.length == 2
+		ll = new kartograph.LonLat(ll[0], ll[1]) if ll.length == 2
 		me.lonlat = ll
 		me.visible = true
 		
 	render: (x,y,cont,paper) ->
 		###
-		this function will be called by svgmap to render the marker
+		this function will be called by kartograph to render the marker
 		###
 	
-svgmap.marker.MapMarker = MapMarker
+kartograph.marker.MapMarker = MapMarker
 
 
 
@@ -405,7 +405,7 @@ class LabelMarker extends MapMarker
 		super ll
 		@label = label
 	
-svgmap.marker.LabelMarker = LabelMarker
+kartograph.marker.LabelMarker = LabelMarker
 
 
 
@@ -429,7 +429,7 @@ class DotMarker extends LabelMarker
 		@path.remove()
 		
 
-svgmap.marker.DotMarker = DotMarker
+kartograph.marker.DotMarker = DotMarker
 
 
 
@@ -439,7 +439,7 @@ class IconMarker extends MapMarker
 	###
 	constructor: (ll, icon) ->
 
-svgmap.marker.IconMarker = IconMarker
+kartograph.marker.IconMarker = IconMarker
 
 
 class LabeledIconMarker extends MapMarker
@@ -469,7 +469,7 @@ class LabeledIconMarker extends MapMarker
 			left: (x+me.dx)+'px'
 			top: (y+me.dy)+'px'
 
-svgmap.marker.LabeledIconMarker = LabeledIconMarker
+kartograph.marker.LabeledIconMarker = LabeledIconMarker
 		
 		
 

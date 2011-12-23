@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
-svgmap.geom ?= {} 
+kartograph = root.kartograph ?= {}
+kartograph.geom ?= {} 
 
 class Path
 	###
@@ -97,7 +97,7 @@ class Path
 				
 				
 
-svgmap.geom.Path = Path
+kartograph.geom.Path = Path
 
 class Circle extends Path
 
@@ -116,7 +116,7 @@ class Circle extends Path
 		me = @
 		Math.PI * me.r*m.r
 
-svgmap.geom.Circle = Circle
+kartograph.geom.Circle = Circle
 
 Path.fromSVG = (path) ->
 	###
@@ -141,7 +141,7 @@ Path.fromSVG = (path) ->
 					contour.push([Number(x), Number(y)])
 				contours.push(contour)	
 		
-		res = new svgmap.geom.Path(type, contours, closed)	
+		res = new kartograph.geom.Path(type, contours, closed)	
 		
 	else if type == "circle"
 		
@@ -149,7 +149,7 @@ Path.fromSVG = (path) ->
 		cy = path.getAttribute "cy"
 		r = path.getAttribute "r"
 		
-		res = new svgmap.geom.Circle(cx,cy,r)
+		res = new kartograph.geom.Circle(cx,cy,r)
 		
 	res
 		
@@ -164,7 +164,7 @@ class Line
 	clipToBBox: (bbox) ->
 		self = @
 		# line clipping here
-		clip = new svgmap.geom.clipping.CohenSutherland().clip
+		clip = new kartograph.geom.clipping.CohenSutherland().clip
 		pts = []
 		lines = []
 		last_in = false
@@ -194,6 +194,6 @@ class Line
 			pts.push x+','+y 
 		'M' + pts.join 'L'
 		
-svgmap.geom.Line = Line
+kartograph.geom.Line = Line
 
 

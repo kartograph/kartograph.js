@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var BlurFilter, Filter, GlowFilter, filter, root, svgmap, _ref, _ref2;
+  var BlurFilter, Filter, GlowFilter, filter, kartograph, root, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  filter = (_ref2 = svgmap.filter) != null ? _ref2 : svgmap.filter = {};
+  filter = (_ref2 = kartograph.filter) != null ? _ref2 : kartograph.filter = {};
 
   Filter = (function() {
 

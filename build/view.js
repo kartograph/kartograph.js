@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -72,18 +72,18 @@
           }
           contours.push(cont);
         }
-        return new svgmap.geom.Path(path.type, contours, path.closed);
+        return new kartograph.geom.Path(path.type, contours, path.closed);
       } else if (path.type === "circle") {
         _ref4 = me.project(path.x, path.y), x = _ref4[0], y = _ref4[1];
         r = path.r * me.scale;
-        return new svgmap.geom.Circle(x, y, r);
+        return new kartograph.geom.Circle(x, y, r);
       }
     };
 
     View.prototype.asBBox = function() {
       var me;
       me = this;
-      return new svgmap.BBox(0, 0, me.width, me.height);
+      return new kartograph.BBox(0, 0, me.width, me.height);
     };
 
     return View;
@@ -100,13 +100,13 @@
     pad = Number(xml.getAttribute('padding'));
     bbox_xml = xml.getElementsByTagName('bbox')[0];
     bbox = BBox.fromXML(bbox_xml);
-    return new svgmap.View(bbox, w, h, pad);
+    return new kartograph.View(bbox, w, h, pad);
   };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  if ((_ref = root.svgmap) == null) root.svgmap = {};
+  if ((_ref = root.kartograph) == null) root.kartograph = {};
 
-  root.svgmap.View = View;
+  root.kartograph.View = View;
 
 }).call(this);

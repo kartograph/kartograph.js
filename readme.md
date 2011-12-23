@@ -1,7 +1,7 @@
-svgmap
+kartograph
 ======
 
-**svgmap** is a simple toolset that helps creating interactive thematic maps that run across multiple browsers without using tile-based mapping environments like Google Maps or OpenStreetMaps. Think of it as OpenLayers, but *a lot* more simple to use.
+**kartograph** is a simple toolset that helps creating interactive thematic maps that run across multiple browsers without using tile-based mapping environments like Google Maps or OpenStreetMaps. Think of it as OpenLayers, but *a lot* more simple to use.
 
 ## How it works
 
@@ -9,24 +9,24 @@ Basically, a Python script generates SVG files that are loaded and rendered by a
 
 ### The Python side
 
-**svgmap.py** is a small Python script that renders SVG maps out of shapefiles. At the moment it can be used from the command line.
+**kartograph.py** is a small Python script that renders SVG maps out of shapefiles. At the moment it can be used from the command line.
 
 For instance, if you want an SVG map of Brazil you type:
 
-	svgmap.py country BRA --o Brazil.svg
+	kartograph.py country BRA --o Brazil.svg
 
-Of course, there are plenty of possible options, see readme in svgmap.py directory.
+Of course, there are plenty of possible options, see readme in kartograph.py directory.
 
 ### The JavaScript side
 
-**svgmap.js** will then load the SVG maps and allows to connect the maps with some data. You can color the map polygons (which could be countries, for instance) to get a chloropleth map, or you can add labels or charts at geo-locations etc.
+**kartograph.js** will then load the SVG maps and allows to connect the maps with some data. You can color the map polygons (which could be countries, for instance) to get a chloropleth map, or you can add labels or charts at geo-locations etc.
 
-Again, see readme in svgmap.js directory to get more information.
+Again, see readme in kartograph.js directory to get more information.
 
 
 ### License
 
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify

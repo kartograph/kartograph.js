@@ -1,3 +1,3 @@
 /*
- * test for svgmap.geom.clipping
+ * test for kartograph.geom.clipping
  */

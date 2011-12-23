@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
+kartograph = root.kartograph ?= {}
 
-__proj = svgmap.proj = {}
+__proj = kartograph.proj = {}
 
 Function::bind = (scope) ->
 	_function = @
@@ -79,7 +79,7 @@ class Proj
 	world_bbox: ->
 		p = @project.bind @
 		sea = @sea()
-		bbox = new svgmap.BBox()
+		bbox = new kartograph.BBox()
 		for s in sea
 			bbox.update(s[0],s[1])
 		bbox
@@ -95,9 +95,9 @@ Proj.fromXML = (xml) ->
 		attr = xml.attributes[i]
 		if attr.name != "id"
 			opts[attr.name] = attr.value
-	new svgmap.proj[id](opts)
+	new kartograph.proj[id](opts)
 	
-svgmap.Proj = Proj
+kartograph.Proj = Proj
 	
 # ---------------------------------
 # Family of Cylindrical Projecitons
@@ -413,7 +413,7 @@ class Mollweide extends PseudoCylindrical
 			me.cy = cy
 			me.cp = cp
 		else
-			console.error('svgmap.proj.Mollweide: either p or cx,cy,cp must be defined')
+			console.error('kartograph.proj.Mollweide: either p or cx,cy,cp must be defined')
 		
 	project: (lon, lat) ->
 		me = @
@@ -540,7 +540,7 @@ class Azimuthal extends Proj
 	
 	world_bbox: ->
 		r = @r
-		new svgmap.BBox(0,0,r*2, r*2)
+		new kartograph.BBox(0,0,r*2, r*2)
 
 
 class Orthographic extends Azimuthal

@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,29 +17,28 @@
 ###
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
+kartograph = root.K = root.kartograph ?= {}
 
-svgmap.version = "0.4.2"
+kartograph.version = "0.4.2"
 
 
 warn = (s) ->
-	console.warn('svgmap ('+svgmap.version+'): '+s)
+	console.warn('kartograph ('+kartograph.version+'): '+s)
 
 log = (s) ->
-	console.log('svgmap ('+svgmap.version+'): '+s)
+	console.log('kartograph ('+kartograph.version+'): '+s)
 
 
-
-class SVGMap
+class Kartograph
 
 	constructor: (container) ->
 		#
 		me = @
 		me.container = cnt = $(container)
-		me.viewport = new svgmap.BBox 0,0,cnt.width(),cnt.height()
+		me.viewport = new kartograph.BBox 0,0,cnt.width(),cnt.height()
 		me.paper = me.createSVGLayer()
 		me.markers = []
-		me.container.addClass 'svgmap'
+		me.container.addClass 'kartograph'
 		
 	createSVGLayer: (id) ->
 		me = @
@@ -60,7 +59,7 @@ class SVGMap
 
 		svg.addClass id			
 		about = $('desc', paper.canvas).text()
-		$('desc', paper.canvas).text(about.replace('with ', 'with svgmap '+svgmap.version+' and '))
+		$('desc', paper.canvas).text(about.replace('with ', 'with kartograph '+kartograph.version+' and '))
 		
 		paper
 		
@@ -273,12 +272,12 @@ class SVGMap
 						pts.push xy
 					else
 						if pts.length > 1
-							line = new svgmap.geom.Line(pts)
+							line = new kartograph.geom.Line(pts)
 							pts = []
 							lines = lines.concat(line.clipToBBox(viewbox))
 				
 				if pts.length > 1
-					line = new svgmap.geom.Line(pts)
+					line = new kartograph.geom.Line(pts)
 					pts = []
 					lines = lines.concat(line.clipToBBox(viewbox))
 					
@@ -291,7 +290,7 @@ class SVGMap
 	
 	display: () ->
 		###
-		finally displays the svgmap, needs to be called after
+		finally displays the kartograph, needs to be called after
 		layer and marker setup is finished
 		###
 		@render()
@@ -308,12 +307,12 @@ class SVGMap
 		me.svgSrc = xml
 		vp = me.viewport		
 		$view = $('view', xml)[0] # use first view
-		me.viewAB = AB = svgmap.View.fromXML $view
+		me.viewAB = AB = kartograph.View.fromXML $view
 		padding = me.opts.padding ? 0
 		halign = me.opts.halign ? 'center'
 		valign = me.opts.valign ? 'center'
-		me.viewBC = new svgmap.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
-		me.proj = svgmap.Proj.fromXML $('proj', $view)[0]		
+		me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
+		me.proj = kartograph.Proj.fromXML $('proj', $view)[0]		
 		me.mapLoadCallback(me)
 	
 	
@@ -365,14 +364,14 @@ class SVGMap
 		###
 		me = @
 		cnt = me.container
-		me.viewport = vp = new svgmap.BBox 0,0,cnt.width(),cnt.height()
+		me.viewport = vp = new kartograph.BBox 0,0,cnt.width(),cnt.height()
 		me.paper.setSize vp.width, vp.height
 		vp = me.viewport		
 		padding = me.opts.padding ? 0
 		halign = me.opts.halign ? 'center'
 		valign = me.opts.valign ? 'center'
 		zoom = me.opts.zoom
-		me.viewBC = new svgmap.View me.viewAB.asBBox(),vp.width*zoom,vp.height*zoom, padding,halign,valign
+		me.viewBC = new kartograph.View me.viewAB.asBBox(),vp.width*zoom,vp.height*zoom, padding,halign,valign
 		for id,layer of me.layers
 			layer.setView(me.viewBC)
 		
@@ -380,8 +379,8 @@ class SVGMap
 	addFilter: (id, type, params = {}) ->
 		me = @
 		doc = window.document
-		if svgmap.filter[type]?
-			fltr = new svgmap.filter[type](params).getFilter(id)
+		if kartograph.filter[type]?
+			fltr = new kartograph.filter[type](params).getFilter(id)
 		else
 			throw 'unknown filter type '+type
 		
@@ -395,8 +394,8 @@ class SVGMap
 		
 	lonlat2xy: (lonlat) ->
 		me = @
-		lonlat = new svgmap.LonLat(lonlat[0], lonlat[1]) if lonlat.length == 2
-		lonlat = new svgmap.LonLat(lonlat[0], lonlat[1], lonlat[2]) if lonlat.length == 3
+		lonlat = new kartograph.LonLat(lonlat[0], lonlat[1]) if lonlat.length == 2
+		lonlat = new kartograph.LonLat(lonlat[0], lonlat[1], lonlat[2]) if lonlat.length == 3
 		a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt)
 		me.viewBC.project(me.viewAB.project(a))
 		
@@ -425,7 +424,7 @@ class SVGMap
 		
 	
 		
-svgmap.SVGMap = SVGMap
+kartograph.Kartograph = Kartograph
 
 
 class MapLayer
@@ -475,7 +474,7 @@ class MapLayerPath
 
 	constructor: (svg_path, layer_id, paper, view) ->
 		me = @		
-		me.path = path = svgmap.geom.Path.fromSVG(svg_path)	
+		me.path = path = kartograph.geom.Path.fromSVG(svg_path)	
 		me.svgPath = view.projectPath(path).toSVG(paper)
 		me.baseClass = 'polygon '+layer_id
 		me.svgPath.node.setAttribute('class', me.baseClass)
@@ -511,7 +510,7 @@ class CanvasLayer
 	addPath: (svg_path) ->
 		me = @
 		me.paths ?= []
-		path = svgmap.geom.Path.fromSVG(svg_path)	
+		path = kartograph.geom.Path.fromSVG(svg_path)	
 		me.paths.push path
 		
 		
@@ -580,8 +579,4 @@ class PanAndZoomControl
 		me.map.resize()
 	
 
-Function::bind = (scope) ->
-	_func = @
-	return () ->
-		_func.apply scope,arguments
 

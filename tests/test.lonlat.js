@@ -1,13 +1,13 @@
 /*
- * test for svgmap.LonLat
+ * test for kartograph.LonLat
  */
  
-var svgmap = require('../svgmap.js').svgmap;
+var kartograph = require('../kartograph.js').kartograph;
 
-var ll = new svgmap.LonLat(12, 34);
+var ll = new kartograph.LonLat(12, 34);
 if (ll.lon != 12 || ll.lat != 34)
-	console.error('[svgmap.LonLat] test failed');
+	console.error('[kartograph.LonLat] test failed');
 
-ll = new svgmap.LatLon(34, 12);
+ll = new kartograph.LatLon(34, 12);
 if (ll.lon != 12 || ll.lat != 34)
-	console.error('[svgmap.LatLon] test failed');
+	console.error('[kartograph.LatLon] test failed');

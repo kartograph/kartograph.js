@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Circle, Line, Path, root, svgmap, _ref, _ref2;
+  var Circle, Line, Path, kartograph, root, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  if ((_ref2 = svgmap.geom) == null) svgmap.geom = {};
+  if ((_ref2 = kartograph.geom) == null) kartograph.geom = {};
 
   Path = (function() {
 
@@ -127,7 +127,7 @@
 
   })();
 
-  svgmap.geom.Path = Path;
+  kartograph.geom.Path = Path;
 
   Circle = (function() {
 
@@ -162,7 +162,7 @@
 
   })();
 
-  svgmap.geom.Circle = Circle;
+  kartograph.geom.Circle = Circle;
 
   Path.fromSVG = function(path) {
     /*
@@ -191,12 +191,12 @@
           contours.push(contour);
         }
       }
-      res = new svgmap.geom.Path(type, contours, closed);
+      res = new kartograph.geom.Path(type, contours, closed);
     } else if (type === "circle") {
       cx = path.getAttribute("cx");
       cy = path.getAttribute("cy");
       r = path.getAttribute("r");
-      res = new svgmap.geom.Circle(cx, cy, r);
+      res = new kartograph.geom.Circle(cx, cy, r);
     }
     return res;
   };
@@ -214,7 +214,7 @@
     Line.prototype.clipToBBox = function(bbox) {
       var clip, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _ref3, _ref4, _ref5, _ref6;
       self = this;
-      clip = new svgmap.geom.clipping.CohenSutherland().clip;
+      clip = new kartograph.geom.clipping.CohenSutherland().clip;
       pts = [];
       lines = [];
       last_in = false;
@@ -256,6 +256,6 @@
 
   })();
 
-  svgmap.geom.Line = Line;
+  kartograph.geom.Line = Line;
 
 }).call(this);

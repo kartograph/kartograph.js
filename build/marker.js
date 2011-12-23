@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Bubble, BubbleMarker, DotMarker, HtmlLabel, Icon, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, SvgLabel, Symbol, SymbolGroup, root, svgmap, _ref, _ref2;
+  var Bubble, BubbleMarker, DotMarker, HtmlLabel, Icon, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, SvgLabel, Symbol, SymbolGroup, kartograph, root, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  if ((_ref2 = svgmap.marker) == null) svgmap.marker = {};
+  if ((_ref2 = kartograph.marker) == null) kartograph.marker = {};
 
   /*
   New API
@@ -131,7 +131,7 @@
       if ((_ref3 = me.symbols) == null) me.symbols = [];
       SymbolType = me.type;
       ll = me.evaluate(me.location, data);
-      if (type(ll) === 'array') ll = new svgmap.LonLat(ll[0], ll[1]);
+      if (type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
       sprops = {
         layers: me.layers,
         location: ll,
@@ -236,7 +236,7 @@
 
   SymbolGroup._layerid = 0;
 
-  svgmap.SymbolGroup = SymbolGroup;
+  kartograph.SymbolGroup = SymbolGroup;
 
   Symbol = (function() {
 
@@ -339,7 +339,7 @@
     }
   ];
 
-  svgmap.Bubble = Bubble;
+  kartograph.Bubble = Bubble;
 
   HtmlLabel = (function() {
 
@@ -411,7 +411,7 @@
     }
   ];
 
-  svgmap.HtmlLabel = HtmlLabel;
+  kartograph.HtmlLabel = HtmlLabel;
 
   SvgLabel = (function() {
 
@@ -466,7 +466,7 @@
 
   SvgLabel.layers = [];
 
-  svgmap.Label = SvgLabel;
+  kartograph.Label = SvgLabel;
 
   Icon = (function() {
 
@@ -494,14 +494,14 @@
       */
       var me;
       me = this;
-      if (ll.length === 2) ll = new svgmap.LonLat(ll[0], ll[1]);
+      if (ll.length === 2) ll = new kartograph.LonLat(ll[0], ll[1]);
       me.lonlat = ll;
       me.visible = true;
     }
 
     MapMarker.prototype.render = function(x, y, cont, paper) {
       /*
-      		this function will be called by svgmap to render the marker
+      		this function will be called by kartograph to render the marker
       */
     };
 
@@ -509,7 +509,7 @@
 
   })();
 
-  svgmap.marker.MapMarker = MapMarker;
+  kartograph.marker.MapMarker = MapMarker;
 
   LabelMarker = (function() {
 
@@ -528,7 +528,7 @@
 
   })();
 
-  svgmap.marker.LabelMarker = LabelMarker;
+  kartograph.marker.LabelMarker = LabelMarker;
 
   DotMarker = (function() {
 
@@ -561,7 +561,7 @@
 
   })();
 
-  svgmap.marker.DotMarker = DotMarker;
+  kartograph.marker.DotMarker = DotMarker;
 
   IconMarker = (function() {
 
@@ -576,7 +576,7 @@
 
   })();
 
-  svgmap.marker.IconMarker = IconMarker;
+  kartograph.marker.IconMarker = IconMarker;
 
   LabeledIconMarker = (function() {
 
@@ -615,7 +615,7 @@
 
   })();
 
-  svgmap.marker.LabeledIconMarker = LabeledIconMarker;
+  kartograph.marker.LabeledIconMarker = LabeledIconMarker;
 
   BubbleMarker = (function() {
 

@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,11 +18,11 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var BBox, root, svgmap, _ref;
+  var BBox, kartograph, root, _ref;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
   BBox = (function() {
 
@@ -104,9 +104,9 @@
     y = Number(xml.getAttribute('y'));
     w = Number(xml.getAttribute('w'));
     h = Number(xml.getAttribute('h'));
-    return new svgmap.BBox(x, y, w, h);
+    return new kartograph.BBox(x, y, w, h);
   };
 
-  svgmap.BBox = BBox;
+  kartograph.BBox = BBox;
 
 }).call(this);

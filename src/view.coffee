@@ -1,5 +1,5 @@
 ###
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -71,15 +71,15 @@ class View
 					[x,y] = me.project x,y
 					cont.push([x,y])
 				contours.push(cont)
-			new svgmap.geom.Path path.type,contours,path.closed
+			new kartograph.geom.Path path.type,contours,path.closed
 		else if path.type == "circle"
 			[x,y] = me.project path.x,path.y
 			r = path.r * me.scale
-			new svgmap.geom.Circle x,y,r
+			new kartograph.geom.Circle x,y,r
 		
 	asBBox: ->
 		me = @
-		new svgmap.BBox 0,0,me.width,me.height
+		new kartograph.BBox 0,0,me.width,me.height
 
 View.fromXML = (xml) ->
 	###
@@ -90,8 +90,8 @@ View.fromXML = (xml) ->
 	pad = Number(xml.getAttribute('padding'))
 	bbox_xml = xml.getElementsByTagName('bbox')[0]
 	bbox = BBox.fromXML(bbox_xml)
-	new svgmap.View bbox,w,h,pad
+	new kartograph.View bbox,w,h,pad
 		
 root = (exports ? this)	
-root.svgmap ?= {}
-root.svgmap.View = View
+root.kartograph ?= {}
+root.kartograph.View = View

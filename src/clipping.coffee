@@ -1,5 +1,5 @@
 """
-    svgmap - a simple toolset that helps creating interactive thematic maps
+    kartograph - a svg mapping library 
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
 """
 
 root = (exports ? this)	
-svgmap = root.svgmap ?= {}
-svgmap.geom ?= {} 
-svgmap.geom.clipping ?= {}
+kartograph = root.kartograph ?= {}
+kartograph.geom ?= {} 
+kartograph.geom.clipping ?= {}
 
 
 class CohenSutherland
@@ -88,6 +88,6 @@ class CohenSutherland
 		if accept then [x0, y0, x1, y1] else null
 			
 
-svgmap.geom.clipping.CohenSutherland = CohenSutherland
+kartograph.geom.clipping.CohenSutherland = CohenSutherland
 
 		

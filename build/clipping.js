@@ -1,16 +1,16 @@
 (function() {
 
-  "svgmap - a simple toolset that helps creating interactive thematic maps\nCopyright (C) 2011  Gregor Aisch\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.";
+  "kartograph - a svg mapping library \nCopyright (C) 2011  Gregor Aisch\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.";
 
-  var CohenSutherland, root, svgmap, _base, _ref, _ref2, _ref3;
+  var CohenSutherland, kartograph, root, _base, _ref, _ref2, _ref3;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  if ((_ref2 = svgmap.geom) == null) svgmap.geom = {};
+  if ((_ref2 = kartograph.geom) == null) kartograph.geom = {};
 
-  if ((_ref3 = (_base = svgmap.geom).clipping) == null) _base.clipping = {};
+  if ((_ref3 = (_base = kartograph.geom).clipping) == null) _base.clipping = {};
 
   CohenSutherland = (function() {
     var BOTTOM, INSIDE, LEFT, RIGHT, TOP;
@@ -93,6 +93,6 @@
 
   })();
 
-  svgmap.geom.clipping.CohenSutherland = CohenSutherland;
+  kartograph.geom.clipping.CohenSutherland = CohenSutherland;
 
 }).call(this);

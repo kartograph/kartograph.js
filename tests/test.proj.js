@@ -1,14 +1,14 @@
 /*
- * test for svgmap projections
+ * test for kartograph projections
  */
  
-var svgmap = exports.svgmap = require('../svgmap.js').svgmap;
+var kartograph = exports.kartograph = require('../kartograph.js').kartograph;
 
 
-for (var p in svgmap.proj) {
+for (var p in kartograph.proj) {
 	try {
 	
-		var proj = new svgmap.proj[p]({ lon0: 10, lat0: 40 });
+		var proj = new kartograph.proj[p]({ lon0: 10, lat0: 40 });
 		var xy = proj.project(0,20);
 		if (isNaN(xy[0]) || isNaN(xy[1])) {
 			throw "projection is NaN "+xy;	
@@ -23,7 +23,7 @@ for (var p in svgmap.proj) {
 		}
 
 	} catch (er) {
-		console.log('[svgmap.proj.'+p+'] test failed: '+er)
+		console.log('[kartograph.proj.'+p+'] test failed: '+er)
 	}
 }
 

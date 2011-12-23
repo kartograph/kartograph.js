@@ -1,7 +1,7 @@
 (function() {
 
   /*
-      svgmap - a simple toolset that helps creating interactive thematic maps
+      kartograph - a svg mapping library 
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoConic, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, root, svgmap, __proj, _ref;
+  var Aitoff, Azimuthal, Balthasart, Behrmann, CEA, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, GallPeters, HoboDyer, LAEA, LCC, Loximuthal, Mercator, Mollweide, NaturalEarth, Orthographic, Proj, PseudoConic, PseudoCylindrical, Robinson, Satellite, Sinusoidal, Stereographic, WagnerIV, WagnerV, kartograph, root, __proj, _ref;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  svgmap = (_ref = root.svgmap) != null ? _ref : root.svgmap = {};
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  __proj = svgmap.proj = {};
+  __proj = kartograph.proj = {};
 
   Function.prototype.bind = function(scope) {
     var _function;
@@ -111,7 +111,7 @@
       var bbox, p, s, sea, _i, _len;
       p = this.project.bind(this);
       sea = this.sea();
-      bbox = new svgmap.BBox();
+      bbox = new kartograph.BBox();
       for (_i = 0, _len = sea.length; _i < _len; _i++) {
         s = sea[_i];
         bbox.update(s[0], s[1]);
@@ -134,10 +134,10 @@
       attr = xml.attributes[i];
       if (attr.name !== "id") opts[attr.name] = attr.value;
     }
-    return new svgmap.proj[id](opts);
+    return new kartograph.proj[id](opts);
   };
 
-  svgmap.Proj = Proj;
+  kartograph.Proj = Proj;
 
   Cylindrical = (function() {
 
@@ -578,7 +578,7 @@
         me.cy = cy;
         me.cp = cp;
       } else {
-        console.error('svgmap.proj.Mollweide: either p or cx,cy,cp must be defined');
+        console.error('kartograph.proj.Mollweide: either p or cx,cy,cp must be defined');
       }
     }
 
@@ -750,7 +750,7 @@
     Azimuthal.prototype.world_bbox = function() {
       var r;
       r = this.r;
-      return new svgmap.BBox(0, 0, r * 2, r * 2);
+      return new kartograph.BBox(0, 0, r * 2, r * 2);
     };
 
     return Azimuthal;
