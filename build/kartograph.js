@@ -92,6 +92,7 @@
     Kartograph.prototype.loadMap = function(mapurl, callback, opts) {
       var me, _base, _ref2;
       me = this;
+      me.clear();
       me.opts = opts != null ? opts : {};
       if ((_ref2 = (_base = me.opts).zoom) == null) _base.zoom = 1;
       me.mapLoadCallback = callback;
@@ -400,17 +401,6 @@
       return _results;
     };
 
-    Kartograph.prototype.onPathEvent = function(evt) {
-      /*
-      		forwards path events to their callbacks, but attaches the path to
-      		the event object
-      */
-      var me, path;
-      me = this;
-      path = evt.target.path;
-      return me.layerEventCallbacks[path.layer][evt.type](path);
-    };
-
     Kartograph.prototype.resize = function() {
       /*
       		forces redraw of every layer
@@ -493,6 +483,33 @@
       return me;
     };
 
+    Kartograph.prototype.addSymbolGroup = function(symbolgroup) {
+      var me, _ref2;
+      me = this;
+      if ((_ref2 = me.symbolGroups) == null) me.symbolGroups = [];
+      return me.symbolGroups.push(symbolgroup);
+    };
+
+    Kartograph.prototype.clear = function() {
+      var id, me, sg, _i, _len, _ref2;
+      me = this;
+      if (me.layers != null) {
+        for (id in me.layers) {
+          me.layers[id].remove();
+        }
+        me.layers = {};
+        me.layerIds = [];
+      }
+      if (me.symbolGroups != null) {
+        _ref2 = me.symbolGroups;
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          sg = _ref2[_i];
+          sg.remove();
+        }
+        return me.symbolGroups = [];
+      }
+    };
+
     return Kartograph;
 
   })();
@@ -553,6 +570,21 @@
       return _results;
     };
 
+    MapLayer.prototype.remove = function() {
+      /*
+      		removes every path
+      */
+      var me, path, _i, _len, _ref2, _results;
+      me = this;
+      _ref2 = me.paths;
+      _results = [];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        path = _ref2[_i];
+        _results.push(path.remove());
+      }
+      return _results;
+    };
+
     return MapLayer;
 
   })();
@@ -593,6 +625,12 @@
           r: path.r
         });
       }
+    };
+
+    MapLayerPath.prototype.remove = function() {
+      var me;
+      me = this;
+      return me.svgPath.remove();
     };
 
     return MapLayerPath;

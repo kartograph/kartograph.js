@@ -83,6 +83,7 @@ class Kartograph
 	loadMap: (mapurl, callback, opts) ->
 		# load svg map
 		me = @
+		me.clear() 
 		me.opts = opts ? {}
 		me.opts.zoom ?= 1
 		me.mapLoadCallback = callback
@@ -346,16 +347,7 @@ class Kartograph
 				me.paper.path(pathstr).attr('opacity',.8)
 		
 		# for debugging purposes
-	
-	
-	onPathEvent: (evt) ->
-		###
-		forwards path events to their callbacks, but attaches the path to
-		the event object
-		###
-		me = @
-		path = evt.target.path
-		me.layerEventCallbacks[path.layer][evt.type](path)
+
 	
 	
 	resize: () ->
@@ -421,7 +413,24 @@ class Kartograph
 		me.zc = new PanAndZoomControl me
 		me
 		
+	addSymbolGroup: (symbolgroup) ->
+		me = @
+		me.symbolGroups ?= []
+		me.symbolGroups.push(symbolgroup)
 		
+		
+	clear: () ->
+		me = @
+		if me.layers?
+			for id of me.layers
+				me.layers[id].remove()
+			me.layers = {}
+			me.layerIds = []
+		
+		if me.symbolGroups? 
+			for sg in me.symbolGroups
+				sg.remove()
+			me.symbolGroups = []
 	
 		
 kartograph.Kartograph = Kartograph
@@ -469,6 +478,14 @@ class MapLayer
 		for path in me.paths
 			path.setView(view)
 			
+	remove: ->
+		###
+		removes every path
+		###
+		me = @
+		for path in me.paths
+			path.remove()
+			
 		
 class MapLayerPath
 
@@ -495,6 +512,10 @@ class MapLayerPath
 			me.svgPath.attr({ path: path_str }) 
 		else if me.path.type == "circle"
 			me.svgPath.attr({ cx: path.x, cy: path.y, r: path.r })
+			
+	remove: () ->
+		me = @
+		me.svgPath.remove()
 			
 			
 class CanvasLayer

@@ -64,7 +64,7 @@ class SymbolGroup
 	constructor: (opts) ->
 		me = @
 		required = ['data','location','type','map']
-		optional = ['filter', 'tooltip', 'layout', 'group']
+		optional = ['filter', 'tooltip', 'layout', 'group','click']
 		
 		for p in required
 			if opts[p]?
@@ -86,6 +86,7 @@ class SymbolGroup
 		# init layer
 		me.layers = 
 			mapcanvas: me.map.paper
+			
 		for l in SymbolType.layers
 			nid = SymbolGroup._layerid++
 			id = 'sl_'+nid
@@ -96,6 +97,7 @@ class SymbolGroup
 			me.layers[l.id] = layer
 		
 		# add symbols
+		me.symbols = [] 
 		for i of me.data
 			d = me.data[i]
 			if type(me.filter) == "function"
@@ -112,13 +114,21 @@ class SymbolGroup
 			
 		if type(me.tooltip) == "function"
 			me.initTooltips()
+			
+		if type(me.click) == "function"
+			for s in me.symbols
+				for node in s.nodes()
+					node.symbol = s
+					$(node).click (e) =>
+						me.click e.target.symbol.data
+			
+		me.map.addSymbolGroup(me)
 		
 	addSymbol: (data) ->
 		###
 		adds a new symbol to this group
 		###
 		me = @
-		me.symbols ?= [] 
 		SymbolType = me.type
 		ll = me.evaluate me.location,data
 		if type(ll) == 'array'
@@ -198,7 +208,13 @@ class SymbolGroup
 				$(node).qtip(cfg)
 		return
 				
-	
+	remove: () ->
+		me = @
+		for s in me.symbols
+			s.clear()
+		for id,layer of me.layers
+			if id != "mapcanvas"
+				layer.remove()
 		
 SymbolGroup._layerid = 0
 kartograph.SymbolGroup = SymbolGroup		
@@ -221,6 +237,9 @@ class Symbol
 		
 	nodes: () ->
 		[]
+		
+	clear: () ->
+		return
 
 	
 class Bubble extends Symbol
@@ -269,6 +288,9 @@ class Bubble extends Symbol
 	nodes: () ->
 		me = @
 		[me.path.node]
+		
+	
+		
 		
 
 Bubble.props = ['radius','style','class']

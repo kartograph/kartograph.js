@@ -68,10 +68,11 @@
   SymbolGroup = (function() {
 
     function SymbolGroup(opts) {
-      var SymbolType, d, i, id, l, layer, me, nid, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _m, _ref3, _ref4, _ref5;
+      var SymbolType, d, i, id, l, layer, me, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _len7, _m, _n, _o, _ref3, _ref4, _ref5, _ref6, _ref7;
+      var _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'layout', 'group'];
+      optional = ['filter', 'tooltip', 'layout', 'group', 'click'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -105,6 +106,7 @@
         }
         me.layers[l.id] = layer;
       }
+      me.symbols = [];
       for (i in me.data) {
         d = me.data[i];
         if (type(me.filter) === "function") {
@@ -120,15 +122,29 @@
         s.render();
       }
       if (type(me.tooltip) === "function") me.initTooltips();
+      if (type(me.click) === "function") {
+        _ref6 = me.symbols;
+        for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
+          s = _ref6[_n];
+          _ref7 = s.nodes();
+          for (_o = 0, _len7 = _ref7.length; _o < _len7; _o++) {
+            node = _ref7[_o];
+            node.symbol = s;
+            $(node).click(function(e) {
+              return me.click(e.target.symbol.data);
+            });
+          }
+        }
+      }
+      me.map.addSymbolGroup(me);
     }
 
     SymbolGroup.prototype.addSymbol = function(data) {
       /*
       		adds a new symbol to this group
       */
-      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref3, _ref4;
+      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref3;
       me = this;
-      if ((_ref3 = me.symbols) == null) me.symbols = [];
       SymbolType = me.type;
       ll = me.evaluate(me.location, data);
       if (type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
@@ -137,9 +153,9 @@
         location: ll,
         data: data
       };
-      _ref4 = SymbolType.props;
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        p = _ref4[_i];
+      _ref3 = SymbolType.props;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        p = _ref3[_i];
         if (me[p] != null) sprops[p] = me.evaluate(me[p], data);
       }
       symbol = new SymbolType(sprops);
@@ -230,6 +246,27 @@
       }
     };
 
+    SymbolGroup.prototype.remove = function() {
+      var id, layer, me, s, _i, _len, _ref3, _ref4, _results;
+      me = this;
+      _ref3 = me.symbols;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        s.clear();
+      }
+      _ref4 = me.layers;
+      _results = [];
+      for (id in _ref4) {
+        layer = _ref4[id];
+        if (id !== "mapcanvas") {
+          _results.push(layer.remove());
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
     return SymbolGroup;
 
   })();
@@ -259,6 +296,8 @@
     Symbol.prototype.nodes = function() {
       return [];
     };
+
+    Symbol.prototype.clear = function() {};
 
     return Symbol;
 
