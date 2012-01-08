@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var CanvasLayer, Kartograph, MapLayer, MapLayerPath, PanAndZoomControl, kartograph, log, root, warn, _ref;
+  var CanvasLayer, Kartograph, MapLayer, MapLayerPath, PanAndZoomControl, kartograph, log, root, warn, _base, _ref, _ref2;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -35,6 +35,12 @@
     return console.log('kartograph (' + kartograph.version + '): ' + s);
   };
 
+  if ((_ref2 = (_base = String.prototype).trim) == null) {
+    _base.trim = function() {
+      return this.replace(/^\s+|\s+$/g, "");
+    };
+  }
+
   Kartograph = (function() {
 
     function Kartograph(container) {
@@ -48,9 +54,9 @@
     }
 
     Kartograph.prototype.createSVGLayer = function(id) {
-      var about, cnt, lid, me, paper, svg, vp, _ref2;
+      var about, cnt, lid, me, paper, svg, vp, _ref3;
       me = this;
-      if ((_ref2 = me._layerCnt) == null) me._layerCnt = 0;
+      if ((_ref3 = me._layerCnt) == null) me._layerCnt = 0;
       lid = me._layerCnt++;
       vp = me.viewport;
       cnt = me.container;
@@ -70,11 +76,11 @@
     };
 
     Kartograph.prototype.createHTMLLayer = function(id) {
-      var cnt, div, lid, me, vp, _ref2;
+      var cnt, div, lid, me, vp, _ref3;
       me = this;
       vp = me.viewport;
       cnt = me.container;
-      if ((_ref2 = me._layerCnt) == null) me._layerCnt = 0;
+      if ((_ref3 = me._layerCnt) == null) me._layerCnt = 0;
       lid = me._layerCnt++;
       div = $('<div class="layer ' + id + '" />');
       div.css({
@@ -90,11 +96,11 @@
     };
 
     Kartograph.prototype.loadMap = function(mapurl, callback, opts) {
-      var me, _base, _ref2;
+      var me, _base2, _ref3;
       me = this;
       me.clear();
       me.opts = opts != null ? opts : {};
-      if ((_ref2 = (_base = me.opts).zoom) == null) _base.zoom = 1;
+      if ((_ref3 = (_base2 = me.opts).zoom) == null) _base2.zoom = 1;
       me.mapLoadCallback = callback;
       $.ajax({
         url: mapurl,
@@ -108,10 +114,10 @@
       /*
       		add new layer
       */
-      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref2, _ref3;
+      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref3, _ref4;
       me = this;
-      if ((_ref2 = me.layerIds) == null) me.layerIds = [];
-      if ((_ref3 = me.layers) == null) me.layers = {};
+      if ((_ref3 = me.layerIds) == null) me.layerIds = [];
+      if ((_ref4 = me.layers) == null) me.layers = {};
       if (layer_id == null) layer_id = src_id;
       svgLayer = $('#' + src_id, me.svgSrc);
       if (svgLayer.length === 0) {
@@ -197,36 +203,36 @@
     };
 
     Kartograph.prototype.clearMarkers = function() {
-      var marker, me, _i, _len, _ref2;
+      var marker, me, _i, _len, _ref3;
       me = this;
-      _ref2 = me.markers;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        marker = _ref2[_i];
+      _ref3 = me.markers;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        marker = _ref3[_i];
         marker.clear();
       }
       return me.markers = [];
     };
 
     Kartograph.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref2, _ref3, _ref4;
+      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref3, _ref4, _ref5;
       me = this;
-      layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      layer_id = (_ref3 = opts.layer) != null ? _ref3 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
         warn('choropleth error: layer "' + layer_ihad + '" not found');
         return;
       }
       data = opts.data;
       data_col = opts.key;
-      no_data_color = (_ref3 = opts.noDataColor) != null ? _ref3 : '#ccc';
+      no_data_color = (_ref4 = opts.noDataColor) != null ? _ref4 : '#ccc';
       colorscale = opts.colorscale;
       pathData = {};
       for (id in data) {
         row = data[id];
         pathData[id] = row[data_col];
       }
-      _ref4 = me.layers[layer_id].pathsById;
-      for (id in _ref4) {
-        paths = _ref4[id];
+      _ref5 = me.layers[layer_id].pathsById;
+      for (id in _ref5) {
+        paths = _ref5[id];
         for (_i = 0, _len = paths.length; _i < _len; _i++) {
           path = paths[_i];
           if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
@@ -241,18 +247,18 @@
     };
 
     Kartograph.prototype.tooltips = function(opts) {
-      var cfg, id, layer_id, me, path, paths, tooltips, tt, _ref2, _ref3, _results;
+      var cfg, id, layer_id, me, path, paths, tooltips, tt, _ref3, _ref4, _results;
       me = this;
       tooltips = opts.content;
-      layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
+      layer_id = (_ref3 = opts.layer) != null ? _ref3 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
         warn('tooltips error: layer "' + layer_id + '" not found');
         return;
       }
-      _ref3 = me.layers[layer_id].pathsById;
+      _ref4 = me.layers[layer_id].pathsById;
       _results = [];
-      for (id in _ref3) {
-        paths = _ref3[id];
+      for (id in _ref4) {
+        paths = _ref4[id];
         _results.push((function() {
           var _i, _len, _results2;
           _results2 = [];
@@ -349,16 +355,16 @@
     */
 
     Kartograph.prototype.mapLoaded = function(xml) {
-      var $view, AB, halign, me, padding, valign, vp, _ref2, _ref3, _ref4;
+      var $view, AB, halign, me, padding, valign, vp, _ref3, _ref4, _ref5;
       me = this;
       if ($.browser.msie) xml = $(xml);
       me.svgSrc = xml;
       vp = me.viewport;
       $view = $('view', xml)[0];
       me.viewAB = AB = kartograph.View.fromXML($view);
-      padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
-      halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
-      valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
+      padding = (_ref3 = me.opts.padding) != null ? _ref3 : 0;
+      halign = (_ref4 = me.opts.halign) != null ? _ref4 : 'center';
+      valign = (_ref5 = me.opts.valign) != null ? _ref5 : 'center';
       me.viewBC = new kartograph.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
       me.proj = kartograph.Proj.fromXML($('proj', $view)[0]);
       return me.mapLoadCallback(me);
@@ -375,7 +381,7 @@
     };
 
     Kartograph.prototype.renderCoastline = function(coastlines) {
-      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref2, _results;
+      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref3, _results;
       me = this;
       P = me.proj;
       vp = me.viewport;
@@ -385,7 +391,7 @@
       for (_i = 0, _len = coastlines.length; _i < _len; _i++) {
         line = coastlines[_i];
         pathstr = '';
-        for (i = 0, _ref2 = line.length - 2; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+        for (i = 0, _ref3 = line.length - 2; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
           p0 = line[i];
           p1 = line[i + 1];
           d = 0;
@@ -410,21 +416,21 @@
       /*
       		forces redraw of every layer
       */
-      var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref2, _ref3, _ref4, _ref5, _results;
+      var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref3, _ref4, _ref5, _ref6, _results;
       me = this;
       cnt = me.container;
       me.viewport = vp = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
       me.paper.setSize(vp.width, vp.height);
       vp = me.viewport;
-      padding = (_ref2 = me.opts.padding) != null ? _ref2 : 0;
-      halign = (_ref3 = me.opts.halign) != null ? _ref3 : 'center';
-      valign = (_ref4 = me.opts.valign) != null ? _ref4 : 'center';
+      padding = (_ref3 = me.opts.padding) != null ? _ref3 : 0;
+      halign = (_ref4 = me.opts.halign) != null ? _ref4 : 'center';
+      valign = (_ref5 = me.opts.valign) != null ? _ref5 : 'center';
       zoom = me.opts.zoom;
       me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
-      _ref5 = me.layers;
+      _ref6 = me.layers;
       _results = [];
-      for (id in _ref5) {
-        layer = _ref5[id];
+      for (id in _ref6) {
+        layer = _ref6[id];
         _results.push(layer.setView(me.viewBC));
       }
       return _results;
@@ -465,7 +471,7 @@
     };
 
     Kartograph.prototype.addGeoPath = function(points, cmds, className) {
-      var cmd, i, me, path, path_str, pt, xy, _ref2;
+      var cmd, i, me, path, path_str, pt, xy, _ref3;
       if (cmds == null) cmds = [];
       if (className == null) className = '';
       me = this;
@@ -473,7 +479,7 @@
       path_str = '';
       for (i in points) {
         pt = points[i];
-        cmd = (_ref2 = cmds[i]) != null ? _ref2 : 'L';
+        cmd = (_ref3 = cmds[i]) != null ? _ref3 : 'L';
         xy = me.lonlat2xy(pt);
         path_str += cmd + xy[0] + ',' + xy[1];
       }
@@ -489,14 +495,14 @@
     };
 
     Kartograph.prototype.addSymbolGroup = function(symbolgroup) {
-      var me, _ref2;
+      var me, _ref3;
       me = this;
-      if ((_ref2 = me.symbolGroups) == null) me.symbolGroups = [];
+      if ((_ref3 = me.symbolGroups) == null) me.symbolGroups = [];
       return me.symbolGroups.push(symbolgroup);
     };
 
     Kartograph.prototype.clear = function() {
-      var id, me, sg, _i, _len, _ref2;
+      var id, me, sg, _i, _len, _ref3;
       me = this;
       if (me.layers != null) {
         for (id in me.layers) {
@@ -506,9 +512,9 @@
         me.layerIds = [];
       }
       if (me.symbolGroups != null) {
-        _ref2 = me.symbolGroups;
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          sg = _ref2[_i];
+        _ref3 = me.symbolGroups;
+        for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+          sg = _ref3[_i];
           sg.remove();
         }
         return me.symbolGroups = [];
@@ -533,15 +539,15 @@
     }
 
     MapLayer.prototype.addPath = function(svg_path) {
-      var layerPath, me, _base, _name, _ref2, _ref3, _ref4;
+      var layerPath, me, _base2, _name, _ref3, _ref4, _ref5;
       me = this;
-      if ((_ref2 = me.paths) == null) me.paths = [];
+      if ((_ref3 = me.paths) == null) me.paths = [];
       layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view);
       me.paths.push(layerPath);
       if (me.path_id != null) {
-        if ((_ref3 = me.pathsById) == null) me.pathsById = {};
-        if ((_ref4 = (_base = me.pathsById)[_name = layerPath.data[me.path_id]]) == null) {
-          _base[_name] = [];
+        if ((_ref4 = me.pathsById) == null) me.pathsById = {};
+        if ((_ref5 = (_base2 = me.pathsById)[_name = layerPath.data[me.path_id]]) == null) {
+          _base2[_name] = [];
         }
         return me.pathsById[layerPath.data[me.path_id]].push(layerPath);
       }
@@ -564,12 +570,12 @@
       /*
       		# after resizing of the map, each layer gets a new view
       */
-      var me, path, _i, _len, _ref2, _results;
+      var me, path, _i, _len, _ref3, _results;
       me = this;
-      _ref2 = me.paths;
+      _ref3 = me.paths;
       _results = [];
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        path = _ref2[_i];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        path = _ref3[_i];
         _results.push(path.setView(view));
       }
       return _results;
@@ -579,12 +585,12 @@
       /*
       		removes every path
       */
-      var me, path, _i, _len, _ref2, _results;
+      var me, path, _i, _len, _ref3, _results;
       me = this;
-      _ref2 = me.paths;
+      _ref3 = me.paths;
       _results = [];
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        path = _ref2[_i];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        path = _ref3[_i];
         _results.push(path.remove());
       }
       return _results;
@@ -597,7 +603,7 @@
   MapLayerPath = (function() {
 
     function MapLayerPath(svg_path, layer_id, paper, view) {
-      var attr, data, i, me, path, _ref2;
+      var attr, data, i, me, path, _ref3;
       me = this;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
@@ -606,7 +612,7 @@
       me.baseClass = 'polygon ' + layer_id;
       me.svgPath.node.path = me;
       data = {};
-      for (i = 0, _ref2 = svg_path.attributes.length - 1; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+      for (i = 0, _ref3 = svg_path.attributes.length - 1; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
         attr = svg_path.attributes[i];
         if (attr.name.substr(0, 5) === "data-") {
           data[attr.name.substr(5)] = attr.value;
@@ -655,40 +661,40 @@
     }
 
     CanvasLayer.prototype.addPath = function(svg_path) {
-      var me, path, _ref2;
+      var me, path, _ref3;
       me = this;
-      if ((_ref2 = me.paths) == null) me.paths = [];
+      if ((_ref3 = me.paths) == null) me.paths = [];
       path = kartograph.geom.Path.fromSVG(svg_path);
       return me.paths.push(path);
     };
 
     CanvasLayer.prototype.render = function() {
-      var me, path, paths, _i, _len, _ref2;
+      var me, path, paths, _i, _len, _ref3;
       me = this;
       paths = [];
-      _ref2 = me.paths;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        path = _ref2[_i];
+      _ref3 = me.paths;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        path = _ref3[_i];
         paths.push(me.view.projectPath(path));
       }
       return me.renderCallback(me, paths);
     };
 
     CanvasLayer.prototype.drawPaths = function() {
-      var c, contour, me, path, pt, _i, _len, _ref2, _results;
+      var c, contour, me, path, pt, _i, _len, _ref3, _results;
       me = this;
       c = me.canvas.getContext('2d');
-      _ref2 = me.paths;
+      _ref3 = me.paths;
       _results = [];
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        path = _ref2[_i];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        path = _ref3[_i];
         path = me.view.projectPath(path);
         _results.push((function() {
-          var _j, _len2, _ref3, _results2;
-          _ref3 = path.contours;
+          var _j, _len2, _ref4, _results2;
+          _ref4 = path.contours;
           _results2 = [];
-          for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
-            contour = _ref3[_j];
+          for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+            contour = _ref4[_j];
             contour.reverse();
             _results2.push((function() {
               var _k, _len3, _results3;
