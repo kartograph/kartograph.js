@@ -4,7 +4,7 @@
 <title>proj.js test</title>
 <script src="../lib/jquery.min.js"></script>
 <script src="../lib/dat.gui.min.js"></script>
-<script src="../svgmap.js"></script>
+<script src="../kartograph.js"></script>
 <style>
 canvas {
 	margin: 10px;
@@ -79,7 +79,7 @@ $(function() {
 	
 	showMap = function(p, coastlines) {
 	
-		P = new svgmap.proj[p](globeopt);
+		P = new kartograph.proj[p](globeopt);
 		xy = P.project(13,14);
 		if (isNaN(xy[0]) || isNaN(xy[1])) {
 			console.error(p, P, xy);
@@ -101,7 +101,7 @@ $(function() {
 		ctx.beginPath();		
 		ctx.fillStyle ="#fff";
 		
-		view = new svgmap.View(bbox, w, h, 10);
+		view = new kartograph.View(bbox, w, h, 10);
 			
 		for (i=0;i<sea.length;i++) {
 			xy = view.project(sea[i]);
@@ -203,7 +203,7 @@ $(function() {
 	gui.remember(globeopt);
 
 	var proj = [];
-	for (var p in svgmap.proj) proj.push(p);
+	for (var p in kartograph.proj) proj.push(p);
 	
 	gui.add(globeopt, 'proj', proj).onChange(renderFrame);
 	gui.add(globeopt, 'flip', [0,1]).onChange(renderFrame);

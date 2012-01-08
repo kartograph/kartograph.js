@@ -19,7 +19,7 @@
 root = (exports ? this)	
 kartograph = root.K = root.kartograph ?= {}
 
-kartograph.version = "0.4.2"
+kartograph.version = "0.4.3"
 
 
 warn = (s) ->
@@ -89,6 +89,7 @@ class Kartograph
 		me.mapLoadCallback = callback
 		$.ajax 
 			url: mapurl
+			dataType: if $.browser.msie then "text" else "xml"  
 			success: me.mapLoaded
 			context: me
 		return
@@ -102,25 +103,30 @@ class Kartograph
 		me.layerIds ?= []
 		me.layers ?= {}
 		
-		layer_id ?= src_id
-		svgLayer = $('g#'+src_id, me.svgSrc)
+		layer_id ?= src_id	
+		svgLayer = $('#'+src_id, me.svgSrc)
 		
 		if svgLayer.length == 0
-			warn 'didn\'t find any paths for layer "'+layer_id+'"'
+			warn 'didn\'t find any paths for layer "'+src_id+'"'
+			console.log me.svgSrc
+			window.t = me.svgSrc
 			return
+		
 		layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC)
 		
 		$paths = $('*', svgLayer[0])		
-		for svg_path in $paths				
-			layer.addPath(svg_path)
 		
+		for svg_path in $paths		
+			layer.addPath(svg_path)
+				
 		if layer.paths.length > 0
 			me.layers[layer_id] = layer
 			me.layerIds.push layer_id
 		else
 			warn 'didn\'t find any paths for layer '+layer_id
-		
+		console.log 'E '
 		return
+		
 
 	getLayerPath: (layer_id, path_id) ->
 		me = @
@@ -305,6 +311,7 @@ class Kartograph
 	
 	mapLoaded: (xml) ->
 		me = @
+		xml = $(xml) if $.browser.msie		
 		me.svgSrc = xml
 		vp = me.viewport		
 		$view = $('view', xml)[0] # use first view
@@ -313,7 +320,7 @@ class Kartograph
 		halign = me.opts.halign ? 'center'
 		valign = me.opts.valign ? 'center'
 		me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
-		me.proj = kartograph.Proj.fromXML $('proj', $view)[0]		
+		me.proj = kartograph.Proj.fromXML $('proj', $view)[0]
 		me.mapLoadCallback(me)
 	
 	
@@ -427,7 +434,7 @@ class Kartograph
 			me.layers = {}
 			me.layerIds = []
 		
-		if me.symbolGroups? 
+		if me.symbolGroups?  
 			for sg in me.symbolGroups
 				sg.remove()
 			me.symbolGroups = []
@@ -448,7 +455,6 @@ class MapLayer
 	addPath: (svg_path) ->
 		me = @
 		me.paths ?= []
-				
 		layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view)
 		
 		me.paths.push(layerPath)
@@ -457,7 +463,7 @@ class MapLayer
 			me.pathsById ?= {}
 			me.pathsById[layerPath.data[me.path_id]] ?= []
 			me.pathsById[layerPath.data[me.path_id]].push(layerPath)
-			
+		
 	
 	hasPath: (id) ->
 		me = @
@@ -493,8 +499,10 @@ class MapLayerPath
 		me = @		
 		me.path = path = kartograph.geom.Path.fromSVG(svg_path)	
 		me.svgPath = view.projectPath(path).toSVG(paper)
+		me.svgPath.attr 'fill','#ccb'
+		me.svgPath.attr 'stroke','#fff'
 		me.baseClass = 'polygon '+layer_id
-		me.svgPath.node.setAttribute('class', me.baseClass)
+		# me.svgPath.node.setAttribute('class', me.baseClass)
 		me.svgPath.node.path = me # store reference to this path
 		
 		data = {}

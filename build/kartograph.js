@@ -25,7 +25,7 @@
 
   kartograph = root.K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.4.2";
+  kartograph.version = "0.4.3";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -98,6 +98,7 @@
       me.mapLoadCallback = callback;
       $.ajax({
         url: mapurl,
+        dataType: $.browser.msie ? "text" : "xml",
         success: me.mapLoaded,
         context: me
       });
@@ -112,9 +113,11 @@
       if ((_ref2 = me.layerIds) == null) me.layerIds = [];
       if ((_ref3 = me.layers) == null) me.layers = {};
       if (layer_id == null) layer_id = src_id;
-      svgLayer = $('g#' + src_id, me.svgSrc);
+      svgLayer = $('#' + src_id, me.svgSrc);
       if (svgLayer.length === 0) {
-        warn('didn\'t find any paths for layer "' + layer_id + '"');
+        warn('didn\'t find any paths for layer "' + src_id + '"');
+        console.log(me.svgSrc);
+        window.t = me.svgSrc;
         return;
       }
       layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC);
@@ -129,6 +132,7 @@
       } else {
         warn('didn\'t find any paths for layer ' + layer_id);
       }
+      console.log('E ');
     };
 
     Kartograph.prototype.getLayerPath = function(layer_id, path_id) {
@@ -347,6 +351,7 @@
     Kartograph.prototype.mapLoaded = function(xml) {
       var $view, AB, halign, me, padding, valign, vp, _ref2, _ref3, _ref4;
       me = this;
+      if ($.browser.msie) xml = $(xml);
       me.svgSrc = xml;
       vp = me.viewport;
       $view = $('view', xml)[0];
@@ -596,8 +601,9 @@
       me = this;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
+      me.svgPath.attr('fill', '#ccb');
+      me.svgPath.attr('stroke', '#fff');
       me.baseClass = 'polygon ' + layer_id;
-      me.svgPath.node.setAttribute('class', me.baseClass);
       me.svgPath.node.path = me;
       data = {};
       for (i = 0, _ref2 = svg_path.attributes.length - 1; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {

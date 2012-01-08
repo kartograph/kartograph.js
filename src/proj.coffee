@@ -83,6 +83,10 @@ class Proj
 		for s in sea
 			bbox.update(s[0],s[1])
 		bbox
+		
+	toString: ->
+		me = @
+		'[Proj: '+me.name+']'
 
 	
 Proj.fromXML = (xml) ->
@@ -95,7 +99,9 @@ Proj.fromXML = (xml) ->
 		attr = xml.attributes[i]
 		if attr.name != "id"
 			opts[attr.name] = attr.value
-	new kartograph.proj[id](opts)
+	proj = new kartograph.proj[id](opts)
+	proj.name = id
+	proj
 	
 kartograph.Proj = Proj
 	

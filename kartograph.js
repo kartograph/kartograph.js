@@ -469,7 +469,7 @@
 
   kartograph = root.K = (_ref7 = root.kartograph) != null ? _ref7 : root.kartograph = {};
 
-  kartograph.version = "0.4.2";
+  kartograph.version = "0.4.3";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -542,6 +542,7 @@
       me.mapLoadCallback = callback;
       $.ajax({
         url: mapurl,
+        dataType: $.browser.msie ? "text" : "xml",
         success: me.mapLoaded,
         context: me
       });
@@ -556,9 +557,11 @@
       if ((_ref8 = me.layerIds) == null) me.layerIds = [];
       if ((_ref9 = me.layers) == null) me.layers = {};
       if (layer_id == null) layer_id = src_id;
-      svgLayer = $('g#' + src_id, me.svgSrc);
+      svgLayer = $('#' + src_id, me.svgSrc);
       if (svgLayer.length === 0) {
-        warn('didn\'t find any paths for layer "' + layer_id + '"');
+        warn('didn\'t find any paths for layer "' + src_id + '"');
+        console.log(me.svgSrc);
+        window.t = me.svgSrc;
         return;
       }
       layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC);
@@ -573,6 +576,7 @@
       } else {
         warn('didn\'t find any paths for layer ' + layer_id);
       }
+      console.log('E ');
     };
 
     Kartograph.prototype.getLayerPath = function(layer_id, path_id) {
@@ -791,6 +795,7 @@
     Kartograph.prototype.mapLoaded = function(xml) {
       var $view, AB, halign, me, padding, valign, vp, _ref10, _ref8, _ref9;
       me = this;
+      if ($.browser.msie) xml = $(xml);
       me.svgSrc = xml;
       vp = me.viewport;
       $view = $('view', xml)[0];
@@ -1040,8 +1045,9 @@
       me = this;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
+      me.svgPath.attr('fill', '#ccb');
+      me.svgPath.attr('stroke', '#fff');
       me.baseClass = 'polygon ' + layer_id;
-      me.svgPath.node.setAttribute('class', me.baseClass);
       me.svgPath.node.path = me;
       data = {};
       for (i = 0, _ref8 = svg_path.attributes.length - 1; 0 <= _ref8 ? i <= _ref8 : i >= _ref8; 0 <= _ref8 ? i++ : i--) {
@@ -2117,7 +2123,7 @@
     type = path.nodeName;
     res = null;
     if (type === "path") {
-      path_str = path.getAttribute('d').trim();
+      path_str = $.trim(path.getAttribute('d'));
       closed = path_str[path_str.length - 1] === "Z";
       sep = closed ? "Z M" : "M";
       path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
@@ -2318,6 +2324,12 @@
       return bbox;
     };
 
+    Proj.prototype.toString = function() {
+      var me;
+      me = this;
+      return '[Proj: ' + me.name + ']';
+    };
+
     return Proj;
 
   })();
@@ -2326,14 +2338,16 @@
     /*
     	reconstructs a projection from xml description
     */
-    var attr, i, id, opts, _ref14;
+    var attr, i, id, opts, proj, _ref14;
     id = xml.getAttribute('id');
     opts = {};
     for (i = 0, _ref14 = xml.attributes.length - 1; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
       attr = xml.attributes[i];
       if (attr.name !== "id") opts[attr.name] = attr.value;
     }
-    return new kartograph.proj[id](opts);
+    proj = new kartograph.proj[id](opts);
+    proj.name = id;
+    return proj;
   };
 
   kartograph.Proj = Proj;

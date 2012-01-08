@@ -173,7 +173,7 @@
     type = path.nodeName;
     res = null;
     if (type === "path") {
-      path_str = path.getAttribute('d').trim();
+      path_str = $.trim(path.getAttribute('d'));
       closed = path_str[path_str.length - 1] === "Z";
       sep = closed ? "Z M" : "M";
       path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));

@@ -119,6 +119,12 @@
       return bbox;
     };
 
+    Proj.prototype.toString = function() {
+      var me;
+      me = this;
+      return '[Proj: ' + me.name + ']';
+    };
+
     return Proj;
 
   })();
@@ -127,14 +133,16 @@
     /*
     	reconstructs a projection from xml description
     */
-    var attr, i, id, opts, _ref2;
+    var attr, i, id, opts, proj, _ref2;
     id = xml.getAttribute('id');
     opts = {};
     for (i = 0, _ref2 = xml.attributes.length - 1; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
       attr = xml.attributes[i];
       if (attr.name !== "id") opts[attr.name] = attr.value;
     }
-    return new kartograph.proj[id](opts);
+    proj = new kartograph.proj[id](opts);
+    proj.name = id;
+    return proj;
   };
 
   kartograph.Proj = Proj;
