@@ -28,6 +28,9 @@ warn = (s) ->
 log = (s) ->
 	console.log('kartograph ('+kartograph.version+'): '+s)
 
+String::trim ?= () ->
+	this.replace /^\s+|\s+$/g,""
+
 
 class Kartograph
 
