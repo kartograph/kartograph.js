@@ -151,7 +151,8 @@
       sprops = {
         layers: me.layers,
         location: ll,
-        data: data
+        data: data,
+        map: me.map
       };
       _ref3 = SymbolType.props;
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
@@ -230,7 +231,6 @@
           },
           content: {}
         };
-        console.log(s, s.data);
         tt = tooltips(s.data);
         if (type(tt) === "string") {
           cfg.content.text = tt;
@@ -282,6 +282,7 @@
       me = this;
       me.location = opts.location;
       me.data = opts.data;
+      me.map = opts.map;
       me.layers = opts.layers;
       me.x = opts.x;
       me.y = opts.y;
@@ -335,6 +336,7 @@
       me = this;
       me.path = me.layers.a.circle(me.x, me.y, me.radius);
       me.update();
+      me.map.applyStyles(me.path);
       return me;
     };
 

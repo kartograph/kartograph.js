@@ -30,6 +30,39 @@ log = (s) ->
 
 String::trim ?= () ->
 	this.replace /^\s+|\s+$/g,""
+	
+`if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}`
 
 
 class Kartograph
@@ -41,6 +74,7 @@ class Kartograph
 		me.viewport = new kartograph.BBox 0,0,cnt.width(),cnt.height()
 		me.paper = me.createSVGLayer()
 		me.markers = []
+		me.pathById = {}
 		me.container.addClass 'kartograph'
 		
 	createSVGLayer: (id) ->
@@ -95,6 +129,8 @@ class Kartograph
 			dataType: if $.browser.msie then "text" else "xml"  
 			success: me.mapLoaded
 			context: me
+			error: (a,b,c) ->
+				warn a,b,c
 		return
 	
 	
@@ -111,11 +147,10 @@ class Kartograph
 		
 		if svgLayer.length == 0
 			warn 'didn\'t find any paths for layer "'+src_id+'"'
-			console.log me.svgSrc
 			window.t = me.svgSrc
 			return
 		
-		layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC)
+		layer = new MapLayer(layer_id, path_id, me)
 		
 		$paths = $('*', svgLayer[0])		
 		
@@ -127,7 +162,6 @@ class Kartograph
 			me.layerIds.push layer_id
 		else
 			warn 'didn\'t find any paths for layer '+layer_id
-		console.log 'E '
 		return
 		
 
@@ -254,6 +288,7 @@ class Kartograph
 						cfg.content.text = tt[1]
 					
 					$(path.svgPath.node).qtip(cfg);
+	
 		
 	###
 		for some reasons, this runs horribly slow in Firefox
@@ -441,6 +476,62 @@ class Kartograph
 			for sg in me.symbolGroups
 				sg.remove()
 			me.symbolGroups = []
+			
+	
+	loadStyles: (url, callback) ->
+		###
+		loads a stylesheet
+		###
+		me = @
+		if $.browser.msie
+			$.ajax
+				url: url
+				dataType: 'text'
+				success: (resp) ->
+					me.styles = kartograph.parsecss resp
+					callback()
+				error: (a,b,c) ->
+					warn 'error while loading '+url, a,b,c
+					
+		else
+			$('body').append '<link rel="stylesheet" href="'+url+'" />'
+			callback()
+	
+	
+	applyStyles: (el) ->
+		###
+		applies pre-loaded css styles to
+		raphael elements
+		###
+		me = @
+		if not me.styles?
+			return el
+			
+		me._pathTypes ?= ["path", "circle", "rectangle", "ellipse"]
+		me._regardStyles ?= ["fill", "stroke", "fill-opacity", "stroke-width", "stroke-opacity"]
+		className = el.node.getAttribute('class')
+		for sel of me.styles
+			p = sel
+			for selectors in p.split ','				
+				p = p.split ' ' # ignore hierarchy
+				p = p[p.length-1]
+				p = p.split ':' # check pseudo classes
+				if p.length > 1
+					continue
+				p = p[0].split '.' # check classes
+				classes = p.slice(1)
+				if classes.length > 0 and classes.indexOf(className) < 0
+					continue
+				p = p[0]
+				if me._pathTypes.indexOf(p) >= 0 and p != el.type
+					continue
+				# if we made it until here, the styles can be applied
+				props = me.styles[sel]
+				for k in me._regardStyles
+					if props[k]?
+						el.attr k,props[k]
+		el
+
 	
 		
 kartograph.Kartograph = Kartograph
@@ -448,17 +539,18 @@ kartograph.Kartograph = Kartograph
 
 class MapLayer
 	
-	constructor: (layer_id, path_id, paper, view)->
+	constructor: (layer_id, path_id, map)->
 		me = @
 		me.id = layer_id
 		me.path_id = path_id
-		me.paper = paper
-		me.view = view
+		me.paper = map.paper
+		me.view = map.viewBC
+		me.map = map
 				
 	addPath: (svg_path) ->
 		me = @
 		me.paths ?= []
-		layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view)
+		layerPath = new MapLayerPath(svg_path, me.id, me.map)
 		
 		me.paths.push(layerPath)
 		
@@ -494,20 +586,22 @@ class MapLayer
 		me = @
 		for path in me.paths
 			path.remove()
-			
+
+map_layer_path_uid = 0			
 		
 class MapLayerPath
 
-	constructor: (svg_path, layer_id, paper, view) ->
+	constructor: (svg_path, layer_id, map) ->
 		me = @		
+		paper = map.paper
+		view = map.viewBC
 		me.path = path = kartograph.geom.Path.fromSVG(svg_path)	
 		me.svgPath = view.projectPath(path).toSVG(paper)
-		me.svgPath.attr 'fill','#ccb'
-		me.svgPath.attr 'stroke','#fff'
-		me.baseClass = 'polygon '+layer_id
-		# me.svgPath.node.setAttribute('class', me.baseClass)
-		me.svgPath.node.path = me # store reference to this path
-		
+		me.svgPath.node.setAttribute('class', layer_id)
+		map.applyStyles me.svgPath
+		uid = 'path_'+map_layer_path_uid++
+		me.svgPath.node.setAttribute('id', uid)
+		map.pathById[uid] = me
 		data = {}
 		for i in [0..svg_path.attributes.length-1]
 			attr = svg_path.attributes[i]

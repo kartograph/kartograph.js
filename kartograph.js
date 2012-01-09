@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, IconMarker, Kartograph, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, munge, munged, parsedeclarations, restore, root, uid, warn, __proj, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, IconMarker, Kartograph, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __proj, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -485,6 +485,39 @@
     };
   }
 
+  if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+};
+
   Kartograph = (function() {
 
     function Kartograph(container) {
@@ -494,6 +527,7 @@
       me.viewport = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
       me.paper = me.createSVGLayer();
       me.markers = [];
+      me.pathById = {};
       me.container.addClass('kartograph');
     }
 
@@ -550,7 +584,10 @@
         url: mapurl,
         dataType: $.browser.msie ? "text" : "xml",
         success: me.mapLoaded,
-        context: me
+        context: me,
+        error: function(a, b, c) {
+          return warn(a, b, c);
+        }
       });
     };
 
@@ -566,11 +603,10 @@
       svgLayer = $('#' + src_id, me.svgSrc);
       if (svgLayer.length === 0) {
         warn('didn\'t find any paths for layer "' + src_id + '"');
-        console.log(me.svgSrc);
         window.t = me.svgSrc;
         return;
       }
-      layer = new MapLayer(layer_id, path_id, me.paper, me.viewBC);
+      layer = new MapLayer(layer_id, path_id, me);
       $paths = $('*', svgLayer[0]);
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
         svg_path = $paths[_i];
@@ -582,7 +618,6 @@
       } else {
         warn('didn\'t find any paths for layer ' + layer_id);
       }
-      console.log('E ');
     };
 
     Kartograph.prototype.getLayerPath = function(layer_id, path_id) {
@@ -965,6 +1000,70 @@
       }
     };
 
+    Kartograph.prototype.loadStyles = function(url, callback) {
+      /*
+      		loads a stylesheet
+      */
+      var me;
+      me = this;
+      if ($.browser.msie) {
+        return $.ajax({
+          url: url,
+          dataType: 'text',
+          success: function(resp) {
+            me.styles = kartograph.parsecss(resp);
+            return callback();
+          },
+          error: function(a, b, c) {
+            return warn('error while loading ' + url, a, b, c);
+          }
+        });
+      } else {
+        $('body').append('<link rel="stylesheet" href="' + url + '" />');
+        return callback();
+      }
+    };
+
+    Kartograph.prototype.applyStyles = function(el) {
+      /*
+      		applies pre-loaded css styles to
+      		raphael elements
+      */
+      var className, classes, k, me, p, props, sel, selectors, _i, _j, _len, _len2, _ref10, _ref11, _ref12, _ref9;
+      me = this;
+      if (!(me.styles != null)) return el;
+      if ((_ref9 = me._pathTypes) == null) {
+        me._pathTypes = ["path", "circle", "rectangle", "ellipse"];
+      }
+      if ((_ref10 = me._regardStyles) == null) {
+        me._regardStyles = ["fill", "stroke", "fill-opacity", "stroke-width", "stroke-opacity"];
+      }
+      className = el.node.getAttribute('class');
+      for (sel in me.styles) {
+        p = sel;
+        _ref11 = p.split(',');
+        for (_i = 0, _len = _ref11.length; _i < _len; _i++) {
+          selectors = _ref11[_i];
+          p = p.split(' ');
+          p = p[p.length - 1];
+          p = p.split(':');
+          if (p.length > 1) continue;
+          p = p[0].split('.');
+          classes = p.slice(1);
+          if (classes.length > 0 && classes.indexOf(className) < 0) continue;
+          p = p[0];
+          if (me._pathTypes.indexOf(p) >= 0 && p !== el.type) continue;
+          props = me.styles[sel];
+          _ref12 = me._regardStyles;
+          for (_j = 0, _len2 = _ref12.length; _j < _len2; _j++) {
+            k = _ref12[_j];
+            if (props[k] != null) el.attr(k, props[k]);
+          }
+        }
+      }
+      return el;
+    };
+
     return Kartograph;
 
   })();
@@ -973,20 +1072,21 @@
 
   MapLayer = (function() {
 
-    function MapLayer(layer_id, path_id, paper, view) {
+    function MapLayer(layer_id, path_id, map) {
       var me;
       me = this;
       me.id = layer_id;
       me.path_id = path_id;
-      me.paper = paper;
-      me.view = view;
+      me.paper = map.paper;
+      me.view = map.viewBC;
+      me.map = map;
     }
 
     MapLayer.prototype.addPath = function(svg_path) {
       var layerPath, me, _base3, _name, _ref10, _ref11, _ref9;
       me = this;
       if ((_ref9 = me.paths) == null) me.paths = [];
-      layerPath = new MapLayerPath(svg_path, me.id, me.paper, me.view);
+      layerPath = new MapLayerPath(svg_path, me.id, me.map);
       me.paths.push(layerPath);
       if (me.path_id != null) {
         if ((_ref10 = me.pathsById) == null) me.pathsById = {};
@@ -1044,17 +1144,22 @@
 
   })();
 
+  map_layer_path_uid = 0;
+
   MapLayerPath = (function() {
 
-    function MapLayerPath(svg_path, layer_id, paper, view) {
-      var attr, data, i, me, path, _ref9;
+    function MapLayerPath(svg_path, layer_id, map) {
+      var attr, data, i, me, paper, path, uid, view, _ref9;
       me = this;
+      paper = map.paper;
+      view = map.viewBC;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
-      me.svgPath.attr('fill', '#ccb');
-      me.svgPath.attr('stroke', '#fff');
-      me.baseClass = 'polygon ' + layer_id;
-      me.svgPath.node.path = me;
+      me.svgPath.node.setAttribute('class', layer_id);
+      map.applyStyles(me.svgPath);
+      uid = 'path_' + map_layer_path_uid++;
+      me.svgPath.node.setAttribute('id', uid);
+      map.pathById[uid] = me;
       data = {};
       for (i = 0, _ref9 = svg_path.attributes.length - 1; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
         attr = svg_path.attributes[i];
@@ -1438,7 +1543,8 @@
       sprops = {
         layers: me.layers,
         location: ll,
-        data: data
+        data: data,
+        map: me.map
       };
       _ref12 = SymbolType.props;
       for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
@@ -1517,7 +1623,6 @@
           },
           content: {}
         };
-        console.log(s, s.data);
         tt = tooltips(s.data);
         if (type(tt) === "string") {
           cfg.content.text = tt;
@@ -1569,6 +1674,7 @@
       me = this;
       me.location = opts.location;
       me.data = opts.data;
+      me.map = opts.map;
       me.layers = opts.layers;
       me.x = opts.x;
       me.y = opts.y;
@@ -1622,6 +1728,7 @@
       me = this;
       me.path = me.layers.a.circle(me.x, me.y, me.radius);
       me.update();
+      me.map.applyStyles(me.path);
       return me;
     };
 

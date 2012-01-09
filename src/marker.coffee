@@ -138,6 +138,7 @@ class SymbolGroup
 			layers: me.layers
 			location: ll
 			data: data
+			map: me.map
 			
 		for p in SymbolType.props
 			if me[p]?
@@ -196,7 +197,6 @@ class SymbolGroup
 				show: 
 					delay: 20 
 				content: {}
-			console.log s, s.data
 			tt = tooltips(s.data)
 			if type(tt) == "string"
 				cfg.content.text = tt
@@ -225,6 +225,7 @@ class Symbol
 		me = @
 		me.location = opts.location
 		me.data = opts.data
+		me.map = opts.map
 		me.layers = opts.layers
 		me.x = opts.x
 		me.y = opts.y
@@ -267,6 +268,7 @@ class Bubble extends Symbol
 		me = @
 		me.path = me.layers.a.circle(me.x,me.y,me.radius)
 		me.update()
+		me.map.applyStyles(me.path)
 		me
 		
 	update: () ->
