@@ -76,7 +76,11 @@ class SymbolGroup
 			if opts[p]?
 				me[p] = opts[p]
 		
-		SymbolType = me.type
+		if type(me.type) == "string"
+			SymbolType = K[me.type]
+		else
+			SymbolType = me.type
+			
 		
 		# init symbol properties
 		for p in SymbolType.props
@@ -120,6 +124,7 @@ class SymbolGroup
 				for node in s.nodes()
 					node.symbol = s
 					$(node).click (e) =>
+						e.stopPropagation()
 						me.click e.target.symbol.data
 			
 		me.map.addSymbolGroup(me)
@@ -293,7 +298,6 @@ class Bubble extends Symbol
 		
 	
 		
-		
 
 Bubble.props = ['radius','style','class']
 Bubble.layers = [{ id:'a', type: 'svg' }]
@@ -392,116 +396,50 @@ kartograph.Label = SvgLabel
 
 
 class Icon extends Symbol
-
-
-Icon.props = ['icon']
-Icon.layer = ['html']
-
-
-
-class MapMarker
 	
-	constructor: (ll) ->
-		###
-		lonlat - LonLat instance
-		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
-		offset - x and y offset for the marker
-		###
+	constructor: (opts) ->
 		me = @
-		ll = new kartograph.LonLat(ll[0], ll[1]) if ll.length == 2
-		me.lonlat = ll
-		me.visible = true
-		
-	render: (x,y,cont,paper) ->
-		###
-		this function will be called by kartograph to render the marker
-		###
+		super opts
+		me.icon = opts.icon ? ''
+		me.offset = opts.offset ? [0,0]
+		me.class = opts.class ? ''
+		me.title = opts.title ? ''
 	
-kartograph.marker.MapMarker = MapMarker
-
-
-
-class LabelMarker extends MapMarker
-	###
-	a simple label
-	###
-	constructor: (ll, label) ->
-		super ll
-		@label = label
-	
-kartograph.marker.LabelMarker = LabelMarker
-
-
-
-class DotMarker extends LabelMarker
-	
-	constructor: (ll, label, rad, color=null) ->
-		super ll, label
-		@rad = rad
-		@color = color
-	
-	render: (x,y,cont,paper) ->
+	render: (layers) ->
 		me = @
-		me.path = paper.circle(x,y,@rad)
-		node = me.path.node
-		node.setAttribute('class', 'dotMarker')
-		node.setAttribute('title', @label)
-		if @color?
-			node.setAttribute('style', 'fill:'+@color)
+		cont = me.map.container
+		me.img = $ '<img src="'+me.icon+'" title="'+me.title+'" alt="'+me.title+'" class="'+me.class+'" />'
+		me.img.css
+			position: 'absolute'
+			'z-index': 1000
+			cursor: 'pointer'
+		me.img[0].symbol = me
+		cont.append me.img
+		me.update()
+	
+	update: () ->
+		me = @
+		me.img.css
+			left: (me.x+me.offset[0])+'px'
+			top: (me.y+me.offset[1])+'px'
 			
 	clear: () ->
-		@path.remove()
-		
-
-kartograph.marker.DotMarker = DotMarker
-
-
-
-class IconMarker extends MapMarker
-	###
-	
-	###
-	constructor: (ll, icon) ->
-
-kartograph.marker.IconMarker = IconMarker
-
-
-class LabeledIconMarker extends MapMarker
-	
-	constructor: (params) ->
 		me = @
-		super params.ll
-		me.icon_src = params.icon
-		me.label_txt = params.label
-		me.className = params.className ? 'marker'
-		me.dx = params.dx ? 0
-		me.dy = params.dy ? 0
+		me.img.remove()
+		me
 		
-	render: (x,y,cont,paper) ->
+	nodes: () ->
 		me = @
-		if not me.markerDiv
-			me.icon = $('<img src="'+me.icon_src+'" class="icon"/>')
-			me.label = $('<div class="label">'+me.label_txt+'</div>')
-			me.markerDiv = $('<div class="'+me.className+'" />')
-			me.markerDiv.append me.icon
-			me.markerDiv.append me.label
-			
-			cont.append me.markerDiv
-		
-		me.markerDiv.css
-			position: 'absolute'
-			left: (x+me.dx)+'px'
-			top: (y+me.dy)+'px'
-
-kartograph.marker.LabeledIconMarker = LabeledIconMarker
-		
-		
+		[me.img]
 
 
-class BubbleMarker extends MapMarker
-	###
-	will display a bubble centered on the marker position
-	###
-	constructor: (ll, size, cssClass='bubble') ->
-		super ll
-		
+Icon.props = ['icon','offset','class','title']
+Icon.layers = []
+
+kartograph.Icon = Icon
+
+
+
+
+
+

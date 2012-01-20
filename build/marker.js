@@ -18,7 +18,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Bubble, BubbleMarker, DotMarker, HtmlLabel, Icon, IconMarker, LabelMarker, LabeledIconMarker, MapMarker, SvgLabel, Symbol, SymbolGroup, kartograph, root, _ref, _ref2;
+  var Bubble, HtmlLabel, Icon, SvgLabel, Symbol, SymbolGroup, kartograph, root, _ref, _ref2;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -85,7 +85,11 @@
         p = optional[_j];
         if (opts[p] != null) me[p] = opts[p];
       }
-      SymbolType = me.type;
+      if (type(me.type) === "string") {
+        SymbolType = K[me.type];
+      } else {
+        SymbolType = me.type;
+      }
       _ref3 = SymbolType.props;
       for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
         p = _ref3[_k];
@@ -131,6 +135,7 @@
             node = _ref7[_o];
             node.symbol = s;
             $(node).click(function(e) {
+              e.stopPropagation();
               return me.click(e.target.symbol.data);
             });
           }
@@ -513,166 +518,61 @@
 
     __extends(Icon, Symbol);
 
-    function Icon() {
-      Icon.__super__.constructor.apply(this, arguments);
+    function Icon(opts) {
+      var me, _ref3, _ref4, _ref5, _ref6;
+      me = this;
+      Icon.__super__.constructor.call(this, opts);
+      me.icon = (_ref3 = opts.icon) != null ? _ref3 : '';
+      me.offset = (_ref4 = opts.offset) != null ? _ref4 : [0, 0];
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+      me.title = (_ref6 = opts.title) != null ? _ref6 : '';
     }
+
+    Icon.prototype.render = function(layers) {
+      var cont, me;
+      me = this;
+      cont = me.map.container;
+      me.img = $('<img src="' + me.icon + '" title="' + me.title + '" alt="' + me.title + '" class="' + me["class"] + '" />');
+      me.img.css({
+        position: 'absolute',
+        'z-index': 1000,
+        cursor: 'pointer'
+      });
+      me.img[0].symbol = me;
+      cont.append(me.img);
+      return me.update();
+    };
+
+    Icon.prototype.update = function() {
+      var me;
+      me = this;
+      return me.img.css({
+        left: (me.x + me.offset[0]) + 'px',
+        top: (me.y + me.offset[1]) + 'px'
+      });
+    };
+
+    Icon.prototype.clear = function() {
+      var me;
+      me = this;
+      me.img.remove();
+      return me;
+    };
+
+    Icon.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.img];
+    };
 
     return Icon;
 
   })();
 
-  Icon.props = ['icon'];
+  Icon.props = ['icon', 'offset', 'class', 'title'];
 
-  Icon.layer = ['html'];
+  Icon.layers = [];
 
-  MapMarker = (function() {
-
-    function MapMarker(ll) {
-      /*
-      		lonlat - LonLat instance
-      		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
-      		offset - x and y offset for the marker
-      */
-      var me;
-      me = this;
-      if (ll.length === 2) ll = new kartograph.LonLat(ll[0], ll[1]);
-      me.lonlat = ll;
-      me.visible = true;
-    }
-
-    MapMarker.prototype.render = function(x, y, cont, paper) {
-      /*
-      		this function will be called by kartograph to render the marker
-      */
-    };
-
-    return MapMarker;
-
-  })();
-
-  kartograph.marker.MapMarker = MapMarker;
-
-  LabelMarker = (function() {
-
-    __extends(LabelMarker, MapMarker);
-
-    /*
-    	a simple label
-    */
-
-    function LabelMarker(ll, label) {
-      LabelMarker.__super__.constructor.call(this, ll);
-      this.label = label;
-    }
-
-    return LabelMarker;
-
-  })();
-
-  kartograph.marker.LabelMarker = LabelMarker;
-
-  DotMarker = (function() {
-
-    __extends(DotMarker, LabelMarker);
-
-    function DotMarker(ll, label, rad, color) {
-      if (color == null) color = null;
-      DotMarker.__super__.constructor.call(this, ll, label);
-      this.rad = rad;
-      this.color = color;
-    }
-
-    DotMarker.prototype.render = function(x, y, cont, paper) {
-      var me, node;
-      me = this;
-      me.path = paper.circle(x, y, this.rad);
-      node = me.path.node;
-      node.setAttribute('class', 'dotMarker');
-      node.setAttribute('title', this.label);
-      if (this.color != null) {
-        return node.setAttribute('style', 'fill:' + this.color);
-      }
-    };
-
-    DotMarker.prototype.clear = function() {
-      return this.path.remove();
-    };
-
-    return DotMarker;
-
-  })();
-
-  kartograph.marker.DotMarker = DotMarker;
-
-  IconMarker = (function() {
-
-    __extends(IconMarker, MapMarker);
-
-    /*
-    */
-
-    function IconMarker(ll, icon) {}
-
-    return IconMarker;
-
-  })();
-
-  kartograph.marker.IconMarker = IconMarker;
-
-  LabeledIconMarker = (function() {
-
-    __extends(LabeledIconMarker, MapMarker);
-
-    function LabeledIconMarker(params) {
-      var me, _ref3, _ref4, _ref5;
-      me = this;
-      LabeledIconMarker.__super__.constructor.call(this, params.ll);
-      me.icon_src = params.icon;
-      me.label_txt = params.label;
-      me.className = (_ref3 = params.className) != null ? _ref3 : 'marker';
-      me.dx = (_ref4 = params.dx) != null ? _ref4 : 0;
-      me.dy = (_ref5 = params.dy) != null ? _ref5 : 0;
-    }
-
-    LabeledIconMarker.prototype.render = function(x, y, cont, paper) {
-      var me;
-      me = this;
-      if (!me.markerDiv) {
-        me.icon = $('<img src="' + me.icon_src + '" class="icon"/>');
-        me.label = $('<div class="label">' + me.label_txt + '</div>');
-        me.markerDiv = $('<div class="' + me.className + '" />');
-        me.markerDiv.append(me.icon);
-        me.markerDiv.append(me.label);
-        cont.append(me.markerDiv);
-      }
-      return me.markerDiv.css({
-        position: 'absolute',
-        left: (x + me.dx) + 'px',
-        top: (y + me.dy) + 'px'
-      });
-    };
-
-    return LabeledIconMarker;
-
-  })();
-
-  kartograph.marker.LabeledIconMarker = LabeledIconMarker;
-
-  BubbleMarker = (function() {
-
-    __extends(BubbleMarker, MapMarker);
-
-    /*
-    	will display a bubble centered on the marker position
-    */
-
-    function BubbleMarker(ll, size, cssClass) {
-      if (cssClass == null) cssClass = 'bubble';
-      BubbleMarker.__super__.constructor.call(this, ll);
-    }
-
-    return BubbleMarker;
-
-  })();
+  kartograph.Icon = Icon;
 
 }).call(this);
