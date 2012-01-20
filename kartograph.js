@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, BubbleMarker, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, DotMarker, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, IconMarker, Kartograph, LAEA, LCC, LabelMarker, LabeledIconMarker, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, MapMarker, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __proj, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __proj, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -520,11 +520,13 @@
 
   Kartograph = (function() {
 
-    function Kartograph(container) {
+    function Kartograph(container, width, height) {
       var cnt, me;
       me = this;
       me.container = cnt = $(container);
-      me.viewport = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
+      if (width == null) width = cnt.width();
+      if (height == null) height = cnt.height();
+      me.viewport = new kartograph.BBox(0, 0, width, height);
       me.paper = me.createSVGLayer();
       me.markers = [];
       me.pathById = {};
@@ -595,18 +597,22 @@
       /*
       		add new layer
       */
-      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref10, _ref9;
+      var $paths, layer, me, opts, svgLayer, svg_path, _i, _len, _ref10, _ref9;
       me = this;
       if ((_ref9 = me.layerIds) == null) me.layerIds = [];
       if ((_ref10 = me.layers) == null) me.layers = {};
+      if (type(src_id) === 'object') {
+        opts = src_id;
+        src_id = opts.id;
+        layer_id = opts.className;
+        path_id = opts.key;
+      } else {
+        opts = {};
+      }
       if (layer_id == null) layer_id = src_id;
       svgLayer = $('#' + src_id, me.svgSrc);
-      if (svgLayer.length === 0) {
-        warn('didn\'t find any paths for layer "' + src_id + '"');
-        window.t = me.svgSrc;
-        return;
-      }
-      layer = new MapLayer(layer_id, path_id, me);
+      if (svgLayer.length === 0) return;
+      layer = new MapLayer(layer_id, path_id, me, opts.filter);
       $paths = $('*', svgLayer[0]);
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
         svg_path = $paths[_i];
@@ -615,8 +621,6 @@
       if (layer.paths.length > 0) {
         me.layers[layer_id] = layer;
         me.layerIds.push(layer_id);
-      } else {
-        warn('didn\'t find any paths for layer ' + layer_id);
       }
     };
 
@@ -629,48 +633,19 @@
       return null;
     };
 
-    Kartograph.prototype.addCanvasLayer = function(src_id, drawCallback) {
-      var $paths, canvas, layer, me, svgLayer, svg_path, _i, _len;
-      me = this;
-      if (!(me.canvas != null)) {
-        canvas = $('<canvas />');
-        canvas.css({
-          position: 'absolute',
-          top: '0px',
-          left: '0px'
-        });
-        canvas.attr({
-          width: me.viewport.width + 'px',
-          height: me.viewport.height + 'px'
-        });
-        me.container.append(canvas);
-        me.canvas = canvas[0];
-      }
-      svgLayer = $('g#' + src_id, me.svgSrc);
-      if (svgLayer.length === 0) {
-        warn('didn\'t find any paths for layer "' + layer_id + '"');
-        return;
-      }
-      layer = new CanvasLayer(src_id, me.canvas, me.viewBC, drawCallback);
-      $paths = $('*', svgLayer[0]);
-      for (_i = 0, _len = $paths.length; _i < _len; _i++) {
-        svg_path = $paths[_i];
-        layer.addPath(svg_path);
-      }
-      return layer.render();
-    };
-
     Kartograph.prototype.addLayerEvent = function(event, callback, layerId) {
       var me, path, paths, _i, _len, _results;
       me = this;
       if (layerId == null) layerId = me.layerIds[me.layerIds.length - 1];
-      paths = me.layers[layerId].paths;
-      _results = [];
-      for (_i = 0, _len = paths.length; _i < _len; _i++) {
-        path = paths[_i];
-        _results.push($(path.svgPath.node).bind(event, callback));
+      if (me.layers[layerId] != null) {
+        paths = me.layers[layerId].paths;
+        _results = [];
+        for (_i = 0, _len = paths.length; _i < _len; _i++) {
+          path = paths[_i];
+          _results.push($(path.svgPath.node).bind(event, callback));
+        }
+        return _results;
       }
-      return _results;
     };
 
     Kartograph.prototype.addMarker = function(marker) {
@@ -693,7 +668,7 @@
     };
 
     Kartograph.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref10, _ref11, _ref9;
+      var col, colorscale, data, data_col, data_key, id, layer_id, me, no_data_color, path, pathData, paths, row, v, val, _i, _j, _len, _len2, _ref10, _ref11, _ref9;
       me = this;
       layer_id = (_ref9 = opts.layer) != null ? _ref9 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
@@ -701,19 +676,30 @@
         return;
       }
       data = opts.data;
-      data_col = opts.key;
+      data_col = opts.value;
+      data_key = opts.key;
       no_data_color = (_ref10 = opts.noDataColor) != null ? _ref10 : '#ccc';
       colorscale = opts.colorscale;
       pathData = {};
-      for (id in data) {
-        row = data[id];
-        pathData[id] = row[data_col];
+      if ((data_key != null) && type(data) === "array") {
+        for (_i = 0, _len = data.length; _i < _len; _i++) {
+          row = data[_i];
+          id = row[data_key];
+          val = row[data_col];
+          pathData[id] = val;
+        }
+      } else {
+        for (id in data) {
+          row = data[id];
+          pathData[id] = data_col != null ? row[data_col] : row;
+        }
       }
+      console.log(pathData);
       _ref11 = me.layers[layer_id].pathsById;
       for (id in _ref11) {
         paths = _ref11[id];
-        for (_i = 0, _len = paths.length; _i < _len; _i++) {
-          path = paths[_i];
+        for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
+          path = paths[_j];
           if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
             v = pathData[id];
             col = colorscale.getColor(v);
@@ -1072,7 +1058,7 @@
 
   MapLayer = (function() {
 
-    function MapLayer(layer_id, path_id, map) {
+    function MapLayer(layer_id, path_id, map, filter) {
       var me;
       me = this;
       me.id = layer_id;
@@ -1080,6 +1066,7 @@
       me.paper = map.paper;
       me.view = map.viewBC;
       me.map = map;
+      me.filter = filter;
     }
 
     MapLayer.prototype.addPath = function(svg_path) {
@@ -1087,6 +1074,12 @@
       me = this;
       if ((_ref9 = me.paths) == null) me.paths = [];
       layerPath = new MapLayerPath(svg_path, me.id, me.map);
+      if (type(me.filter) === 'function') {
+        if (me.filter(layerPath.data) === false) {
+          layerPath.remove();
+          return;
+        }
+      }
       me.paths.push(layerPath);
       if (me.path_id != null) {
         if ((_ref10 = me.pathsById) == null) me.pathsById = {};
@@ -1477,7 +1470,11 @@
         p = optional[_j];
         if (opts[p] != null) me[p] = opts[p];
       }
-      SymbolType = me.type;
+      if (type(me.type) === "string") {
+        SymbolType = K[me.type];
+      } else {
+        SymbolType = me.type;
+      }
       _ref12 = SymbolType.props;
       for (_k = 0, _len3 = _ref12.length; _k < _len3; _k++) {
         p = _ref12[_k];
@@ -1523,6 +1520,7 @@
             node = _ref16[_o];
             node.symbol = s;
             $(node).click(function(e) {
+              e.stopPropagation();
               return me.click(e.target.symbol.data);
             });
           }
@@ -1905,184 +1903,80 @@
 
     __extends(Icon, Symbol);
 
-    function Icon() {
-      Icon.__super__.constructor.apply(this, arguments);
+    function Icon(opts) {
+      var me, _ref12, _ref13, _ref14, _ref15;
+      me = this;
+      Icon.__super__.constructor.call(this, opts);
+      me.icon = (_ref12 = opts.icon) != null ? _ref12 : '';
+      me.offset = (_ref13 = opts.offset) != null ? _ref13 : [0, 0];
+      me["class"] = (_ref14 = opts["class"]) != null ? _ref14 : '';
+      me.title = (_ref15 = opts.title) != null ? _ref15 : '';
     }
+
+    Icon.prototype.render = function(layers) {
+      var cont, me;
+      me = this;
+      cont = me.map.container;
+      me.img = $('<img src="' + me.icon + '" title="' + me.title + '" alt="' + me.title + '" class="' + me["class"] + '" />');
+      me.img.css({
+        position: 'absolute',
+        'z-index': 1000,
+        cursor: 'pointer'
+      });
+      me.img[0].symbol = me;
+      cont.append(me.img);
+      return me.update();
+    };
+
+    Icon.prototype.update = function() {
+      var me;
+      me = this;
+      return me.img.css({
+        left: (me.x + me.offset[0]) + 'px',
+        top: (me.y + me.offset[1]) + 'px'
+      });
+    };
+
+    Icon.prototype.clear = function() {
+      var me;
+      me = this;
+      me.img.remove();
+      return me;
+    };
+
+    Icon.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.img];
+    };
 
     return Icon;
 
   })();
 
-  Icon.props = ['icon'];
+  Icon.props = ['icon', 'offset', 'class', 'title'];
 
-  Icon.layer = ['html'];
+  Icon.layers = [];
 
-  MapMarker = (function() {
+  kartograph.Icon = Icon;
 
-    function MapMarker(ll) {
-      /*
-      		lonlat - LonLat instance
-      		content - html code that will be placed inside a <div class="marker"> which then will be positioned at the corresponding map position
-      		offset - x and y offset for the marker
-      */
-      var me;
-      me = this;
-      if (ll.length === 2) ll = new kartograph.LonLat(ll[0], ll[1]);
-      me.lonlat = ll;
-      me.visible = true;
-    }
-
-    MapMarker.prototype.render = function(x, y, cont, paper) {
-      /*
-      		this function will be called by kartograph to render the marker
-      */
-    };
-
-    return MapMarker;
-
-  })();
-
-  kartograph.marker.MapMarker = MapMarker;
-
-  LabelMarker = (function() {
-
-    __extends(LabelMarker, MapMarker);
-
-    /*
-    	a simple label
-    */
-
-    function LabelMarker(ll, label) {
-      LabelMarker.__super__.constructor.call(this, ll);
-      this.label = label;
-    }
-
-    return LabelMarker;
-
-  })();
-
-  kartograph.marker.LabelMarker = LabelMarker;
-
-  DotMarker = (function() {
-
-    __extends(DotMarker, LabelMarker);
-
-    function DotMarker(ll, label, rad, color) {
-      if (color == null) color = null;
-      DotMarker.__super__.constructor.call(this, ll, label);
-      this.rad = rad;
-      this.color = color;
-    }
-
-    DotMarker.prototype.render = function(x, y, cont, paper) {
-      var me, node;
-      me = this;
-      me.path = paper.circle(x, y, this.rad);
-      node = me.path.node;
-      node.setAttribute('class', 'dotMarker');
-      node.setAttribute('title', this.label);
-      if (this.color != null) {
-        return node.setAttribute('style', 'fill:' + this.color);
-      }
-    };
-
-    DotMarker.prototype.clear = function() {
-      return this.path.remove();
-    };
-
-    return DotMarker;
-
-  })();
-
-  kartograph.marker.DotMarker = DotMarker;
-
-  IconMarker = (function() {
-
-    __extends(IconMarker, MapMarker);
-
-    /*
-    */
-
-    function IconMarker(ll, icon) {}
-
-    return IconMarker;
-
-  })();
-
-  kartograph.marker.IconMarker = IconMarker;
-
-  LabeledIconMarker = (function() {
-
-    __extends(LabeledIconMarker, MapMarker);
-
-    function LabeledIconMarker(params) {
-      var me, _ref12, _ref13, _ref14;
-      me = this;
-      LabeledIconMarker.__super__.constructor.call(this, params.ll);
-      me.icon_src = params.icon;
-      me.label_txt = params.label;
-      me.className = (_ref12 = params.className) != null ? _ref12 : 'marker';
-      me.dx = (_ref13 = params.dx) != null ? _ref13 : 0;
-      me.dy = (_ref14 = params.dy) != null ? _ref14 : 0;
-    }
-
-    LabeledIconMarker.prototype.render = function(x, y, cont, paper) {
-      var me;
-      me = this;
-      if (!me.markerDiv) {
-        me.icon = $('<img src="' + me.icon_src + '" class="icon"/>');
-        me.label = $('<div class="label">' + me.label_txt + '</div>');
-        me.markerDiv = $('<div class="' + me.className + '" />');
-        me.markerDiv.append(me.icon);
-        me.markerDiv.append(me.label);
-        cont.append(me.markerDiv);
-      }
-      return me.markerDiv.css({
-        position: 'absolute',
-        left: (x + me.dx) + 'px',
-        top: (y + me.dy) + 'px'
-      });
-    };
-
-    return LabeledIconMarker;
-
-  })();
-
-  kartograph.marker.LabeledIconMarker = LabeledIconMarker;
-
-  BubbleMarker = (function() {
-
-    __extends(BubbleMarker, MapMarker);
-
-    /*
-    	will display a bubble centered on the marker position
-    */
-
-    function BubbleMarker(ll, size, cssClass) {
-      if (cssClass == null) cssClass = 'bubble';
-      BubbleMarker.__super__.constructor.call(this, ll);
-      /*
-          kartograph - a svg mapping library 
-          Copyright (C) 2011  Gregor Aisch
-      
-          This program is free software: you can redistribute it and/or modify
-          it under the terms of the GNU General Public License as published by
-          the Free Software Foundation, either version 3 of the License, or
-          (at your option) any later version.
-      
-          This program is distributed in the hope that it will be useful,
-          but WITHOUT ANY WARRANTY; without even the implied warranty of
-          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-          GNU General Public License for more details.
-      
-          You should have received a copy of the GNU General Public License
-          along with this program.  If not, see <http://www.gnu.org/licenses/>.
-      */
-    }
-
-    return BubbleMarker;
-
-  })();
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -4569,7 +4463,7 @@
   };
 
   chroma.limits = function(data, mode, num, prop) {
-    var assignments, best, centroids, cluster, clusterSizes, dist, i, j, k, kClusters, limits, max, min, mindist, n, nb_iters, newCentroids, p, pb, pr, repeat, sum, tmpKMeansBreaks, val, value, values, _i, _j, _len, _len2, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    var assignments, best, centroids, cluster, clusterSizes, dist, i, j, k, kClusters, limits, max, min, mindist, n, nb_iters, newCentroids, p, pb, pr, repeat, row, sum, tmpKMeansBreaks, val, value, values, _i, _j, _k, _len, _len2, _len3, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     if (mode == null) mode = 'equal';
     if (num == null) num = 7;
     if (prop == null) prop = null;
@@ -4578,9 +4472,16 @@
     sum = 0;
     values = [];
     if (type(data) === "array") {
-      for (_i = 0, _len = data.length; _i < _len; _i++) {
-        val = data[_i];
-        if (!isNaN(val)) values.push(val);
+      if (!isNaN(data[0])) {
+        for (_i = 0, _len = data.length; _i < _len; _i++) {
+          val = data[_i];
+          if (!isNaN(val)) values.push(val);
+        }
+      } else {
+        for (_j = 0, _len2 = data.length; _j < _len2; _j++) {
+          row = data[_j];
+          values.push(row[prop]);
+        }
       }
     } else if (type(data) === "object") {
       for (k in data) {
@@ -4592,8 +4493,8 @@
         }
       }
     }
-    for (_j = 0, _len2 = values.length; _j < _len2; _j++) {
-      val = values[_j];
+    for (_k = 0, _len3 = values.length; _k < _len3; _k++) {
+      val = values[_k];
       if (!!isNaN(val)) continue;
       if (val < min) min = val;
       if (val > max) max = val;

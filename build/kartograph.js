@@ -76,11 +76,13 @@
 
   Kartograph = (function() {
 
-    function Kartograph(container) {
+    function Kartograph(container, width, height) {
       var cnt, me;
       me = this;
       me.container = cnt = $(container);
-      me.viewport = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
+      if (width == null) width = cnt.width();
+      if (height == null) height = cnt.height();
+      me.viewport = new kartograph.BBox(0, 0, width, height);
       me.paper = me.createSVGLayer();
       me.markers = [];
       me.pathById = {};
@@ -151,18 +153,22 @@
       /*
       		add new layer
       */
-      var $paths, layer, me, svgLayer, svg_path, _i, _len, _ref3, _ref4;
+      var $paths, layer, me, opts, svgLayer, svg_path, _i, _len, _ref3, _ref4;
       me = this;
       if ((_ref3 = me.layerIds) == null) me.layerIds = [];
       if ((_ref4 = me.layers) == null) me.layers = {};
+      if (type(src_id) === 'object') {
+        opts = src_id;
+        src_id = opts.id;
+        layer_id = opts.className;
+        path_id = opts.key;
+      } else {
+        opts = {};
+      }
       if (layer_id == null) layer_id = src_id;
       svgLayer = $('#' + src_id, me.svgSrc);
-      if (svgLayer.length === 0) {
-        warn('didn\'t find any paths for layer "' + src_id + '"');
-        window.t = me.svgSrc;
-        return;
-      }
-      layer = new MapLayer(layer_id, path_id, me);
+      if (svgLayer.length === 0) return;
+      layer = new MapLayer(layer_id, path_id, me, opts.filter);
       $paths = $('*', svgLayer[0]);
       for (_i = 0, _len = $paths.length; _i < _len; _i++) {
         svg_path = $paths[_i];
@@ -171,8 +177,6 @@
       if (layer.paths.length > 0) {
         me.layers[layer_id] = layer;
         me.layerIds.push(layer_id);
-      } else {
-        warn('didn\'t find any paths for layer ' + layer_id);
       }
     };
 
@@ -185,48 +189,19 @@
       return null;
     };
 
-    Kartograph.prototype.addCanvasLayer = function(src_id, drawCallback) {
-      var $paths, canvas, layer, me, svgLayer, svg_path, _i, _len;
-      me = this;
-      if (!(me.canvas != null)) {
-        canvas = $('<canvas />');
-        canvas.css({
-          position: 'absolute',
-          top: '0px',
-          left: '0px'
-        });
-        canvas.attr({
-          width: me.viewport.width + 'px',
-          height: me.viewport.height + 'px'
-        });
-        me.container.append(canvas);
-        me.canvas = canvas[0];
-      }
-      svgLayer = $('g#' + src_id, me.svgSrc);
-      if (svgLayer.length === 0) {
-        warn('didn\'t find any paths for layer "' + layer_id + '"');
-        return;
-      }
-      layer = new CanvasLayer(src_id, me.canvas, me.viewBC, drawCallback);
-      $paths = $('*', svgLayer[0]);
-      for (_i = 0, _len = $paths.length; _i < _len; _i++) {
-        svg_path = $paths[_i];
-        layer.addPath(svg_path);
-      }
-      return layer.render();
-    };
-
     Kartograph.prototype.addLayerEvent = function(event, callback, layerId) {
       var me, path, paths, _i, _len, _results;
       me = this;
       if (layerId == null) layerId = me.layerIds[me.layerIds.length - 1];
-      paths = me.layers[layerId].paths;
-      _results = [];
-      for (_i = 0, _len = paths.length; _i < _len; _i++) {
-        path = paths[_i];
-        _results.push($(path.svgPath.node).bind(event, callback));
+      if (me.layers[layerId] != null) {
+        paths = me.layers[layerId].paths;
+        _results = [];
+        for (_i = 0, _len = paths.length; _i < _len; _i++) {
+          path = paths[_i];
+          _results.push($(path.svgPath.node).bind(event, callback));
+        }
+        return _results;
       }
-      return _results;
     };
 
     Kartograph.prototype.addMarker = function(marker) {
@@ -249,7 +224,7 @@
     };
 
     Kartograph.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, id, layer_id, me, no_data_color, path, pathData, paths, row, v, _i, _len, _ref3, _ref4, _ref5;
+      var col, colorscale, data, data_col, data_key, id, layer_id, me, no_data_color, path, pathData, paths, row, v, val, _i, _j, _len, _len2, _ref3, _ref4, _ref5;
       me = this;
       layer_id = (_ref3 = opts.layer) != null ? _ref3 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
@@ -257,19 +232,30 @@
         return;
       }
       data = opts.data;
-      data_col = opts.key;
+      data_col = opts.value;
+      data_key = opts.key;
       no_data_color = (_ref4 = opts.noDataColor) != null ? _ref4 : '#ccc';
       colorscale = opts.colorscale;
       pathData = {};
-      for (id in data) {
-        row = data[id];
-        pathData[id] = row[data_col];
+      if ((data_key != null) && type(data) === "array") {
+        for (_i = 0, _len = data.length; _i < _len; _i++) {
+          row = data[_i];
+          id = row[data_key];
+          val = row[data_col];
+          pathData[id] = val;
+        }
+      } else {
+        for (id in data) {
+          row = data[id];
+          pathData[id] = data_col != null ? row[data_col] : row;
+        }
       }
+      console.log(pathData);
       _ref5 = me.layers[layer_id].pathsById;
       for (id in _ref5) {
         paths = _ref5[id];
-        for (_i = 0, _len = paths.length; _i < _len; _i++) {
-          path = paths[_i];
+        for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
+          path = paths[_j];
           if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
             v = pathData[id];
             col = colorscale.getColor(v);
@@ -628,7 +614,7 @@
 
   MapLayer = (function() {
 
-    function MapLayer(layer_id, path_id, map) {
+    function MapLayer(layer_id, path_id, map, filter) {
       var me;
       me = this;
       me.id = layer_id;
@@ -636,6 +622,7 @@
       me.paper = map.paper;
       me.view = map.viewBC;
       me.map = map;
+      me.filter = filter;
     }
 
     MapLayer.prototype.addPath = function(svg_path) {
@@ -643,6 +630,12 @@
       me = this;
       if ((_ref3 = me.paths) == null) me.paths = [];
       layerPath = new MapLayerPath(svg_path, me.id, me.map);
+      if (type(me.filter) === 'function') {
+        if (me.filter(layerPath.data) === false) {
+          layerPath.remove();
+          return;
+        }
+      }
       me.paths.push(layerPath);
       if (me.path_id != null) {
         if ((_ref4 = me.pathsById) == null) me.pathsById = {};
