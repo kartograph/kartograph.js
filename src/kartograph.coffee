@@ -67,15 +67,17 @@ String::trim ?= () ->
 
 class Kartograph
 
-	constructor: (container) ->
-		#
+	constructor: (container, width, height) ->
 		me = @
 		me.container = cnt = $(container)
-		me.viewport = new kartograph.BBox 0,0,cnt.width(),cnt.height()
+		width ?= cnt.width()
+		height ?= cnt.height()
+		me.viewport = new kartograph.BBox 0,0,width,height
 		me.paper = me.createSVGLayer()
 		me.markers = []
 		me.pathById = {}
 		me.container.addClass 'kartograph'
+		
 		
 	createSVGLayer: (id) ->
 		me = @
@@ -130,7 +132,7 @@ class Kartograph
 			success: me.mapLoaded
 			context: me
 			error: (a,b,c) ->
-				warn a,b,c
+				warn a,b,c 
 		return
 	
 	
@@ -142,17 +144,25 @@ class Kartograph
 		me.layerIds ?= []
 		me.layers ?= {}
 		
+		if type(src_id) == 'object'
+			opts = src_id
+			src_id = opts.id
+			layer_id = opts.className
+			path_id = opts.key
+		else
+			opts = {}
+			
 		layer_id ?= src_id	
 		svgLayer = $('#'+src_id, me.svgSrc)
 		
 		if svgLayer.length == 0
-			warn 'didn\'t find any paths for layer "'+src_id+'"'
-			window.t = me.svgSrc
+			# warn 'didn\'t find any paths for layer "'+src_id+'"'
 			return
 		
-		layer = new MapLayer(layer_id, path_id, me)
+		layer = new MapLayer(layer_id, path_id, me, opts.filter)
 		
 		$paths = $('*', svgLayer[0])		
+		
 		
 		for svg_path in $paths		
 			layer.addPath(svg_path)
@@ -160,8 +170,6 @@ class Kartograph
 		if layer.paths.length > 0
 			me.layers[layer_id] = layer
 			me.layerIds.push layer_id
-		else
-			warn 'didn\'t find any paths for layer '+layer_id
 		return
 		
 
@@ -170,44 +178,15 @@ class Kartograph
 		if me.layers[layer_id]? and me.layers[layer_id].hasPath(path_id)
 			return me.layers[layer_id].getPath(path_id)
 		null
-			
-	
-	addCanvasLayer: (src_id, drawCallback) ->
-		me = @
-		if not me.canvas?
-			canvas = $ '<canvas />'
-			canvas.css
-				position: 'absolute'
-				top: '0px'
-				left: '0px'
-				
-			canvas.attr
-				width: me.viewport.width+'px'
-				height: me.viewport.height+'px'
-				
-			me.container.append canvas
-			me.canvas = canvas[0]
-				
-		svgLayer = $('g#'+src_id, me.svgSrc)
-		if svgLayer.length == 0
-			warn 'didn\'t find any paths for layer "'+layer_id+'"'
-			return
-		
-		layer = new CanvasLayer(src_id, me.canvas, me.viewBC, drawCallback)
-
-		$paths = $('*', svgLayer[0])		
-		for svg_path in $paths				
-			layer.addPath(svg_path)
-			
-		layer.render()
-			
+					
 		
 	addLayerEvent: (event, callback, layerId) ->
 		me = @
 		layerId ?= me.layerIds[me.layerIds.length-1]
-		paths = me.layers[layerId].paths
-		for path in paths
-			$(path.svgPath.node).bind(event, callback)
+		if me.layers[layerId]?
+			paths = me.layers[layerId].paths
+			for path in paths
+				$(path.svgPath.node).bind(event, callback)
 			
 	
 	addMarker: (marker) ->
@@ -227,20 +206,30 @@ class Kartograph
 	choropleth: (opts) ->
 		me = @	
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
+		
 		if not me.layers.hasOwnProperty layer_id
 			warn 'choropleth error: layer "'+layer_ihad+'" not found'
 			return
 
 		data = opts.data
-		data_col = opts.key
+		data_col = opts.value
+		data_key = opts.key
 		no_data_color = opts.noDataColor ? '#ccc'
 		colorscale = opts.colorscale
 		
 		pathData = {}
 		
-		for id, row of data
-			pathData[id] = row[data_col]
-			
+		if data_key? and type(data) == "array"
+			for row in data
+				id = row[data_key]
+				val = row[data_col]
+				pathData[id] = val
+		else 
+			for id, row of data
+				pathData[id] = if data_col? then row[data_col] else row
+				
+		console.log pathData		
+				
 		for id, paths of me.layers[layer_id].pathsById
 			for path in paths
 				if pathData[id]? and colorscale.validValue(pathData[id])
@@ -539,18 +528,24 @@ kartograph.Kartograph = Kartograph
 
 class MapLayer
 	
-	constructor: (layer_id, path_id, map)->
+	constructor: (layer_id, path_id, map, filter)->
 		me = @
 		me.id = layer_id
 		me.path_id = path_id
 		me.paper = map.paper
 		me.view = map.viewBC
 		me.map = map
+		me.filter = filter
+		
 				
 	addPath: (svg_path) ->
 		me = @
 		me.paths ?= []
 		layerPath = new MapLayerPath(svg_path, me.id, me.map)
+		if type(me.filter) == 'function'
+			if me.filter(layerPath.data) == false
+				layerPath.remove()
+				return
 		
 		me.paths.push(layerPath)
 		
