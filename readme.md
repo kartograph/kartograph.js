@@ -4,7 +4,7 @@ Kartograph.js is a JavaScript library that renders [SVG maps](https://github.com
 
 ### Author
 
-Kartograph was created by [Gregor Aisch](http://github.com/gka/). It is funded by [Piwik Web Analytics](http://piwik.org) and the [Open Knowledge Foundation](http://okfn.org). 
+Kartograph was created by [Gregor Aisch](http://github.com/gka/). It is supported by [Piwik Web Analytics](http://piwik.org) and the [Open Knowledge Foundation](http://okfn.org). 
 
 ### License
 
