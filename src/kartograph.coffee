@@ -228,8 +228,6 @@ class Kartograph
 			for id, row of data
 				pathData[id] = if data_col? then row[data_col] else row
 				
-		console.log pathData		
-				
 		for id, paths of me.layers[layer_id].pathsById
 			for path in paths
 				if pathData[id]? and colorscale.validValue(pathData[id])
@@ -502,7 +500,7 @@ class Kartograph
 		for sel of me.styles
 			p = sel
 			for selectors in p.split ','				
-				p = p.split ' ' # ignore hierarchy
+				p = selectors.split ' ' # ignore hierarchy
 				p = p[p.length-1]
 				p = p.split ':' # check pseudo classes
 				if p.length > 1

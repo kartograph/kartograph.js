@@ -250,7 +250,6 @@
           pathData[id] = data_col != null ? row[data_col] : row;
         }
       }
-      console.log(pathData);
       _ref5 = me.layers[layer_id].pathsById;
       for (id in _ref5) {
         paths = _ref5[id];
@@ -586,7 +585,7 @@
         _ref5 = p.split(',');
         for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
           selectors = _ref5[_i];
-          p = p.split(' ');
+          p = selectors.split(' ');
           p = p[p.length - 1];
           p = p.split(':');
           if (p.length > 1) continue;
