@@ -1,11 +1,11 @@
 /*
- * base stylesheet for svgmap.js
+ * base stylesheet for kartograph.js
  *
  * 
  *
  */
  
-.svgmap .zoom-control {
+.kartograph .zoom-control {
 	width: 38px;
 	height: 60px;
 	position: absolute;
@@ -14,7 +14,7 @@
 	cursor: pointer;
 }
 
-.svgmap .zoom-control .plus {
+.kartograph .zoom-control .plus {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -22,13 +22,13 @@
 	height: 30px;
 	background: url('zoom.png') 0 0 no-repeat;
 }
-.svgmap .zoom-control .plus:hover {
+.kartograph .zoom-control .plus:hover {
 	background: url('zoom.png') -38px 0 no-repeat;
 }
-.svgmap .zoom-control .plus.md {
+.kartograph .zoom-control .plus.md {
 	background: url('zoom.png') -76px 0 no-repeat;
 }
-.svgmap .zoom-control .minus {
+.kartograph .zoom-control .minus {
 	position: absolute;
 	top: 30px;
 	left: 0;
@@ -36,9 +36,9 @@
 	height: 30px;
 	background: url('zoom.png') 0 -30px no-repeat;
 }
-.svgmap .zoom-control .minus:hover {
+.kartograph .zoom-control .minus:hover {
 	background: url('zoom.png') -38px -30px no-repeat;
 }
-.svgmap .zoom-control .minus.md {
+.kartograph .zoom-control .minus.md {
 	background: url('zoom.png') -76px -30px no-repeat;
 }
