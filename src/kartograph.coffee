@@ -17,10 +17,9 @@
 ###
 
 root = (exports ? this)	
-kartograph = root.K = root.kartograph ?= {}
+kartograph = root.$K = root.kartograph ?= {}
 
-kartograph.version = "0.4.3"
-
+kartograph.version = "0.4.4"
 
 warn = (s) ->
 	console.warn('kartograph ('+kartograph.version+'): '+s)
@@ -72,6 +71,8 @@ class Kartograph
 		me.container = cnt = $(container)
 		width ?= cnt.width()
 		height ?= cnt.height()
+		if height == 0
+			height = width * .5
 		me.viewport = new kartograph.BBox 0,0,width,height
 		me.paper = me.createSVGLayer()
 		me.markers = []
@@ -230,7 +231,14 @@ class Kartograph
 			for path in paths
 				pd = pathData[id] ? null				
 				col = colors(pd)
-				path.svgPath.node.setAttribute('style', 'fill:'+col) 
+				
+				if opts.duration?
+					ncol = colors(null)
+					path.svgPath.attr('fill',ncol)
+					path.svgPath.animate({fill: col}, opts.duration)
+				else
+					path.svgPath.attr('fill', col)
+				#path.svgPath.node.setAttribute('style', 'fill:'+col) 
 		return
 		
 	
@@ -270,60 +278,8 @@ class Kartograph
 					
 					$(path.svgPath.node).qtip(cfg);
 	
-		
-	###
-		for some reasons, this runs horribly slow in Firefox
-		will use pre-calculated graticules instead
 
-	addGraticule: (lon_step=15, lat_step) ->	
-		self = @
-		lat_step ?= lon_step
-		globe = self.proj
-		v0 = self.viewAB
-		v1 = self.viewBC
-		viewbox = v1.asBBox()
-		
-		grat_lines = []
-		
-		for lat in [0..90] by lat_step
-			lats = if lat == 0 then [0] else [lat, -lat]
-			for lat_ in lats
-				if lat_ < globe.minLat or lat_ > globe.maxLat
-					continue
-				pts = []
-				lines = []
-				for lon in [-180..180]
-					if globe._visible(lon, lat_)
-						xy = v1.project(v0.project(globe.project(lon, lat_)))
-						pts.push xy
-					else
-						if pts.length > 1
-							line = new kartograph.geom.Line(pts)
-							pts = []
-							lines = lines.concat(line.clipToBBox(viewbox))
-				
-				if pts.length > 1
-					line = new kartograph.geom.Line(pts)
-					pts = []
-					lines = lines.concat(line.clipToBBox(viewbox))
-					
-				for line in lines
-					path = self.paper.path(line.toSVG())
-					path.setAttribute('class', 'graticule latitude lat_'+Math.abs(lat_)+(if lat_ < 0 then 'W' else 'E'))
-					grat_lines.push(path)		
-					
-	###
-	
-	display: () ->
-		###
-		finally displays the kartograph, needs to be called after
-		layer and marker setup is finished
-		###
-		@render()
-	
 
-		
-	
 	### 
 	    end of public API
 	###
@@ -349,31 +305,6 @@ class Kartograph
 			url: 'coastline.json'
 			success: me.renderCoastline
 			context: me
-	
-	
-	renderCoastline: (coastlines) ->
-		me = @
-		P = me.proj
-		vp = me.viewport
-		view0 = me.viewAB
-		view1 = me.viewBC
-
-		for line in coastlines
-			pathstr = ''
-			for i in [0..line.length-2]
-				p0 = line[i]
-				p1 = line[i+1]
-				d = 0
-				if true and P._visible(p0[0],p0[1]) and P._visible(p1[0],p1[1])					
-					p0 = view1.project(view0.project(P.project(p0[0],p0[1])))
-					p1 = view1.project(view0.project(P.project(p1[0],p1[1])))
-					if vp.inside(p0[0],p0[1]) or vp.inside(p1[0],p1[1])
-						pathstr += 'M'+p0[0]+','+p0[1]+'L'+p1[0]+','+p1[1]	
-			if pathstr != ""
-				me.paper.path(pathstr).attr('opacity',.8)
-		
-		# for debugging purposes
-
 	
 	
 	resize: () ->
@@ -516,6 +447,9 @@ class Kartograph
 	
 		
 kartograph.Kartograph = Kartograph
+
+kartograph.map = (container, width, height) ->
+	new Kartograph container, width, height
 
 
 class MapLayer

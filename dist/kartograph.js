@@ -467,9 +467,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  kartograph = root.K = (_ref7 = root.kartograph) != null ? _ref7 : root.kartograph = {};
+  kartograph = root.$K = (_ref7 = root.kartograph) != null ? _ref7 : root.kartograph = {};
 
-  kartograph.version = "0.4.3";
+  kartograph.version = "0.4.4";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -526,6 +526,7 @@
       me.container = cnt = $(container);
       if (width == null) width = cnt.width();
       if (height == null) height = cnt.height();
+      if (height === 0) height = width * .5;
       me.viewport = new kartograph.BBox(0, 0, width, height);
       me.paper = me.createSVGLayer();
       me.markers = [];
@@ -668,7 +669,7 @@
     };
 
     Kartograph.prototype.choropleth = function(opts) {
-      var col, colors, data, data_col, data_key, id, layer_id, me, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref10, _ref11, _ref9;
+      var col, colors, data, data_col, data_key, id, layer_id, me, ncol, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref10, _ref11, _ref9;
       me = this;
       layer_id = (_ref9 = opts.layer) != null ? _ref9 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
@@ -699,7 +700,15 @@
           path = paths[_j];
           pd = (_ref11 = pathData[id]) != null ? _ref11 : null;
           col = colors(pd);
-          path.svgPath.node.setAttribute('style', 'fill:' + col);
+          if (opts.duration != null) {
+            ncol = colors(null);
+            path.svgPath.attr('fill', ncol);
+            path.svgPath.animate({
+              fill: col
+            }, opts.duration);
+          } else {
+            path.svgPath.attr('fill', col);
+          }
         }
       }
     };
@@ -759,55 +768,6 @@
       return _results;
     };
 
-    /*
-    		for some reasons, this runs horribly slow in Firefox
-    		will use pre-calculated graticules instead
-    
-    	addGraticule: (lon_step=15, lat_step) ->	
-    		self = @
-    		lat_step ?= lon_step
-    		globe = self.proj
-    		v0 = self.viewAB
-    		v1 = self.viewBC
-    		viewbox = v1.asBBox()
-    		
-    		grat_lines = []
-    		
-    		for lat in [0..90] by lat_step
-    			lats = if lat == 0 then [0] else [lat, -lat]
-    			for lat_ in lats
-    				if lat_ < globe.minLat or lat_ > globe.maxLat
-    					continue
-    				pts = []
-    				lines = []
-    				for lon in [-180..180]
-    					if globe._visible(lon, lat_)
-    						xy = v1.project(v0.project(globe.project(lon, lat_)))
-    						pts.push xy
-    					else
-    						if pts.length > 1
-    							line = new kartograph.geom.Line(pts)
-    							pts = []
-    							lines = lines.concat(line.clipToBBox(viewbox))
-    				
-    				if pts.length > 1
-    					line = new kartograph.geom.Line(pts)
-    					pts = []
-    					lines = lines.concat(line.clipToBBox(viewbox))
-    					
-    				for line in lines
-    					path = self.paper.path(line.toSVG())
-    					path.setAttribute('class', 'graticule latitude lat_'+Math.abs(lat_)+(if lat_ < 0 then 'W' else 'E'))
-    					grat_lines.push(path)
-    */
-
-    Kartograph.prototype.display = function() {
-      /*
-      		finally displays the kartograph, needs to be called after
-      		layer and marker setup is finished
-      */      return this.render();
-    };
-
     /* 
     	    end of public API
     */
@@ -836,38 +796,6 @@
         success: me.renderCoastline,
         context: me
       });
-    };
-
-    Kartograph.prototype.renderCoastline = function(coastlines) {
-      var P, d, i, line, me, p0, p1, pathstr, view0, view1, vp, _i, _len, _ref9, _results;
-      me = this;
-      P = me.proj;
-      vp = me.viewport;
-      view0 = me.viewAB;
-      view1 = me.viewBC;
-      _results = [];
-      for (_i = 0, _len = coastlines.length; _i < _len; _i++) {
-        line = coastlines[_i];
-        pathstr = '';
-        for (i = 0, _ref9 = line.length - 2; 0 <= _ref9 ? i <= _ref9 : i >= _ref9; 0 <= _ref9 ? i++ : i--) {
-          p0 = line[i];
-          p1 = line[i + 1];
-          d = 0;
-          if (true && P._visible(p0[0], p0[1]) && P._visible(p1[0], p1[1])) {
-            p0 = view1.project(view0.project(P.project(p0[0], p0[1])));
-            p1 = view1.project(view0.project(P.project(p1[0], p1[1])));
-            if (vp.inside(p0[0], p0[1]) || vp.inside(p1[0], p1[1])) {
-              pathstr += 'M' + p0[0] + ',' + p0[1] + 'L' + p1[0] + ',' + p1[1];
-            }
-          }
-        }
-        if (pathstr !== "") {
-          _results.push(me.paper.path(pathstr).attr('opacity', .8));
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
     };
 
     Kartograph.prototype.resize = function() {
@@ -1048,6 +976,10 @@
   })();
 
   kartograph.Kartograph = Kartograph;
+
+  kartograph.map = function(container, width, height) {
+    return new Kartograph(container, width, height);
+  };
 
   MapLayer = (function() {
 
