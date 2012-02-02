@@ -224,7 +224,7 @@
     };
 
     Kartograph.prototype.choropleth = function(opts) {
-      var col, colorscale, data, data_col, data_key, id, layer_id, me, no_data_color, path, pathData, paths, row, v, val, _i, _j, _len, _len2, _ref3, _ref4, _ref5;
+      var col, colors, data, data_col, data_key, id, layer_id, me, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref3, _ref4, _ref5;
       me = this;
       layer_id = (_ref3 = opts.layer) != null ? _ref3 : me.layerIds[me.layerIds.length - 1];
       if (!me.layers.hasOwnProperty(layer_id)) {
@@ -234,34 +234,28 @@
       data = opts.data;
       data_col = opts.value;
       data_key = opts.key;
-      no_data_color = (_ref4 = opts.noDataColor) != null ? _ref4 : '#ccc';
-      colorscale = opts.colorscale;
+      colors = opts.colors;
       pathData = {};
       if ((data_key != null) && type(data) === "array") {
         for (_i = 0, _len = data.length; _i < _len; _i++) {
           row = data[_i];
           id = row[data_key];
-          val = row[data_col];
-          pathData[id] = val;
+          pathData[id] = row;
         }
       } else {
         for (id in data) {
           row = data[id];
-          pathData[id] = data_col != null ? row[data_col] : row;
+          pathData[id] = row;
         }
       }
-      _ref5 = me.layers[layer_id].pathsById;
-      for (id in _ref5) {
-        paths = _ref5[id];
+      _ref4 = me.layers[layer_id].pathsById;
+      for (id in _ref4) {
+        paths = _ref4[id];
         for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
           path = paths[_j];
-          if ((pathData[id] != null) && colorscale.validValue(pathData[id])) {
-            v = pathData[id];
-            col = colorscale.getColor(v);
-            path.svgPath.node.setAttribute('style', 'fill:' + col);
-          } else {
-            path.svgPath.node.setAttribute('style', 'fill:' + no_data_color);
-          }
+          pd = (_ref5 = pathData[id]) != null ? _ref5 : null;
+          col = colors(pd);
+          path.svgPath.node.setAttribute('style', 'fill:' + col);
         }
       }
     };

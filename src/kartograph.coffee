@@ -214,29 +214,23 @@ class Kartograph
 		data = opts.data
 		data_col = opts.value
 		data_key = opts.key
-		no_data_color = opts.noDataColor ? '#ccc'
-		colorscale = opts.colorscale
+		colors = opts.colors
 		
 		pathData = {}
 		
 		if data_key? and type(data) == "array"
 			for row in data
 				id = row[data_key]
-				val = row[data_col]
-				pathData[id] = val
+				pathData[id] = row
 		else 
 			for id, row of data
-				pathData[id] = if data_col? then row[data_col] else row
+				pathData[id] = row
 				
 		for id, paths of me.layers[layer_id].pathsById
 			for path in paths
-				if pathData[id]? and colorscale.validValue(pathData[id])
-					v = pathData[id]
-					col = colorscale.getColor(v)
-					
-					path.svgPath.node.setAttribute('style', 'fill:'+col)
-				else
-					path.svgPath.node.setAttribute('style', 'fill:'+no_data_color)
+				pd = pathData[id] ? null				
+				col = colors(pd)
+				path.svgPath.node.setAttribute('style', 'fill:'+col) 
 		return
 		
 	
