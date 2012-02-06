@@ -2,7 +2,7 @@
  * test for kartograph.BBox
  */
  
-var kartograph = require('../kartograph.js').kartograph;
+var kartograph = require('../dist/kartograph.js').kartograph;
 var $ = require('jQuery');
 
 try {

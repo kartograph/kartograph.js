@@ -2,7 +2,7 @@
  * test for kartograph projections
  */
  
-var kartograph = exports.kartograph = require('../kartograph.js').kartograph;
+var kartograph = exports.kartograph = require('../dist/kartograph.js').kartograph;
 
 try {
 	var ll = new kartograph.LonLat(10.1, 52.0);

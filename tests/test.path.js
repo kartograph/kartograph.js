@@ -2,7 +2,7 @@
  * test for kartograph.Path
  */
  
-var kartograph = exports.kartograph = require('../kartograph.js').kartograph;
+var kartograph = exports.kartograph = require('../dist/kartograph.js').kartograph;
 var jsdom = require("jsdom");
 
 /*

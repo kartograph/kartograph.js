@@ -12,6 +12,8 @@ uglifyjs kartograph.js > kartograph.min.js
 cp kartograph.min.js kartograph-chroma.min.js
 uglifyjs lib/chroma.js >> kartograph-chroma.min.js
 uglifyjs lib/chroma.colors.js >> kartograph-chroma.min.js
-echo "build complete"
-node tests/*.js
 mv kartograph*.js dist
+echo "build complete"
+
+cp dist/kartograph.* ~/Incubator/maps/unrefugee/his.locsis.com/js
+cp dist/kartograph.* ~/Incubator/maps/kenya/demo/js/lib
