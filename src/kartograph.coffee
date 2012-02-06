@@ -145,11 +145,12 @@ class Kartograph
 		me.layerIds ?= []
 		me.layers ?= {}
 		
-		if type(src_id) == 'object'
+		if __type(src_id) == 'object'
 			opts = src_id
 			src_id = opts.id
 			layer_id = opts.className
 			path_id = opts.key
+			titles = opts.title
 		else
 			opts = {}
 			
@@ -162,15 +163,21 @@ class Kartograph
 		
 		layer = new MapLayer(layer_id, path_id, me, opts.filter)
 		
-		$paths = $('*', svgLayer[0])		
-		
+		$paths = $('*', svgLayer[0])
 		
 		for svg_path in $paths		
-			layer.addPath(svg_path)
+			layer.addPath(svg_path, titles)
 				
 		if layer.paths.length > 0
 			me.layers[layer_id] = layer
 			me.layerIds.push layer_id
+		
+		# add event handlers
+		checkEvents = ['click']
+		for evt in checkEvents
+			if __type(opts[evt]) == 'function'
+				me.onLayerEvent evt, opts[evt], layer_id
+		
 		return
 		
 
@@ -181,14 +188,26 @@ class Kartograph
 		null
 					
 		
-	addLayerEvent: (event, callback, layerId) ->
+	onLayerEvent: (event, callback, layerId) ->
 		me = @
+		me
 		layerId ?= me.layerIds[me.layerIds.length-1]
+		
+		class EventContext
+			constructor: (@type, @cb, @map) ->
+
+			handle: (e) =>
+				me = @
+				path = me.map.pathById[e.target.getAttribute('id')]
+				me.cb path.data
+		
+		ctx = new EventContext(event, callback, me)
+		
 		if me.layers[layerId]?
 			paths = me.layers[layerId].paths
 			for path in paths
-				$(path.svgPath.node).bind(event, callback)
-			
+				$(path.svgPath.node).bind event, ctx.handle
+				
 	
 	addMarker: (marker) ->
 		me = @
@@ -219,7 +238,7 @@ class Kartograph
 		
 		pathData = {}
 		
-		if data_key? and type(data) == "array"
+		if data_key? and __type(data) == "array"
 			for row in data
 				id = row[data_key]
 				pathData[id] = row
@@ -233,9 +252,21 @@ class Kartograph
 				col = colors(pd)
 				
 				if opts.duration?
+					if __type(opts.duration) == "function"
+						dur = opts.duration(pd)
+					else
+						dur = opts.duration
+					if opts.delay?
+						if __type(opts.delay) == 'function'
+							delay = opts.delay(pd)
+						else
+							delay = opts.delay
+					else
+						delay = 0
 					ncol = colors(null)
 					path.svgPath.attr('fill',ncol)
-					path.svgPath.animate({fill: col}, opts.duration)
+					anim = Raphael.animation({fill: col}, dur)
+					path.svgPath.animate(anim.delay(delay))
 				else
 					path.svgPath.attr('fill', col)
 				#path.svgPath.node.setAttribute('style', 'fill:'+col) 
@@ -278,7 +309,22 @@ class Kartograph
 					
 					$(path.svgPath.node).qtip(cfg);
 	
-
+	
+	fadeIn: (opts = {}) ->
+		me = @
+		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
+		duration = opts.duration ? 500
+		
+		for id, paths of me.layers[layer_id].pathsById
+			for path in paths
+				if __type(duration) == "function"
+					dur = duration(path.data)
+				else
+					dur = duration
+				path.svgPath.attr 'opacity',0
+				path.svgPath.animate {opacity:1}, dur
+				
+		
 
 	### 
 	    end of public API
@@ -464,11 +510,11 @@ class MapLayer
 		me.filter = filter
 		
 				
-	addPath: (svg_path) ->
+	addPath: (svg_path, titles) ->
 		me = @
 		me.paths ?= []
-		layerPath = new MapLayerPath(svg_path, me.id, me.map)
-		if type(me.filter) == 'function'
+		layerPath = new MapLayerPath(svg_path, me.id, me.map, titles)
+		if __type(me.filter) == 'function'
 			if me.filter(layerPath.data) == false
 				layerPath.remove()
 				return
@@ -512,7 +558,7 @@ map_layer_path_uid = 0
 		
 class MapLayerPath
 
-	constructor: (svg_path, layer_id, map) ->
+	constructor: (svg_path, layer_id, map, titles) ->
 		me = @		
 		paper = map.paper
 		view = map.viewBC
@@ -521,7 +567,7 @@ class MapLayerPath
 		me.svgPath.node.setAttribute('class', layer_id)
 		map.applyStyles me.svgPath
 		uid = 'path_'+map_layer_path_uid++
-		me.svgPath.node.setAttribute('id', uid)
+		me.svgPath.node.setAttribute('id', uid)	
 		map.pathById[uid] = me
 		data = {}
 		for i in [0..svg_path.attributes.length-1]
@@ -529,6 +575,13 @@ class MapLayerPath
 			if attr.name.substr(0,5) == "data-"
 				data[attr.name.substr(5)] = attr.value
 		me.data = data
+		if __type(titles) == 'string'
+			title = titles
+		else if __type(titles) == 'function'
+			title = titles(data)
+		
+		if title?
+			me.svgPath.attr('title', title)
 		
 	setView: (view) ->
 		me = @
@@ -584,46 +637,21 @@ class CanvasLayer
 						c.moveTo pt[0],pt[1]
 					else
 						c.lineTo pt[0],pt[1]
-		
 
 
-class PanAndZoomControl
+__type = do ->
+	###
+	for browser-safe type checking+
+	ported from jQuery's $.type
+	###
+	classToType = {}
+	for name in "Boolean Number String Function Array Date RegExp Undefined Null".split(" ")
+		classToType["[object " + name + "]"] = name.toLowerCase()
 	
-	constructor: (map) ->
-		me = @
-		me.map = map
-		c = map.container
-		div = (className, childNodes = []) ->
-			d = $('<div class="'+className+'" />')
-			for child in childNodes
-				d.append child
-			d
-		mdown = (evt) ->
-			$(evt.target).addClass 'md'
-		mup = (evt) ->
-			$(evt.target).removeClass 'md'
-			
-		zcp = div 'plus'
-		zcp.mousedown mdown
-		zcp.mouseup mup
-		zcp.click me.zoomIn
-		zcm = div 'minus'
-		zcm.mousedown mdown
-		zcm.mouseup mup
-		zcm.click me.zoomOut
-		zc = div 'zoom-control', [zcp, zcm]
-		c.append zc
-		
-	zoomIn: (evt) =>
-		me = @ 
-		me.map.opts.zoom += 1
-		me.map.resize()
-		
-	zoomOut: (evt) =>
-		me = @ 
-		me.map.opts.zoom -= 1
-		me.map.opts.zoom = 1 if me.map.opts.zoom < 1
-		me.map.resize()
-	
+	(obj) ->
+		strType = Object::toString.call(obj)
+		classToType[strType] or "object"
+    
+root.__type ?= __type
 
 
