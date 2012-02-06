@@ -76,11 +76,14 @@ class SymbolGroup
 			if opts[p]?
 				me[p] = opts[p]
 		
-		if type(me.type) == "string"
-			SymbolType = K[me.type]
+		if __type(me.type) == "string"
+			SymbolType = kartograph[me.type]
 		else
 			SymbolType = me.type
 			
+		if not SymbolType?
+			warn 'could not resolve symbol type', me.type
+			return
 		
 		# init symbol properties
 		for p in SymbolType.props
@@ -104,7 +107,7 @@ class SymbolGroup
 		me.symbols = [] 
 		for i of me.data
 			d = me.data[i]
-			if type(me.filter) == "function"
+			if __type(me.filter) == "function"
 				me.addSymbol d if me.filter d
 			else
 				me.addSymbol d
@@ -116,10 +119,10 @@ class SymbolGroup
 		for s in me.symbols
 			s.render()
 			
-		if type(me.tooltip) == "function"
+		if __type(me.tooltip) == "function"
 			me.initTooltips()
 			
-		if type(me.click) == "function"
+		if __type(me.click) == "function"
 			for s in me.symbols
 				for node in s.nodes()
 					node.symbol = s
@@ -136,7 +139,7 @@ class SymbolGroup
 		me = @
 		SymbolType = me.type
 		ll = me.evaluate me.location,data
-		if type(ll) == 'array'
+		if __type(ll) == 'array'
 			ll = new kartograph.LonLat ll[0],ll[1]
 		
 		sprops = 
@@ -157,7 +160,7 @@ class SymbolGroup
 		###
 		evaluates a property function or returns a static value
 		###
-		if type(prop) == 'function'
+		if __type(prop) == 'function'
 			val = prop(data)
 		else
 			val = prop
@@ -166,7 +169,7 @@ class SymbolGroup
 		me = @
 		for s in me.symbols
 			ll = s.location
-			if type(ll) == 'string'
+			if __type(ll) == 'string'
 				[layer_id, path_id] = ll.split('.')
 				path = me.map.getLayerPath(layer_id, path_id)
 				if path?
@@ -203,9 +206,9 @@ class SymbolGroup
 					delay: 20 
 				content: {}
 			tt = tooltips(s.data)
-			if type(tt) == "string"
+			if __type(tt) == "string"
 				cfg.content.text = tt
-			else if type(tt) == "array"
+			else if __type(tt) == "array"
 				cfg.content.title = tt[0]
 				cfg.content.text = tt[1]
 			

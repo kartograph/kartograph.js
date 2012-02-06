@@ -85,10 +85,14 @@
         p = optional[_j];
         if (opts[p] != null) me[p] = opts[p];
       }
-      if (type(me.type) === "string") {
-        SymbolType = K[me.type];
+      if (__type(me.type) === "string") {
+        SymbolType = kartograph[me.type];
       } else {
         SymbolType = me.type;
+      }
+      if (!(SymbolType != null)) {
+        warn('could not resolve symbol type', me.type);
+        return;
       }
       _ref3 = SymbolType.props;
       for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
@@ -113,7 +117,7 @@
       me.symbols = [];
       for (i in me.data) {
         d = me.data[i];
-        if (type(me.filter) === "function") {
+        if (__type(me.filter) === "function") {
           if (me.filter(d)) me.addSymbol(d);
         } else {
           me.addSymbol(d);
@@ -125,8 +129,8 @@
         s = _ref5[_m];
         s.render();
       }
-      if (type(me.tooltip) === "function") me.initTooltips();
-      if (type(me.click) === "function") {
+      if (__type(me.tooltip) === "function") me.initTooltips();
+      if (__type(me.click) === "function") {
         _ref6 = me.symbols;
         for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
           s = _ref6[_n];
@@ -152,7 +156,7 @@
       me = this;
       SymbolType = me.type;
       ll = me.evaluate(me.location, data);
-      if (type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
+      if (__type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
       sprops = {
         layers: me.layers,
         location: ll,
@@ -174,7 +178,7 @@
       		evaluates a property function or returns a static value
       */
       var val;
-      if (type(prop) === 'function') {
+      if (__type(prop) === 'function') {
         return val = prop(data);
       } else {
         return val = prop;
@@ -188,7 +192,7 @@
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
         s = _ref3[_i];
         ll = s.location;
-        if (type(ll) === 'string') {
+        if (__type(ll) === 'string') {
           _ref4 = ll.split('.'), layer_id = _ref4[0], path_id = _ref4[1];
           path = me.map.getLayerPath(layer_id, path_id);
           if (path != null) {
@@ -237,9 +241,9 @@
           content: {}
         };
         tt = tooltips(s.data);
-        if (type(tt) === "string") {
+        if (__type(tt) === "string") {
           cfg.content.text = tt;
-        } else if (type(tt) === "array") {
+        } else if (__type(tt) === "array") {
           cfg.content.title = tt[0];
           cfg.content.text = tt[1];
         }
