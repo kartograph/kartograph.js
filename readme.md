@@ -2,6 +2,8 @@
 
 Kartograph.js is a JavaScript library that renders [SVG maps](https://github.com/kartograph/kartograph.py/) in web browsers. It is built on top of [jQuery](http://jquery.com) and [RaphaelJS](http://raphaeljs.com). Please have a look at the [API docs](https://github.com/kartograph/kartograph.js/wiki/API) for more details. 
 
+Initializing a new map
+
 ````javascript
 map = $K.map('#map', 600, 400);
 map.loadMap('world.svg', function() {
@@ -10,7 +12,12 @@ map.loadMap('world.svg', function() {
 		key: 'iso3',
 		title: function(d) { return d.countryName; }
 	});
+});
+```
 
+Choropleth maps (aka coloring map polygons based on data):
+
+```javascript
 	pop_density = { 'USA': 123455, 'CAN': 232323, ... };
 
 	colorscale = new chroma.ColorScale({
@@ -27,6 +34,19 @@ map.loadMap('world.svg', function() {
 });
 ```
 
+Adding symbols is easy, too:
+
+```javascript
+cities = [{ lat: 43, lon: -75, label: 'New York', population: 19465197 }];
+
+new $K.SymbolGroup({
+	map: map,
+	data: cities,
+	location: function(d) { return [d.lon, d.lat]; },
+	type: 'Bubble',
+	radius: function(d) { return Math.sqrt(d.population) * 0.001; }
+})
+```
 
 ### Author
 
