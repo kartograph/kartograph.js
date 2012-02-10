@@ -18,19 +18,18 @@ map.loadMap('world.svg', function() {
 Choropleth maps (aka coloring map polygons based on data):
 
 ```javascript
-	pop_density = { 'USA': 123455, 'CAN': 232323, ... };
+pop_density = { 'USA': 123455, 'CAN': 232323, ... };
 
-	colorscale = new chroma.ColorScale({
-		colors: chroma.brewer.YlOrRd,
-		limits: chroma.limits(pop_density, 'k-means', 9)
-	});
+colorscale = new chroma.ColorScale({
+	colors: chroma.brewer.YlOrRd,
+	limits: chroma.limits(pop_density, 'k-means', 9)
+});
 
-	map.choropleth({
-		data: pop_density,
-		color: function(value) {
-			return colorscale.getColor(value);
-		}
-	});
+map.choropleth({
+	data: pop_density,
+	color: function(value) {
+		return colorscale.getColor(value);
+	}
 });
 ```
 
