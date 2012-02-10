@@ -19,7 +19,7 @@
 root = (exports ? this)	
 kartograph = root.$K = root.kartograph ?= {}
 
-kartograph.version = "0.4.4"
+kartograph.version = "0.4.5"
 
 warn = (s) ->
 	console.warn('kartograph ('+kartograph.version+'): '+s)
@@ -353,13 +353,15 @@ class Kartograph
 			context: me
 	
 	
-	resize: () ->
+	resize: (w, h) ->
 		###
 		forces redraw of every layer
 		###
 		me = @
 		cnt = me.container
-		me.viewport = vp = new kartograph.BBox 0,0,cnt.width(),cnt.height()
+		w ?= cnt.width()
+		h ?= cnt.height()
+		me.viewport = vp = new kartograph.BBox 0,0,w,h
 		me.paper.setSize vp.width, vp.height
 		vp = me.viewport		
 		padding = me.opts.padding ? 0
@@ -369,6 +371,11 @@ class Kartograph
 		me.viewBC = new kartograph.View me.viewAB.asBBox(),vp.width*zoom,vp.height*zoom, padding,halign,valign
 		for id,layer of me.layers
 			layer.setView(me.viewBC)
+		
+		if me.symbolGroups?
+			for sg in me.symbolGroups
+				sg.onResize()
+		return
 		
 		
 	addFilter: (id, type, params = {}) ->
@@ -456,7 +463,7 @@ class Kartograph
 			callback()
 	
 	
-	applyStyles: (el) ->
+	applyStyles: (el, className) ->
 		###
 		applies pre-loaded css styles to
 		raphael elements
@@ -467,7 +474,6 @@ class Kartograph
 			
 		me._pathTypes ?= ["path", "circle", "rectangle", "ellipse"]
 		me._regardStyles ?= ["fill", "stroke", "fill-opacity", "stroke-width", "stroke-opacity"]
-		className = el.node.getAttribute('class')
 		for sel of me.styles
 			p = sel
 			for selectors in p.split ','				
@@ -564,8 +570,11 @@ class MapLayerPath
 		view = map.viewBC
 		me.path = path = kartograph.geom.Path.fromSVG(svg_path)	
 		me.svgPath = view.projectPath(path).toSVG(paper)
-		me.svgPath.node.setAttribute('class', layer_id)
-		map.applyStyles me.svgPath
+		if not map.styles? 
+			me.svgPath.node.setAttribute('class', layer_id)
+		else
+			map.applyStyles me.svgPath,layer_id
+
 		uid = 'path_'+map_layer_path_uid++
 		me.svgPath.node.setAttribute('id', uid)	
 		map.pathById[uid] = me

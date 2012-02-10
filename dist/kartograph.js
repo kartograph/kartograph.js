@@ -469,7 +469,7 @@
 
   kartograph = root.$K = (_ref7 = root.kartograph) != null ? _ref7 : root.kartograph = {};
 
-  kartograph.version = "0.4.4";
+  kartograph.version = "0.4.5";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -873,14 +873,16 @@
       });
     };
 
-    Kartograph.prototype.resize = function() {
+    Kartograph.prototype.resize = function(w, h) {
       /*
       		forces redraw of every layer
       */
-      var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref10, _ref11, _ref12, _ref9, _results;
+      var cnt, halign, id, layer, me, padding, sg, valign, vp, zoom, _i, _len, _ref10, _ref11, _ref12, _ref13, _ref9;
       me = this;
       cnt = me.container;
-      me.viewport = vp = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
+      if (w == null) w = cnt.width();
+      if (h == null) h = cnt.height();
+      me.viewport = vp = new kartograph.BBox(0, 0, w, h);
       me.paper.setSize(vp.width, vp.height);
       vp = me.viewport;
       padding = (_ref9 = me.opts.padding) != null ? _ref9 : 0;
@@ -889,12 +891,17 @@
       zoom = me.opts.zoom;
       me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
       _ref12 = me.layers;
-      _results = [];
       for (id in _ref12) {
         layer = _ref12[id];
-        _results.push(layer.setView(me.viewBC));
+        layer.setView(me.viewBC);
       }
-      return _results;
+      if (me.symbolGroups != null) {
+        _ref13 = me.symbolGroups;
+        for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
+          sg = _ref13[_i];
+          sg.onResize();
+        }
+      }
     };
 
     Kartograph.prototype.addFilter = function(id, type, params) {
@@ -1006,12 +1013,12 @@
       }
     };
 
-    Kartograph.prototype.applyStyles = function(el) {
+    Kartograph.prototype.applyStyles = function(el, className) {
       /*
       		applies pre-loaded css styles to
       		raphael elements
       */
-      var className, classes, k, me, p, props, sel, selectors, _i, _j, _len, _len2, _ref10, _ref11, _ref12, _ref9;
+      var classes, k, me, p, props, sel, selectors, _i, _j, _len, _len2, _ref10, _ref11, _ref12, _ref9;
       me = this;
       if (!(me.styles != null)) return el;
       if ((_ref9 = me._pathTypes) == null) {
@@ -1020,7 +1027,6 @@
       if ((_ref10 = me._regardStyles) == null) {
         me._regardStyles = ["fill", "stroke", "fill-opacity", "stroke-width", "stroke-opacity"];
       }
-      className = el.node.getAttribute('class');
       for (sel in me.styles) {
         p = sel;
         _ref11 = p.split(',');
@@ -1148,8 +1154,11 @@
       view = map.viewBC;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
-      me.svgPath.node.setAttribute('class', layer_id);
-      map.applyStyles(me.svgPath);
+      if (!(map.styles != null)) {
+        me.svgPath.node.setAttribute('class', layer_id);
+      } else {
+        map.applyStyles(me.svgPath, layer_id);
+      }
       uid = 'path_' + map_layer_path_uid++;
       me.svgPath.node.setAttribute('id', uid);
       map.pathById[uid] = me;
@@ -1632,6 +1641,19 @@
       return _results;
     };
 
+    SymbolGroup.prototype.onResize = function() {
+      var me, s, _i, _len, _ref13, _results;
+      me = this;
+      me.layoutSymbols();
+      _ref13 = me.symbols;
+      _results = [];
+      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
+        s = _ref13[_i];
+        _results.push(s.update());
+      }
+      return _results;
+    };
+
     return SymbolGroup;
 
   })();
@@ -1879,20 +1901,30 @@
     __extends(Icon, Symbol);
 
     function Icon(opts) {
-      var me, _ref13, _ref14, _ref15, _ref16;
+      var me, _ref13, _ref14, _ref15, _ref16, _ref17;
       me = this;
       Icon.__super__.constructor.call(this, opts);
       me.icon = (_ref13 = opts.icon) != null ? _ref13 : '';
       me.offset = (_ref14 = opts.offset) != null ? _ref14 : [0, 0];
-      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : '';
-      me.title = (_ref16 = opts.title) != null ? _ref16 : '';
+      me.iconsize = (_ref15 = opts.iconsize) != null ? _ref15 : [10, 10];
+      me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : '';
+      me.title = (_ref17 = opts.title) != null ? _ref17 : '';
+      console.log(me.iconsize, 'width="' + me.iconsize[0] + '" height="' + me.iconsize[1] + '"');
     }
 
     Icon.prototype.render = function(layers) {
       var cont, me;
       me = this;
       cont = me.map.container;
-      me.img = $('<img src="' + me.icon + '" title="' + me.title + '" alt="' + me.title + '" class="' + me["class"] + '" />');
+      me.img = $('<img />');
+      me.img.attr({
+        src: me.icon,
+        title: me.title,
+        alt: me.title,
+        width: me.iconsize[0],
+        height: me.iconsize[1]
+      });
+      me.img.addClass(me["class"]);
       me.img.css({
         position: 'absolute',
         'z-index': 1000,
@@ -1929,7 +1961,7 @@
 
   })();
 
-  Icon.props = ['icon', 'offset', 'class', 'title'];
+  Icon.props = ['icon', 'offset', 'class', 'title', 'iconsize'];
 
   Icon.layers = [];
 
@@ -2082,7 +2114,7 @@
         ret[css[0]] = props;
       }
     }
-    if (type(callback) === 'function') {
+    if (__type(callback) === 'function') {
       callback(ret);
     } else {
       return ret;

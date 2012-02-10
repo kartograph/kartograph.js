@@ -75,7 +75,7 @@
         ret[css[0]] = props;
       }
     }
-    if (type(callback) === 'function') {
+    if (__type(callback) === 'function') {
       callback(ret);
     } else {
       return ret;

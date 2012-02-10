@@ -276,6 +276,19 @@
       return _results;
     };
 
+    SymbolGroup.prototype.onResize = function() {
+      var me, s, _i, _len, _ref3, _results;
+      me = this;
+      me.layoutSymbols();
+      _ref3 = me.symbols;
+      _results = [];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        _results.push(s.update());
+      }
+      return _results;
+    };
+
     return SymbolGroup;
 
   })();
@@ -523,20 +536,30 @@
     __extends(Icon, Symbol);
 
     function Icon(opts) {
-      var me, _ref3, _ref4, _ref5, _ref6;
+      var me, _ref3, _ref4, _ref5, _ref6, _ref7;
       me = this;
       Icon.__super__.constructor.call(this, opts);
       me.icon = (_ref3 = opts.icon) != null ? _ref3 : '';
       me.offset = (_ref4 = opts.offset) != null ? _ref4 : [0, 0];
-      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
-      me.title = (_ref6 = opts.title) != null ? _ref6 : '';
+      me.iconsize = (_ref5 = opts.iconsize) != null ? _ref5 : [10, 10];
+      me["class"] = (_ref6 = opts["class"]) != null ? _ref6 : '';
+      me.title = (_ref7 = opts.title) != null ? _ref7 : '';
+      console.log(me.iconsize, 'width="' + me.iconsize[0] + '" height="' + me.iconsize[1] + '"');
     }
 
     Icon.prototype.render = function(layers) {
       var cont, me;
       me = this;
       cont = me.map.container;
-      me.img = $('<img src="' + me.icon + '" title="' + me.title + '" alt="' + me.title + '" class="' + me["class"] + '" />');
+      me.img = $('<img />');
+      me.img.attr({
+        src: me.icon,
+        title: me.title,
+        alt: me.title,
+        width: me.iconsize[0],
+        height: me.iconsize[1]
+      });
+      me.img.addClass(me["class"]);
       me.img.css({
         position: 'absolute',
         'z-index': 1000,
@@ -573,7 +596,7 @@
 
   })();
 
-  Icon.props = ['icon', 'offset', 'class', 'title'];
+  Icon.props = ['icon', 'offset', 'class', 'title', 'iconsize'];
 
   Icon.layers = [];
 

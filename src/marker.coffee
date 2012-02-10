@@ -84,7 +84,7 @@ class SymbolGroup
 		if not SymbolType?
 			warn 'could not resolve symbol type', me.type
 			return
-		
+				
 		# init symbol properties
 		for p in SymbolType.props
 			if opts[p]?
@@ -131,6 +131,7 @@ class SymbolGroup
 						me.click e.target.symbol.data
 			
 		me.map.addSymbolGroup(me)
+		
 		
 	addSymbol: (data) ->
 		###
@@ -223,6 +224,13 @@ class SymbolGroup
 		for id,layer of me.layers
 			if id != "mapcanvas"
 				layer.remove()
+				
+	onResize: () ->
+		me = @
+		me.layoutSymbols()
+		for s in me.symbols
+			s.update()
+		
 		
 SymbolGroup._layerid = 0
 kartograph.SymbolGroup = SymbolGroup		
@@ -405,17 +413,30 @@ class Icon extends Symbol
 		super opts
 		me.icon = opts.icon ? ''
 		me.offset = opts.offset ? [0,0]
+		me.iconsize = opts.iconsize ? [10,10]
 		me.class = opts.class ? ''
 		me.title = opts.title ? ''
+		console.log me.iconsize, 'width="'+me.iconsize[0]+'" height="'+me.iconsize[1]+'"'
+		
 	
 	render: (layers) ->
 		me = @
 		cont = me.map.container
-		me.img = $ '<img src="'+me.icon+'" title="'+me.title+'" alt="'+me.title+'" class="'+me.class+'" />'
+		me.img = $ '<img />'
+		me.img.attr
+			src: me.icon
+			title: me.title
+			alt: me.title
+			width: me.iconsize[0]
+			height: me.iconsize[1]
+		
+		me.img.addClass me.class
+		
 		me.img.css
 			position: 'absolute'
 			'z-index': 1000
 			cursor: 'pointer'
+			
 		me.img[0].symbol = me
 		cont.append me.img
 		me.update()
@@ -436,7 +457,7 @@ class Icon extends Symbol
 		[me.img]
 
 
-Icon.props = ['icon','offset','class','title']
+Icon.props = ['icon','offset','class','title','iconsize']
 Icon.layers = []
 
 kartograph.Icon = Icon

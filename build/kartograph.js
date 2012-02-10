@@ -25,7 +25,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.4.4";
+  kartograph.version = "0.4.5";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -429,14 +429,16 @@
       });
     };
 
-    Kartograph.prototype.resize = function() {
+    Kartograph.prototype.resize = function(w, h) {
       /*
       		forces redraw of every layer
       */
-      var cnt, halign, id, layer, me, padding, valign, vp, zoom, _ref3, _ref4, _ref5, _ref6, _results;
+      var cnt, halign, id, layer, me, padding, sg, valign, vp, zoom, _i, _len, _ref3, _ref4, _ref5, _ref6, _ref7;
       me = this;
       cnt = me.container;
-      me.viewport = vp = new kartograph.BBox(0, 0, cnt.width(), cnt.height());
+      if (w == null) w = cnt.width();
+      if (h == null) h = cnt.height();
+      me.viewport = vp = new kartograph.BBox(0, 0, w, h);
       me.paper.setSize(vp.width, vp.height);
       vp = me.viewport;
       padding = (_ref3 = me.opts.padding) != null ? _ref3 : 0;
@@ -445,12 +447,17 @@
       zoom = me.opts.zoom;
       me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
       _ref6 = me.layers;
-      _results = [];
       for (id in _ref6) {
         layer = _ref6[id];
-        _results.push(layer.setView(me.viewBC));
+        layer.setView(me.viewBC);
       }
-      return _results;
+      if (me.symbolGroups != null) {
+        _ref7 = me.symbolGroups;
+        for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
+          sg = _ref7[_i];
+          sg.onResize();
+        }
+      }
     };
 
     Kartograph.prototype.addFilter = function(id, type, params) {
@@ -562,12 +569,12 @@
       }
     };
 
-    Kartograph.prototype.applyStyles = function(el) {
+    Kartograph.prototype.applyStyles = function(el, className) {
       /*
       		applies pre-loaded css styles to
       		raphael elements
       */
-      var className, classes, k, me, p, props, sel, selectors, _i, _j, _len, _len2, _ref3, _ref4, _ref5, _ref6;
+      var classes, k, me, p, props, sel, selectors, _i, _j, _len, _len2, _ref3, _ref4, _ref5, _ref6;
       me = this;
       if (!(me.styles != null)) return el;
       if ((_ref3 = me._pathTypes) == null) {
@@ -576,7 +583,6 @@
       if ((_ref4 = me._regardStyles) == null) {
         me._regardStyles = ["fill", "stroke", "fill-opacity", "stroke-width", "stroke-opacity"];
       }
-      className = el.node.getAttribute('class');
       for (sel in me.styles) {
         p = sel;
         _ref5 = p.split(',');
@@ -704,8 +710,11 @@
       view = map.viewBC;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.svgPath = view.projectPath(path).toSVG(paper);
-      me.svgPath.node.setAttribute('class', layer_id);
-      map.applyStyles(me.svgPath);
+      if (!(map.styles != null)) {
+        me.svgPath.node.setAttribute('class', layer_id);
+      } else {
+        map.applyStyles(me.svgPath, layer_id);
+      }
       uid = 'path_' + map_layer_path_uid++;
       me.svgPath.node.setAttribute('id', uid);
       map.pathById[uid] = me;

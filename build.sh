@@ -17,3 +17,4 @@ echo "build complete"
 
 cp dist/kartograph.* ~/Incubator/maps/unrefugee/his.locsis.com/js
 cp dist/kartograph.* ~/Incubator/maps/kenya/demo/js/lib
+cp dist/kartograph.* ~/Incubator/okfn/_yourtopia/italymap/   

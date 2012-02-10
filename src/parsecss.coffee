@@ -65,7 +65,7 @@ kartograph.parsecss = (str, callback) ->
 				ret[css[0]][k] = v
 		else
 			ret[css[0]] = props
-	if type(callback) == 'function'
+	if __type(callback) == 'function'
 		callback ret
 		return
 	else
