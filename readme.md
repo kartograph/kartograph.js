@@ -2,6 +2,32 @@
 
 Kartograph.js is a JavaScript library that renders [SVG maps](https://github.com/kartograph/kartograph.py/) in web browsers. It is built on top of [jQuery](http://jquery.com) and [RaphaelJS](http://raphaeljs.com). Please have a look at the [API docs](https://github.com/kartograph/kartograph.js/wiki/API) for more details. 
 
+````javascript
+map = $K.map('#map', 600, 400);
+map.loadMap('world.svg', function() {
+	map.addLayer({
+		id: 'countries',
+		key: 'iso3',
+		title: function(d) { return d.countryName; }
+	});
+
+	pop_density = { 'USA': 123455, 'CAN': 232323, ... };
+
+	colorscale = new chroma.ColorScale({
+		colors: chroma.brewer.YlOrRd,
+		limits: chroma.limits(pop_density, 'k-means', 9)
+	});
+
+	map.choropleth({
+		data: pop_density,
+		color: function(value) {
+			return colorscale.getColor(value);
+		}
+	});
+});
+```
+
+
 ### Author
 
 Kartograph was created by [Gregor Aisch](http://github.com/gka/). It is supported by [Piwik Web Analytics](http://piwik.org) and the [Open Knowledge Foundation](http://okfn.org). 
