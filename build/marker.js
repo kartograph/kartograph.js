@@ -544,7 +544,6 @@
       me.iconsize = (_ref5 = opts.iconsize) != null ? _ref5 : [10, 10];
       me["class"] = (_ref6 = opts["class"]) != null ? _ref6 : '';
       me.title = (_ref7 = opts.title) != null ? _ref7 : '';
-      console.log(me.iconsize, 'width="' + me.iconsize[0] + '" height="' + me.iconsize[1] + '"');
     }
 
     Icon.prototype.render = function(layers) {

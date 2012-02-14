@@ -19,7 +19,7 @@
 root = (exports ? this)	
 kartograph = root.$K = root.kartograph ?= {}
 
-kartograph.version = "0.4.5"
+kartograph.version = "0.4.6"
 
 warn = (s) ->
 	console.warn('kartograph ('+kartograph.version+'): '+s)
@@ -123,18 +123,51 @@ class Kartograph
 	loadMap: (mapurl, callback, opts) ->
 		# load svg map
 		me = @
+		# line 95
 		me.clear() 
 		me.opts = opts ? {}
 		me.opts.zoom ?= 1
 		me.mapLoadCallback = callback
-		$.ajax 
-			url: mapurl
-			dataType: if $.browser.msie then "text" else "xml"  
-			success: me.mapLoaded
-			context: me
-			error: (a,b,c) ->
-				warn a,b,c 
+		me._lastMapUrl = mapurl # store last map url for map cache
+		
+		if me.cacheMaps and kartograph.__mapCache[mapurl]?
+			# use map from cache
+			me._mapLoaded kartograph.__mapCache[mapurl]
+		else
+			# load map from url
+			$.ajax 
+				url: mapurl
+				dataType: "text" # if $.browser.msie then "text" else "xml"  
+				success: me._mapLoaded
+				context: me
+				error: (a,b,c) ->
+					warn a,b,c 
 		return
+	
+	
+	_mapLoaded: (xml) ->
+		me = @
+		
+		if me.cacheMaps
+			# cache map svg (as string)
+			kartograph.__mapCache ?= {}
+			kartograph.__mapCache[me._lastMapUrl] = xml
+			
+		try
+			xml = $(xml) # if $.browser.msie		
+		catch err  
+			console.error 'something went wrong while parsing svg'
+			return	
+		me.svgSrc = xml
+		vp = me.viewport		
+		$view = $('view', xml)[0] # use first view
+		me.viewAB = AB = kartograph.View.fromXML $view
+		padding = me.opts.padding ? 0
+		halign = me.opts.halign ? 'center'
+		valign = me.opts.valign ? 'center'
+		me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
+		me.proj = kartograph.Proj.fromXML $('proj', $view)[0]
+		me.mapLoadCallback(me)
 	
 	
 	addLayer: (src_id, layer_id, path_id) ->
@@ -177,6 +210,9 @@ class Kartograph
 		for evt in checkEvents
 			if __type(opts[evt]) == 'function'
 				me.onLayerEvent evt, opts[evt], layer_id
+		
+		if opts.tooltip?
+			me.tooltips opts.tooltip
 		
 		return
 		
@@ -329,21 +365,6 @@ class Kartograph
 	### 
 	    end of public API
 	###
-	
-	mapLoaded: (xml) ->
-		me = @
-		xml = $(xml) if $.browser.msie		
-		me.svgSrc = xml
-		vp = me.viewport		
-		$view = $('view', xml)[0] # use first view
-		me.viewAB = AB = kartograph.View.fromXML $view
-		padding = me.opts.padding ? 0
-		halign = me.opts.halign ? 'center'
-		valign = me.opts.valign ? 'center'
-		me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
-		me.proj = kartograph.Proj.fromXML $('proj', $view)[0]
-		me.mapLoadCallback(me)
-	
 	
 	loadCoastline: ->
 		me = @
@@ -502,6 +523,8 @@ kartograph.Kartograph = Kartograph
 
 kartograph.map = (container, width, height) ->
 	new Kartograph container, width, height
+
+kartograph.__mapCache = {}
 
 
 class MapLayer

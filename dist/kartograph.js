@@ -469,7 +469,7 @@
 
   kartograph = root.$K = (_ref7 = root.kartograph) != null ? _ref7 : root.kartograph = {};
 
-  kartograph.version = "0.4.5";
+  kartograph.version = "0.4.6";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -583,15 +583,45 @@
       me.opts = opts != null ? opts : {};
       if ((_ref9 = (_base3 = me.opts).zoom) == null) _base3.zoom = 1;
       me.mapLoadCallback = callback;
-      $.ajax({
-        url: mapurl,
-        dataType: $.browser.msie ? "text" : "xml",
-        success: me.mapLoaded,
-        context: me,
-        error: function(a, b, c) {
-          return warn(a, b, c);
-        }
-      });
+      me._lastMapUrl = mapurl;
+      if (me.cacheMaps && (kartograph.__mapCache[mapurl] != null)) {
+        me._mapLoaded(kartograph.__mapCache[mapurl]);
+      } else {
+        $.ajax({
+          url: mapurl,
+          dataType: "text",
+          success: me._mapLoaded,
+          context: me,
+          error: function(a, b, c) {
+            return warn(a, b, c);
+          }
+        });
+      }
+    };
+
+    Kartograph.prototype._mapLoaded = function(xml) {
+      var $view, AB, halign, me, padding, valign, vp, _ref10, _ref11, _ref12, _ref9;
+      me = this;
+      if (me.cacheMaps) {
+        if ((_ref9 = kartograph.__mapCache) == null) kartograph.__mapCache = {};
+        kartograph.__mapCache[me._lastMapUrl] = xml;
+      }
+      try {
+        xml = $(xml);
+      } catch (err) {
+        console.error('something went wrong while parsing svg');
+        return;
+      }
+      me.svgSrc = xml;
+      vp = me.viewport;
+      $view = $('view', xml)[0];
+      me.viewAB = AB = kartograph.View.fromXML($view);
+      padding = (_ref10 = me.opts.padding) != null ? _ref10 : 0;
+      halign = (_ref11 = me.opts.halign) != null ? _ref11 : 'center';
+      valign = (_ref12 = me.opts.valign) != null ? _ref12 : 'center';
+      me.viewBC = new kartograph.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
+      me.proj = kartograph.Proj.fromXML($('proj', $view)[0]);
+      return me.mapLoadCallback(me);
     };
 
     Kartograph.prototype.addLayer = function(src_id, layer_id, path_id) {
@@ -631,6 +661,7 @@
           me.onLayerEvent(evt, opts[evt], layer_id);
         }
       }
+      if (opts.tooltip != null) me.tooltips(opts.tooltip);
     };
 
     Kartograph.prototype.getLayerPath = function(layer_id, path_id) {
@@ -847,22 +878,6 @@
     	    end of public API
     */
 
-    Kartograph.prototype.mapLoaded = function(xml) {
-      var $view, AB, halign, me, padding, valign, vp, _ref10, _ref11, _ref9;
-      me = this;
-      if ($.browser.msie) xml = $(xml);
-      me.svgSrc = xml;
-      vp = me.viewport;
-      $view = $('view', xml)[0];
-      me.viewAB = AB = kartograph.View.fromXML($view);
-      padding = (_ref9 = me.opts.padding) != null ? _ref9 : 0;
-      halign = (_ref10 = me.opts.halign) != null ? _ref10 : 'center';
-      valign = (_ref11 = me.opts.valign) != null ? _ref11 : 'center';
-      me.viewBC = new kartograph.View(AB.asBBox(), vp.width, vp.height, padding, halign, valign);
-      me.proj = kartograph.Proj.fromXML($('proj', $view)[0]);
-      return me.mapLoadCallback(me);
-    };
-
     Kartograph.prototype.loadCoastline = function() {
       var me;
       me = this;
@@ -1061,6 +1076,8 @@
   kartograph.map = function(container, width, height) {
     return new Kartograph(container, width, height);
   };
+
+  kartograph.__mapCache = {};
 
   MapLayer = (function() {
 
@@ -1909,7 +1926,6 @@
       me.iconsize = (_ref15 = opts.iconsize) != null ? _ref15 : [10, 10];
       me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : '';
       me.title = (_ref17 = opts.title) != null ? _ref17 : '';
-      console.log(me.iconsize, 'width="' + me.iconsize[0] + '" height="' + me.iconsize[1] + '"');
     }
 
     Icon.prototype.render = function(layers) {

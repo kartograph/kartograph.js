@@ -416,7 +416,6 @@ class Icon extends Symbol
 		me.iconsize = opts.iconsize ? [10,10]
 		me.class = opts.class ? ''
 		me.title = opts.title ? ''
-		console.log me.iconsize, 'width="'+me.iconsize[0]+'" height="'+me.iconsize[1]+'"'
 		
 	
 	render: (layers) ->
