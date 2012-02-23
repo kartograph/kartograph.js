@@ -277,14 +277,14 @@ class Kartograph
 		if data_key? and __type(data) == "array"
 			for row in data
 				id = row[data_key]
-				pathData[id] = row
+				pathData[String(id)] = row
 		else 
 			for id, row of data
-				pathData[id] = row
+				pathData[String(id)] = row
 				
 		for id, paths of me.layers[layer_id].pathsById
 			for path in paths
-				pd = pathData[id] ? null				
+				pd = pathData[id] ? null
 				col = colors(pd)
 				
 				if opts.duration?
@@ -324,26 +324,27 @@ class Kartograph
 				else
 					tt = tooltips[id]
 					
+				cfg = {
+					position: { 
+						target: 'mouse', 
+						viewport: $(window), 
+						adjust: { x:7, y:7}
+					},
+					show: { 
+						delay: opts.delay ? 20 
+					},
+					content: {}
+				};
+				
 				if tt?
-					cfg = {
-						position: { 
-							target: 'mouse', 
-							viewport: $(window), 
-							adjust: { x:7, y:7}
-						},
-						show: { 
-							delay: 20 
-						},
-						content: {}
-					};
-					
 					if typeof(tt) == "string"
 						cfg.content.text = tt
 					else if $.isArray tt
 						cfg.content.title = tt[0]
-						cfg.content.text = tt[1]
-					
-					$(path.svgPath.node).qtip(cfg);
+						cfg.content.text = tt[1]	
+				else
+					cfg.content.text = 'n/a'
+				$(path.svgPath.node).qtip(cfg);
 	
 	
 	fadeIn: (opts = {}) ->

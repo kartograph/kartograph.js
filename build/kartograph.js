@@ -301,12 +301,12 @@
         for (_i = 0, _len = data.length; _i < _len; _i++) {
           row = data[_i];
           id = row[data_key];
-          pathData[id] = row;
+          pathData[String(id)] = row;
         }
       } else {
         for (id in data) {
           row = data[id];
-          pathData[id] = row;
+          pathData[String(id)] = row;
         }
       }
       _ref4 = me.layers[layer_id].pathsById;
@@ -358,7 +358,7 @@
       for (id in _ref4) {
         paths = _ref4[id];
         _results.push((function() {
-          var _i, _len, _results2;
+          var _i, _len, _ref5, _results2;
           _results2 = [];
           for (_i = 0, _len = paths.length; _i < _len; _i++) {
             path = paths[_i];
@@ -367,31 +367,31 @@
             } else {
               tt = tooltips[id];
             }
+            cfg = {
+              position: {
+                target: 'mouse',
+                viewport: $(window),
+                adjust: {
+                  x: 7,
+                  y: 7
+                }
+              },
+              show: {
+                delay: (_ref5 = opts.delay) != null ? _ref5 : 20
+              },
+              content: {}
+            };
             if (tt != null) {
-              cfg = {
-                position: {
-                  target: 'mouse',
-                  viewport: $(window),
-                  adjust: {
-                    x: 7,
-                    y: 7
-                  }
-                },
-                show: {
-                  delay: 20
-                },
-                content: {}
-              };
               if (typeof tt === "string") {
                 cfg.content.text = tt;
               } else if ($.isArray(tt)) {
                 cfg.content.title = tt[0];
                 cfg.content.text = tt[1];
               }
-              _results2.push($(path.svgPath.node).qtip(cfg));
             } else {
-              _results2.push(void 0);
+              cfg.content.text = 'n/a';
             }
+            _results2.push($(path.svgPath.node).qtip(cfg));
           }
           return _results2;
         })());
