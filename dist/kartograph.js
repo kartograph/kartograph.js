@@ -3631,8 +3631,8 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var PanAndZoomControl;
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var LinearScale, LogScale, PanAndZoomControl, QuantileScale, Scale;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   kartograph.Kartograph.prototype.choropleth = function(opts) {
     var anim, col, colors, data, data_col, data_key, delay, dur, id, layer_id, me, ncol, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref, _ref2, _ref3;
@@ -3715,7 +3715,7 @@
   */
 
   kartograph.Kartograph.prototype.dotgrid = function(opts) {
-    var data, data_col, data_key, dotgrid, dotstyle, ds, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    var anim, data, data_col, data_key, delay, dly, dotgrid, dotstyle, ds, dur, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref10, _ref11, _ref12, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     me = this;
     layer_id = (_ref = opts.layer) != null ? _ref : me.layerIds[me.layerIds.length - 1];
     if (!me.layers.hasOwnProperty(layer_id)) {
@@ -3745,7 +3745,7 @@
     };
     sizes = opts.size;
     gridsize = (_ref3 = opts.gridsize) != null ? _ref3 : 15;
-    dotgrid = (_ref4 = layer.dotgrid) != null ? _ref4 : {
+    dotgrid = (_ref4 = layer.dotgrid) != null ? _ref4 : layer.dotgrid = {
       gridsize: gridsize,
       grid: []
     };
@@ -3761,11 +3761,12 @@
     }
     if (gridsize > 0) {
       if (dotgrid.grid.length === 0) {
+        console.log('initialize new grid', dotgrid.grid.length);
         for (x = 0, _ref6 = me.viewport.width; 0 <= _ref6 ? x <= _ref6 : x >= _ref6; x += gridsize) {
           for (y = 0, _ref7 = me.viewport.height; 0 <= _ref7 ? y <= _ref7 : y >= _ref7; y += gridsize) {
             g = {
-              x: x + (Math.random() - 0.5) * gridsize * 0.3,
-              y: y + (Math.random() - 0.5) * gridsize * 0.3,
+              x: x + (Math.random() - 0.5) * gridsize * 0.2,
+              y: y + (Math.random() - 0.5) * gridsize * 0.2,
               pathid: false
             };
             f = false;
@@ -3793,9 +3794,23 @@
         if (g.pathid) {
           pd = (_ref10 = pathData[g.pathid]) != null ? _ref10 : null;
           size = sizes(pd);
-          g.shape.attr({
-            r: size * 0.5
-          });
+          dur = (_ref11 = opts.duration) != null ? _ref11 : 0;
+          delay = (_ref12 = opts.delay) != null ? _ref12 : 0;
+          if (__type(delay) === "function") {
+            dly = delay(pd);
+          } else {
+            dly = delay;
+          }
+          if (dur > 0) {
+            anim = Raphael.animation({
+              r: size * 0.5
+            }, dur);
+            g.shape.animate(anim.delay(dly));
+          } else {
+            g.shape.attr({
+              r: size * 0.5
+            });
+          }
           if (__type(dotstyle) === "function") {
             ds = dotstyle(pd);
           } else {
@@ -3880,5 +3895,150 @@
     return PanAndZoomControl;
 
   })();
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  Scale = (function() {
+
+    /* scales map values to [0..1]
+    */
+
+    function Scale(domain, prop) {
+      var i, me, values;
+      if (domain == null) domain = [0, 1];
+      if (prop == null) prop = null;
+      this.scale = __bind(this.scale, this);
+      me = this;
+      values = [];
+      for (i in domain) {
+        if (prop != null) {
+          values.push(domain[i][prop]);
+        } else {
+          values.push(domain[i]);
+        }
+      }
+      values = values.sort(function(a, b) {
+        return a - b;
+      });
+      me.values = values;
+    }
+
+    Scale.prototype.scale = function(x) {
+      return x;
+    };
+
+    return Scale;
+
+  })();
+
+  LinearScale = (function() {
+
+    __extends(LinearScale, Scale);
+
+    function LinearScale() {
+      this.scale = __bind(this.scale, this);
+      LinearScale.__super__.constructor.apply(this, arguments);
+    }
+
+    /* liniear scale
+    */
+
+    LinearScale.prototype.scale = function(x) {
+      var me, vals;
+      me = this;
+      vals = me.values;
+      return (x - vals[0]) / (vals[vals.length - 1] - vals[0]);
+    };
+
+    return LinearScale;
+
+  })();
+
+  LogScale = (function() {
+
+    __extends(LogScale, Scale);
+
+    function LogScale() {
+      this.scale = __bind(this.scale, this);
+      LogScale.__super__.constructor.apply(this, arguments);
+    }
+
+    /* logatithmic scale
+    */
+
+    LogScale.prototype.scale = function(x) {
+      var log, me, vals;
+      me = this;
+      vals = me.values;
+      log = Math.log;
+      return (log(x) - log(vals[0])) / (log(vals[vals.length - 1]) - log(vals[0]));
+    };
+
+    return LogScale;
+
+  })();
+
+  QuantileScale = (function() {
+
+    __extends(QuantileScale, Scale);
+
+    function QuantileScale() {
+      this.scale = __bind(this.scale, this);
+      QuantileScale.__super__.constructor.apply(this, arguments);
+    }
+
+    /* quantiles scale
+    */
+
+    QuantileScale.prototype.scale = function(x) {
+      var i, k, me, nv, v, vals;
+      me = this;
+      vals = me.values;
+      k = vals.length - 1;
+      for (i in vals) {
+        v = vals[Number(i)];
+        nv = vals[Number(i) + 1];
+        if (x === v) return i / k;
+        if (i < k && x > v && x < nv) return i / k + (x - v) / (nv - v);
+      }
+    };
+
+    return QuantileScale;
+
+  })();
+
+  kartograph.scale = {};
+
+  kartograph.scale.identity = function(domain, prop) {
+    return new Scale(domain, prop).scale;
+  };
+
+  kartograph.scale.linear = function(domain, prop) {
+    return new LinearScale(domain, prop).scale;
+  };
+
+  kartograph.scale.log = function(domain, prop) {
+    return new LogScale(domain, prop).scale;
+  };
+
+  kartograph.scale.quantile = function(domain, prop) {
+    return new QuantileScale(domain, prop).scale;
+  };
 
 }).call(this);

@@ -49,7 +49,7 @@ kartograph.Kartograph::dotgrid = (opts) ->
 		dotstyle = opts.style ? { fill: 'black', stroke: 'none' }
 		sizes = opts.size
 		gridsize = opts.gridsize ? 15
-		dotgrid = layer.dotgrid ? { gridsize: gridsize, grid: [] }
+		dotgrid = layer.dotgrid ?= { gridsize: gridsize, grid: [] }
 
 		if dotgrid.gridsize != gridsize
 			# assigning a new grid with a different grid size
@@ -63,12 +63,13 @@ kartograph.Kartograph::dotgrid = (opts) ->
 			# a grid size of 0 will be ignored
 			
 			if dotgrid.grid.length == 0
+				console.log 'initialize new grid',dotgrid.grid.length
 				# the grid was not yet initialised
 				for x in [0..me.viewport.width] by gridsize
 					for y in [0..me.viewport.height] by gridsize	
 						g = 
-							x: x+(Math.random()-0.5)*gridsize*0.3
-							y: y+(Math.random()-0.5)*gridsize*0.3
+							x: x+(Math.random()-0.5)*gridsize*0.2
+							y: y+(Math.random()-0.5)*gridsize*0.2
 							pathid: false
 						# assign path id
 						f = false
@@ -86,8 +87,17 @@ kartograph.Kartograph::dotgrid = (opts) ->
 				if g.pathid
 					pd = pathData[g.pathid] ? null
 					size = sizes(pd)
-					g.shape.attr
-						r: size*0.5
+					dur = opts.duration ? 0
+					delay = opts.delay ? 0
+					if __type(delay) == "function"
+						dly = delay(pd)
+					else
+						dly = delay
+					if dur > 0
+						anim = Raphael.animation({r: size*0.5}, dur)
+						g.shape.animate(anim.delay(dly))
+					else
+						g.shape.attr {r: size*0.5}
 					if __type(dotstyle) == "function"
 						ds = dotstyle(pd)
 					else
