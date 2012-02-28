@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __proj, __type, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -549,7 +549,12 @@
         left: '0px',
         'z-index': lid + 5
       });
-      if (cnt.css('position') === 'static') cnt.css('position', 'relative');
+      if (cnt.css('position') === 'static') {
+        cnt.css({
+          position: 'relative',
+          height: vp.height + 'px'
+        });
+      }
       svg.addClass(id);
       about = $('desc', paper.canvas).text();
       $('desc', paper.canvas).text(about.replace('with ', 'with kartograph ' + kartograph.version + ' and '));
@@ -726,66 +731,6 @@
         marker.clear();
       }
       return me.markers = [];
-    };
-
-    Kartograph.prototype.choropleth = function(opts) {
-      var anim, col, colors, data, data_col, data_key, delay, dur, id, layer_id, me, ncol, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref10, _ref11, _ref9;
-      me = this;
-      layer_id = (_ref9 = opts.layer) != null ? _ref9 : me.layerIds[me.layerIds.length - 1];
-      if (!me.layers.hasOwnProperty(layer_id)) {
-        warn('choropleth error: layer "' + layer_ihad + '" not found');
-        return;
-      }
-      data = opts.data;
-      data_col = opts.value;
-      data_key = opts.key;
-      colors = opts.colors;
-      pathData = {};
-      if ((data_key != null) && __type(data) === "array") {
-        for (_i = 0, _len = data.length; _i < _len; _i++) {
-          row = data[_i];
-          id = row[data_key];
-          pathData[String(id)] = row;
-        }
-      } else {
-        for (id in data) {
-          row = data[id];
-          pathData[String(id)] = row;
-        }
-      }
-      _ref10 = me.layers[layer_id].pathsById;
-      for (id in _ref10) {
-        paths = _ref10[id];
-        for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
-          path = paths[_j];
-          pd = (_ref11 = pathData[id]) != null ? _ref11 : null;
-          col = colors(pd);
-          if (opts.duration != null) {
-            if (__type(opts.duration) === "function") {
-              dur = opts.duration(pd);
-            } else {
-              dur = opts.duration;
-            }
-            if (opts.delay != null) {
-              if (__type(opts.delay) === 'function') {
-                delay = opts.delay(pd);
-              } else {
-                delay = opts.delay;
-              }
-            } else {
-              delay = 0;
-            }
-            ncol = colors(null);
-            path.svgPath.attr('fill', ncol);
-            anim = Raphael.animation({
-              fill: col
-            }, dur);
-            path.svgPath.animate(anim.delay(delay));
-          } else {
-            path.svgPath.attr('fill', col);
-          }
-        }
-      }
     };
 
     Kartograph.prototype.tooltips = function(opts) {
@@ -1170,7 +1115,8 @@
       paper = map.paper;
       view = map.viewBC;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
-      me.svgPath = view.projectPath(path).toSVG(paper);
+      me.vpath = view.projectPath(path);
+      me.svgPath = me.vpath.toSVG(paper);
       if (!(map.styles != null)) {
         me.svgPath.node.setAttribute('class', layer_id);
       } else {
@@ -1199,6 +1145,7 @@
       var me, path, path_str;
       me = this;
       path = view.projectPath(me.path);
+      me.vpath = path;
       if (me.path.type === "path") {
         path_str = path.svgString();
         return me.svgPath.attr({
@@ -2001,80 +1948,6 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  PanAndZoomControl = (function() {
-
-    function PanAndZoomControl(map) {
-      this.zoomOut = __bind(this.zoomOut, this);
-      this.zoomIn = __bind(this.zoomIn, this);
-      var c, div, mdown, me, mup, zc, zcm, zcp;
-      me = this;
-      me.map = map;
-      c = map.container;
-      div = function(className, childNodes) {
-        var child, d, _i, _len;
-        if (childNodes == null) childNodes = [];
-        d = $('<div class="' + className + '" />');
-        for (_i = 0, _len = childNodes.length; _i < _len; _i++) {
-          child = childNodes[_i];
-          d.append(child);
-        }
-        return d;
-      };
-      mdown = function(evt) {
-        return $(evt.target).addClass('md');
-      };
-      mup = function(evt) {
-        return $(evt.target).removeClass('md');
-      };
-      zcp = div('plus');
-      zcp.mousedown(mdown);
-      zcp.mouseup(mup);
-      zcp.click(me.zoomIn);
-      zcm = div('minus');
-      zcm.mousedown(mdown);
-      zcm.mouseup(mup);
-      zcm.click(me.zoomOut);
-      zc = div('zoom-control', [zcp, zcm]);
-      c.append(zc);
-    }
-
-    PanAndZoomControl.prototype.zoomIn = function(evt) {
-      var me;
-      me = this;
-      me.map.opts.zoom += 1;
-      return me.map.resize();
-    };
-
-    PanAndZoomControl.prototype.zoomOut = function(evt) {
-      var me;
-      me = this;
-      me.map.opts.zoom -= 1;
-      if (me.map.opts.zoom < 1) me.map.opts.zoom = 1;
-      return me.map.resize();
-    };
-
-    return PanAndZoomControl;
-
-  })();
-
-  /*
-      kartograph - a svg mapping library 
-      Copyright (C) 2011  Gregor Aisch
-  
-      This program is free software: you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation, either version 3 of the License, or
-      (at your option) any later version.
-  
-      This program is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
-  
-      You should have received a copy of the GNU General Public License
-      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
-
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   kartograph = (_ref13 = root.kartograph) != null ? _ref13 : root.kartograph = {};
@@ -2235,8 +2108,7 @@
     };
 
     Path.prototype.toSVG = function(paper) {
-      /*
-      		translates this path to a SVG path string
+      /* translates this path to a SVG path string
       */
       var str;
       str = this.svgString();
@@ -2309,6 +2181,18 @@
       }
       me._centroid = [cx, cy];
       return me._centroid;
+    };
+
+    Path.prototype.isInside = function(x, y) {
+      var bbox, cnt, i, me, _ref16;
+      me = this;
+      bbox = me._bbox;
+      if (x < bbox[0] || x > bbox[2] || y < bbox[1] || y > bbox[3]) return false;
+      for (i = 0, _ref16 = me.contours.length - 1; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
+        cnt = me.contours[i];
+        if (__point_in_polygon(cnt, [x, y])) return true;
+      }
+      return false;
     };
 
     return Path;
@@ -2445,6 +2329,32 @@
   })();
 
   kartograph.geom.Line = Line;
+
+  __point_in_polygon = function(polygon, p) {
+    var angle, atan2, dtheta, i, n, pi, theta1, theta2, twopi, x1, x2, y1, y2, _ref16;
+    pi = Math.PI;
+    atan2 = Math.atan2;
+    twopi = pi * 2;
+    n = polygon.length;
+    angle = 0;
+    for (i = 0, _ref16 = n - 1; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
+      x1 = polygon[i][0] - p[0];
+      y1 = polygon[i][1] - p[1];
+      x2 = polygon[(i + 1) % n][0] - p[0];
+      y2 = polygon[(i + 1) % n][1] - p[1];
+      theta1 = atan2(y1, x1);
+      theta2 = atan2(y2, x2);
+      dtheta = theta2 - theta1;
+      while (dtheta > pi) {
+        dtheta -= twopi;
+      }
+      while (dtheta < -pi) {
+        dtheta += twopi;
+      }
+      angle += dtheta;
+    }
+    return Math.abs(angle) >= pi;
+  };
 
   /*
       kartograph - a svg mapping library 
@@ -3641,10 +3551,11 @@
     };
 
     View.prototype.projectPath = function(path) {
-      var cont, contours, me, pcont, r, x, y, _i, _j, _len, _len2, _ref17, _ref18, _ref19, _ref20;
+      var bbox, cont, contours, me, new_path, pcont, r, x, y, _i, _j, _len, _len2, _ref17, _ref18, _ref19, _ref20;
       me = this;
       if (path.type === "path") {
         contours = [];
+        bbox = [99999, 99999, -99999, -99999];
         _ref17 = path.contours;
         for (_i = 0, _len = _ref17.length; _i < _len; _i++) {
           pcont = _ref17[_i];
@@ -3653,10 +3564,16 @@
             _ref18 = pcont[_j], x = _ref18[0], y = _ref18[1];
             _ref19 = me.project(x, y), x = _ref19[0], y = _ref19[1];
             cont.push([x, y]);
+            bbox[0] = Math.min(bbox[0], x);
+            bbox[1] = Math.min(bbox[1], y);
+            bbox[2] = Math.max(bbox[2], x);
+            bbox[3] = Math.max(bbox[3], y);
           }
           contours.push(cont);
         }
-        return new kartograph.geom.Path(path.type, contours, path.closed);
+        new_path = new kartograph.geom.Path(path.type, contours, path.closed);
+        new_path._bbox = bbox;
+        return new_path;
       } else if (path.type === "circle") {
         _ref20 = me.project(path.x, path.y), x = _ref20[0], y = _ref20[1];
         r = path.r * me.scale;
@@ -3692,5 +3609,276 @@
   if ((_ref17 = root.kartograph) == null) root.kartograph = {};
 
   root.kartograph.View = View;
+
+}).call(this);
+(function() {
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var PanAndZoomControl;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  kartograph.Kartograph.prototype.choropleth = function(opts) {
+    var anim, col, colors, data, data_col, data_key, delay, dur, id, layer_id, me, ncol, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref, _ref2, _ref3;
+    me = this;
+    layer_id = (_ref = opts.layer) != null ? _ref : me.layerIds[me.layerIds.length - 1];
+    if (!me.layers.hasOwnProperty(layer_id)) {
+      warn('choropleth error: layer "' + layer_ihad + '" not found');
+      return;
+    }
+    data = opts.data;
+    data_col = opts.value;
+    data_key = opts.key;
+    colors = opts.colors;
+    pathData = {};
+    if ((data_key != null) && __type(data) === "array") {
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        row = data[_i];
+        id = row[data_key];
+        pathData[String(id)] = row;
+      }
+    } else {
+      for (id in data) {
+        row = data[id];
+        pathData[String(id)] = row;
+      }
+    }
+    _ref2 = me.layers[layer_id].pathsById;
+    for (id in _ref2) {
+      paths = _ref2[id];
+      for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
+        path = paths[_j];
+        pd = (_ref3 = pathData[id]) != null ? _ref3 : null;
+        col = colors(pd);
+        if (opts.duration != null) {
+          if (__type(opts.duration) === "function") {
+            dur = opts.duration(pd);
+          } else {
+            dur = opts.duration;
+          }
+          if (opts.delay != null) {
+            if (__type(opts.delay) === 'function') {
+              delay = opts.delay(pd);
+            } else {
+              delay = opts.delay;
+            }
+          } else {
+            delay = 0;
+          }
+          if (path.svgPath.attrs['fill'] === "none") {
+            ncol = colors(null);
+            path.svgPath.attr('fill', ncol);
+          }
+          anim = Raphael.animation({
+            fill: col
+          }, dur);
+          path.svgPath.animate(anim.delay(delay));
+        } else {
+          path.svgPath.attr('fill', col);
+        }
+      }
+    }
+  };
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  kartograph.Kartograph.prototype.dotgrid = function(opts) {
+    var data, data_col, data_key, dotgrid, dotstyle, ds, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    me = this;
+    layer_id = (_ref = opts.layer) != null ? _ref : me.layerIds[me.layerIds.length - 1];
+    if (!me.layers.hasOwnProperty(layer_id)) {
+      warn('dotgrid error: layer "' + layer_id + '" not found');
+      return;
+    }
+    layer = me.layers[layer_id];
+    data = opts.data;
+    data_col = opts.value;
+    data_key = opts.key;
+    pathData = {};
+    if ((data_key != null) && __type(data) === "array") {
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        row = data[_i];
+        id = row[data_key];
+        pathData[String(id)] = row;
+      }
+    } else {
+      for (id in data) {
+        row = data[id];
+        pathData[String(id)] = row;
+      }
+    }
+    dotstyle = (_ref2 = opts.style) != null ? _ref2 : {
+      fill: 'black',
+      stroke: 'none'
+    };
+    sizes = opts.size;
+    gridsize = (_ref3 = opts.gridsize) != null ? _ref3 : 15;
+    dotgrid = (_ref4 = layer.dotgrid) != null ? _ref4 : {
+      gridsize: gridsize,
+      grid: []
+    };
+    if (dotgrid.gridsize !== gridsize) {
+      _ref5 = dotgrid.grid;
+      for (_j = 0, _len2 = _ref5.length; _j < _len2; _j++) {
+        g = _ref5[_j];
+        if (g.shape != null) {
+          g.shape.remove();
+          g.shape = null;
+        }
+      }
+    }
+    if (gridsize > 0) {
+      if (dotgrid.grid.length === 0) {
+        for (x = 0, _ref6 = me.viewport.width; 0 <= _ref6 ? x <= _ref6 : x >= _ref6; x += gridsize) {
+          for (y = 0, _ref7 = me.viewport.height; 0 <= _ref7 ? y <= _ref7 : y >= _ref7; y += gridsize) {
+            g = {
+              x: x + (Math.random() - 0.5) * gridsize * 0.3,
+              y: y + (Math.random() - 0.5) * gridsize * 0.3,
+              pathid: false
+            };
+            f = false;
+            _ref8 = layer.pathsById;
+            for (id in _ref8) {
+              paths = _ref8[id];
+              for (_k = 0, _len3 = paths.length; _k < _len3; _k++) {
+                path = paths[_k];
+                if (path.vpath.isInside(g.x, g.y)) {
+                  f = true;
+                  g.pathid = id;
+                  g.shape = layer.paper.circle(g.x, g.y, 1);
+                  break;
+                }
+              }
+              if (f) break;
+            }
+            dotgrid.grid.push(g);
+          }
+        }
+      }
+      _ref9 = dotgrid.grid;
+      for (_l = 0, _len4 = _ref9.length; _l < _len4; _l++) {
+        g = _ref9[_l];
+        if (g.pathid) {
+          pd = (_ref10 = pathData[g.pathid]) != null ? _ref10 : null;
+          size = sizes(pd);
+          g.shape.attr({
+            r: size * 0.5
+          });
+          if (__type(dotstyle) === "function") {
+            ds = dotstyle(pd);
+          } else {
+            ds = dotstyle;
+          }
+          g.shape.attr(ds);
+        }
+      }
+    }
+  };
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  PanAndZoomControl = (function() {
+
+    function PanAndZoomControl(map) {
+      this.zoomOut = __bind(this.zoomOut, this);
+      this.zoomIn = __bind(this.zoomIn, this);
+      var c, div, mdown, me, mup, zc, zcm, zcp;
+      me = this;
+      me.map = map;
+      c = map.container;
+      div = function(className, childNodes) {
+        var child, d, _i, _len;
+        if (childNodes == null) childNodes = [];
+        d = $('<div class="' + className + '" />');
+        for (_i = 0, _len = childNodes.length; _i < _len; _i++) {
+          child = childNodes[_i];
+          d.append(child);
+        }
+        return d;
+      };
+      mdown = function(evt) {
+        return $(evt.target).addClass('md');
+      };
+      mup = function(evt) {
+        return $(evt.target).removeClass('md');
+      };
+      zcp = div('plus');
+      zcp.mousedown(mdown);
+      zcp.mouseup(mup);
+      zcp.click(me.zoomIn);
+      zcm = div('minus');
+      zcm.mousedown(mdown);
+      zcm.mouseup(mup);
+      zcm.click(me.zoomOut);
+      zc = div('zoom-control', [zcp, zcm]);
+      c.append(zc);
+    }
+
+    PanAndZoomControl.prototype.zoomIn = function(evt) {
+      var me;
+      me = this;
+      me.map.opts.zoom += 1;
+      return me.map.resize();
+    };
+
+    PanAndZoomControl.prototype.zoomOut = function(evt) {
+      var me;
+      me = this;
+      me.map.opts.zoom -= 1;
+      if (me.map.opts.zoom < 1) me.map.opts.zoom = 1;
+      return me.map.resize();
+    };
+
+    return PanAndZoomControl;
+
+  })();
 
 }).call(this);

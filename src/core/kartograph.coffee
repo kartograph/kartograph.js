@@ -67,6 +67,7 @@ String::trim ?= () ->
 class Kartograph
 
 	constructor: (container, width, height) ->
+		# instantiates a new map	
 		me = @
 		me.container = cnt = $(container)
 		width ?= cnt.width()
@@ -95,7 +96,9 @@ class Kartograph
 			'z-index': lid+5
 
 		if cnt.css('position') == 'static'
-			cnt.css 'position','relative'
+			cnt.css 
+				position: 'relative'
+				height: vp.height+'px'
 
 		svg.addClass id			
 		about = $('desc', paper.canvas).text()
@@ -257,56 +260,6 @@ class Kartograph
 		for marker in me.markers
 			marker.clear()
 		me.markers = []
-		
-	
-	choropleth: (opts) ->
-		me = @	
-		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
-		
-		if not me.layers.hasOwnProperty layer_id
-			warn 'choropleth error: layer "'+layer_ihad+'" not found'
-			return
-
-		data = opts.data
-		data_col = opts.value
-		data_key = opts.key
-		colors = opts.colors
-		
-		pathData = {}
-		
-		if data_key? and __type(data) == "array"
-			for row in data
-				id = row[data_key]
-				pathData[String(id)] = row
-		else 
-			for id, row of data
-				pathData[String(id)] = row
-				
-		for id, paths of me.layers[layer_id].pathsById
-			for path in paths
-				pd = pathData[id] ? null
-				col = colors(pd)
-				
-				if opts.duration?
-					if __type(opts.duration) == "function"
-						dur = opts.duration(pd)
-					else
-						dur = opts.duration
-					if opts.delay?
-						if __type(opts.delay) == 'function'
-							delay = opts.delay(pd)
-						else
-							delay = opts.delay
-					else
-						delay = 0
-					ncol = colors(null)
-					path.svgPath.attr('fill',ncol)
-					anim = Raphael.animation({fill: col}, dur)
-					path.svgPath.animate(anim.delay(delay))
-				else
-					path.svgPath.attr('fill', col)
-				#path.svgPath.node.setAttribute('style', 'fill:'+col) 
-		return
 		
 	
 	tooltips: (opts) ->
@@ -593,7 +546,8 @@ class MapLayerPath
 		paper = map.paper
 		view = map.viewBC
 		me.path = path = kartograph.geom.Path.fromSVG(svg_path)	
-		me.svgPath = view.projectPath(path).toSVG(paper)
+		me.vpath = view.projectPath(path)
+		me.svgPath = me.vpath.toSVG(paper)
 		if not map.styles? 
 			me.svgPath.node.setAttribute('class', layer_id)
 		else
@@ -619,6 +573,7 @@ class MapLayerPath
 	setView: (view) ->
 		me = @
 		path = view.projectPath(me.path)
+		me.vpath = path
 		if me.path.type == "path"
 			path_str = path.svgString()
 			me.svgPath.attr({ path: path_str }) 
@@ -684,6 +639,7 @@ __type = do ->
 	(obj) ->
 		strType = Object::toString.call(obj)
 		classToType[strType] or "object"
+
     
 root.__type ?= __type
 

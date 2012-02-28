@@ -61,17 +61,26 @@ class View
 		y = (y - bbox.top) * s + yf
 		[x,y]
 		
+	
 	projectPath: (path) ->
 		me = @
 		if path.type == "path"
 			contours = []
+			bbox = [99999,99999,-99999,-99999] #minx miny maxx maxy
 			for pcont in path.contours
 				cont = []
 				for [x,y] in pcont
 					[x,y] = me.project x,y
 					cont.push([x,y])
+					bbox[0] = Math.min bbox[0],x
+					bbox[1] = Math.min bbox[1],y
+					bbox[2] = Math.max bbox[2],x
+					bbox[3] = Math.max bbox[3],y
 				contours.push(cont)
-			new kartograph.geom.Path path.type,contours,path.closed
+			new_path = new kartograph.geom.Path path.type,contours, path.closed
+			new_path._bbox = bbox
+			new_path
+			
 		else if path.type == "circle"
 			[x,y] = me.project path.x,path.y
 			r = path.r * me.scale

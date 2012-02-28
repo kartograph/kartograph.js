@@ -35,13 +35,12 @@ class Path
 		throw "path clipping is not implemented yet"
 	
 	toSVG: (paper) ->
-		###
-		translates this path to a SVG path string
-		###
+		### translates this path to a SVG path string ###
 		str = @svgString()
 		paper.path(str)
 		
 	svgString: ->
+		# returns this path as svg string
 		me = @
 		str = ""
 		glue = if me.closed then "Z M" else "M"
@@ -56,6 +55,7 @@ class Path
 		str
 		
 	area: ->
+		# computes the area of this path
 		me = @
 		if me.areas?
 			return me._area
@@ -72,6 +72,7 @@ class Path
 		me._area
 		
 	centroid: ->
+		# computes the center of this path
 		me = @
 		if me._centroid?
 			return me._centroid
@@ -93,8 +94,21 @@ class Path
 			cy += y * k
 		me._centroid = [cx,cy]
 		me._centroid
+
+		
+	isInside: (x,y) ->
+		# checks wether a given point is inside this path or not
+		me = @
+		bbox = me._bbox
+		if x < bbox[0] or x > bbox[2] or y < bbox[1] or y > bbox[3]
+			return false
 			
-				
+		for i in [0..me.contours.length-1]
+			cnt = me.contours[i]
+			if __point_in_polygon(cnt, [x,y])
+				return true
+		return false
+		
 				
 
 kartograph.geom.Path = Path
@@ -117,6 +131,7 @@ class Circle extends Path
 		Math.PI * me.r*m.r
 
 kartograph.geom.Circle = Circle
+
 
 Path.fromSVG = (path) ->
 	###
@@ -196,3 +211,23 @@ class Line
 kartograph.geom.Line = Line
 
 
+__point_in_polygon = (polygon, p) ->
+	pi = Math.PI
+	atan2 = Math.atan2
+	twopi = pi*2
+	n = polygon.length
+	angle = 0
+	for i in [0..n-1]
+		x1 = polygon[i][0] - p[0]
+		y1 = polygon[i][1] - p[1]
+		x2 = polygon[(i+1)%n][0] - p[0]
+		y2 = polygon[(i+1)%n][1] - p[1]
+		theta1 = atan2(y1,x1)
+		theta2 = atan2(y2,x2)
+		dtheta = theta2 - theta1
+		while dtheta > pi
+			dtheta -= twopi
+		while dtheta < -pi
+			dtheta += twopi
+		angle += dtheta
+	return Math.abs(angle) >= pi
