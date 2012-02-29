@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, CEA, CanvasLayer, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, Kartograph, LAEA, LCC, LatLon, Line, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, Path, Proj, PseudoConic, PseudoCylindrical, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Sinusoidal, Stereographic, View, WagnerIV, WagnerV, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -1354,604 +1354,6 @@
 
   kartograph = (_ref11 = root.kartograph) != null ? _ref11 : root.kartograph = {};
 
-  if ((_ref12 = kartograph.marker) == null) kartograph.marker = {};
-
-  /*
-  New API
-  
-  sg = new SymbolGroup({
-  	data: crimeRatesPerCity,
-  	location: function(d) {
-  		return [d.lon, d.lat]];
-  	},
-  	filter: function(d) {
-  		return !isNaN(d.pop);
-  	},
-  	layout: 'group',
-  	group: function(list) {
-  		var s=0,p=0,i,d,g = {},lat=0,lon=0;
-  		for (i in list) {
-  			d = list[i];
-  			s += d.murder;
-  			p += d.pop;
-  		}
-  		for (i in list) {
-  			d = list[i];
-  			lon += d.ll[0] * d.pop/p;
-  			lat += d.ll[1] * d.pop/p;
-  		}
-  		g.murder = s;
-  		g.pop = p;
-  		g.ll = [lon,lat];
-  		return g;
-  	},
-  	// type specific options
-  	type: 'Bubble',
-  	radius: function(d) {
-  		return Math.sqrt(d.murder/d.pop)*5;
-  	},
-  	color: '#c00'
-  })
-  */
-
-  SymbolGroup = (function() {
-
-    function SymbolGroup(opts) {
-      var SymbolType, d, i, id, l, layer, me, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _len7, _m, _n, _o, _ref13, _ref14, _ref15, _ref16, _ref17;
-      var _this = this;
-      me = this;
-      required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'layout', 'group', 'click'];
-      for (_i = 0, _len = required.length; _i < _len; _i++) {
-        p = required[_i];
-        if (opts[p] != null) {
-          me[p] = opts[p];
-        } else {
-          throw "SymbolGroup: missing argument " + p;
-        }
-      }
-      for (_j = 0, _len2 = optional.length; _j < _len2; _j++) {
-        p = optional[_j];
-        if (opts[p] != null) me[p] = opts[p];
-      }
-      if (__type(me.type) === "string") {
-        SymbolType = kartograph[me.type];
-      } else {
-        SymbolType = me.type;
-      }
-      if (!(SymbolType != null)) {
-        warn('could not resolve symbol type', me.type);
-        return;
-      }
-      _ref13 = SymbolType.props;
-      for (_k = 0, _len3 = _ref13.length; _k < _len3; _k++) {
-        p = _ref13[_k];
-        if (opts[p] != null) me[p] = opts[p];
-      }
-      me.layers = {
-        mapcanvas: me.map.paper
-      };
-      _ref14 = SymbolType.layers;
-      for (_l = 0, _len4 = _ref14.length; _l < _len4; _l++) {
-        l = _ref14[_l];
-        nid = SymbolGroup._layerid++;
-        id = 'sl_' + nid;
-        if (l.type === 'svg') {
-          layer = me.map.createSVGLayer(id);
-        } else if (l.type === 'html') {
-          layer = me.map.createHTMLLayer(id);
-        }
-        me.layers[l.id] = layer;
-      }
-      me.symbols = [];
-      for (i in me.data) {
-        d = me.data[i];
-        if (__type(me.filter) === "function") {
-          if (me.filter(d)) me.addSymbol(d);
-        } else {
-          me.addSymbol(d);
-        }
-      }
-      me.layoutSymbols();
-      _ref15 = me.symbols;
-      for (_m = 0, _len5 = _ref15.length; _m < _len5; _m++) {
-        s = _ref15[_m];
-        s.render();
-      }
-      if (__type(me.tooltip) === "function") me.initTooltips();
-      if (__type(me.click) === "function") {
-        _ref16 = me.symbols;
-        for (_n = 0, _len6 = _ref16.length; _n < _len6; _n++) {
-          s = _ref16[_n];
-          _ref17 = s.nodes();
-          for (_o = 0, _len7 = _ref17.length; _o < _len7; _o++) {
-            node = _ref17[_o];
-            node.symbol = s;
-            $(node).click(function(e) {
-              e.stopPropagation();
-              return me.click(e.target.symbol.data);
-            });
-          }
-        }
-      }
-      me.map.addSymbolGroup(me);
-    }
-
-    SymbolGroup.prototype.addSymbol = function(data) {
-      /*
-      		adds a new symbol to this group
-      */
-      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref13;
-      me = this;
-      SymbolType = me.type;
-      ll = me.evaluate(me.location, data);
-      if (__type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
-      sprops = {
-        layers: me.layers,
-        location: ll,
-        data: data,
-        map: me.map
-      };
-      _ref13 = SymbolType.props;
-      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
-        p = _ref13[_i];
-        if (me[p] != null) sprops[p] = me.evaluate(me[p], data);
-      }
-      symbol = new SymbolType(sprops);
-      me.symbols.push(symbol);
-      return symbol;
-    };
-
-    SymbolGroup.prototype.evaluate = function(prop, data) {
-      /*
-      		evaluates a property function or returns a static value
-      */
-      var val;
-      if (__type(prop) === 'function') {
-        return val = prop(data);
-      } else {
-        return val = prop;
-      }
-    };
-
-    SymbolGroup.prototype.layoutSymbols = function() {
-      var layer_id, ll, me, path, path_id, s, xy, _i, _len, _ref13, _ref14;
-      me = this;
-      _ref13 = me.symbols;
-      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
-        s = _ref13[_i];
-        ll = s.location;
-        if (__type(ll) === 'string') {
-          _ref14 = ll.split('.'), layer_id = _ref14[0], path_id = _ref14[1];
-          path = me.map.getLayerPath(layer_id, path_id);
-          if (path != null) {
-            xy = me.map.viewBC.project(path.path.centroid());
-          } else {
-            continue;
-          }
-        } else {
-          xy = me.map.lonlat2xy(ll);
-        }
-        s.x = xy[0];
-        s.y = xy[1];
-      }
-      if (me.layout === 'group') return me.groupLayout();
-    };
-
-    SymbolGroup.prototype.groupLayout = function() {
-      /*
-      		layouts symbols in this group, eventually adds new 'grouped' symbols
-      */
-      var me, overlap, _ref13;
-      me = this;
-      if ((_ref13 = me.gsymbols) == null) me.gsymbols = [];
-      return overlap = true;
-    };
-
-    SymbolGroup.prototype.initTooltips = function() {
-      var cfg, me, node, s, tooltips, tt, _i, _j, _len, _len2, _ref13, _ref14;
-      me = this;
-      tooltips = me.tooltip;
-      _ref13 = me.symbols;
-      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
-        s = _ref13[_i];
-        cfg = {
-          position: {
-            target: 'mouse',
-            viewport: $(window),
-            adjust: {
-              x: 7,
-              y: 7
-            }
-          },
-          show: {
-            delay: 20
-          },
-          content: {}
-        };
-        tt = tooltips(s.data);
-        if (__type(tt) === "string") {
-          cfg.content.text = tt;
-        } else if (__type(tt) === "array") {
-          cfg.content.title = tt[0];
-          cfg.content.text = tt[1];
-        }
-        _ref14 = s.nodes();
-        for (_j = 0, _len2 = _ref14.length; _j < _len2; _j++) {
-          node = _ref14[_j];
-          $(node).qtip(cfg);
-        }
-      }
-    };
-
-    SymbolGroup.prototype.remove = function() {
-      var id, layer, me, s, _i, _len, _ref13, _ref14, _results;
-      me = this;
-      _ref13 = me.symbols;
-      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
-        s = _ref13[_i];
-        s.clear();
-      }
-      _ref14 = me.layers;
-      _results = [];
-      for (id in _ref14) {
-        layer = _ref14[id];
-        if (id !== "mapcanvas") {
-          _results.push(layer.remove());
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    };
-
-    SymbolGroup.prototype.onResize = function() {
-      var me, s, _i, _len, _ref13, _results;
-      me = this;
-      me.layoutSymbols();
-      _ref13 = me.symbols;
-      _results = [];
-      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
-        s = _ref13[_i];
-        _results.push(s.update());
-      }
-      return _results;
-    };
-
-    return SymbolGroup;
-
-  })();
-
-  SymbolGroup._layerid = 0;
-
-  kartograph.SymbolGroup = SymbolGroup;
-
-  Symbol = (function() {
-
-    function Symbol(opts) {
-      var me;
-      me = this;
-      me.location = opts.location;
-      me.data = opts.data;
-      me.map = opts.map;
-      me.layers = opts.layers;
-      me.x = opts.x;
-      me.y = opts.y;
-    }
-
-    Symbol.prototype.init = function() {};
-
-    Symbol.prototype.overlaps = function(symbol) {
-      return false;
-    };
-
-    Symbol.prototype.nodes = function() {
-      return [];
-    };
-
-    Symbol.prototype.clear = function() {};
-
-    return Symbol;
-
-  })();
-
-  Bubble = (function() {
-
-    __extends(Bubble, Symbol);
-
-    function Bubble(opts) {
-      var me, _ref13, _ref14, _ref15;
-      me = this;
-      Bubble.__super__.constructor.call(this, opts);
-      me.radius = (_ref13 = opts.radius) != null ? _ref13 : 4;
-      me.style = (_ref14 = opts.style) != null ? _ref14 : '';
-      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : '';
-    }
-
-    Bubble.prototype.overlaps = function(bubble) {
-      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref13, _ref14;
-      me = this;
-      _ref13 = [me.x, me.y, me.radius], x1 = _ref13[0], y1 = _ref13[1], r1 = _ref13[2];
-      _ref14 = [bubble.x, bubble.y, bubble.radius], x2 = _ref14[0], y2 = _ref14[1], r2 = _ref14[2];
-      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
-        return false;
-      }
-      dx = x1 - x2;
-      dy = y1 - y2;
-      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
-      return true;
-    };
-
-    Bubble.prototype.render = function(layers) {
-      var me;
-      me = this;
-      me.path = me.layers.a.circle(me.x, me.y, me.radius);
-      me.update();
-      me.map.applyStyles(me.path);
-      return me;
-    };
-
-    Bubble.prototype.update = function() {
-      var me, path;
-      me = this;
-      me.path.attr({
-        x: me.x,
-        y: me.y,
-        r: me.radius
-      });
-      path = me.path;
-      path.node.setAttribute('style', me.style);
-      path.node.setAttribute('class', me["class"]);
-      return me;
-    };
-
-    Bubble.prototype.clear = function() {
-      var me;
-      me = this;
-      me.path.remove();
-      return me;
-    };
-
-    Bubble.prototype.nodes = function() {
-      var me;
-      me = this;
-      return [me.path.node];
-    };
-
-    return Bubble;
-
-  })();
-
-  Bubble.props = ['radius', 'style', 'class'];
-
-  Bubble.layers = [
-    {
-      id: 'a',
-      type: 'svg'
-    }
-  ];
-
-  kartograph.Bubble = Bubble;
-
-  HtmlLabel = (function() {
-
-    __extends(HtmlLabel, Symbol);
-
-    function HtmlLabel(opts) {
-      var me, _ref13, _ref14, _ref15;
-      me = this;
-      HtmlLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref13 = opts.text) != null ? _ref13 : '';
-      me.style = (_ref14 = opts.style) != null ? _ref14 : '';
-      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : '';
-    }
-
-    HtmlLabel.prototype.render = function(layers) {
-      var l, lbl, me;
-      me = this;
-      l = $('<div>' + me.text + '</div>');
-      l.css({
-        width: '50px',
-        position: 'absolute',
-        left: '-25px',
-        'text-align': 'center'
-      });
-      me.lbl = lbl = $('<div class="label" />');
-      lbl.append(l);
-      me.layers.lbl.append(lbl);
-      l.css({
-        height: l.height() + 'px',
-        top: (l.height() * -.4) + 'px'
-      });
-      me.update();
-      return me;
-    };
-
-    HtmlLabel.prototype.update = function() {
-      var me;
-      me = this;
-      return me.lbl.css({
-        position: 'absolute',
-        left: me.x + 'px',
-        top: me.y + 'px'
-      });
-    };
-
-    HtmlLabel.prototype.clear = function() {
-      var me;
-      me = this;
-      me.lbl.remove();
-      return me;
-    };
-
-    HtmlLabel.prototype.nodes = function() {
-      var me;
-      me = this;
-      return [me.lbl[0]];
-    };
-
-    return HtmlLabel;
-
-  })();
-
-  HtmlLabel.props = ['text', 'style', 'class'];
-
-  HtmlLabel.layers = [
-    {
-      id: 'lbl',
-      type: 'html'
-    }
-  ];
-
-  kartograph.HtmlLabel = HtmlLabel;
-
-  SvgLabel = (function() {
-
-    __extends(SvgLabel, Symbol);
-
-    function SvgLabel(opts) {
-      var me, _ref13, _ref14, _ref15;
-      me = this;
-      SvgLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref13 = opts.text) != null ? _ref13 : '';
-      me.style = (_ref14 = opts.style) != null ? _ref14 : '';
-      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : '';
-    }
-
-    SvgLabel.prototype.render = function(layers) {
-      var lbl, me;
-      me = this;
-      me.lbl = lbl = me.layers.mapcanvas.text(me.x, me.y, me.text);
-      me.update();
-      return me;
-    };
-
-    SvgLabel.prototype.update = function() {
-      var me;
-      me = this;
-      me.lbl.attr({
-        x: me.x,
-        y: me.y
-      });
-      me.lbl.node.setAttribute('style', me.style);
-      return me.lbl.node.setAttribute('class', me["class"]);
-    };
-
-    SvgLabel.prototype.clear = function() {
-      var me;
-      me = this;
-      me.lbl.remove();
-      return me;
-    };
-
-    SvgLabel.prototype.nodes = function() {
-      var me;
-      me = this;
-      return [me.lbl.node];
-    };
-
-    return SvgLabel;
-
-  })();
-
-  SvgLabel.props = ['text', 'style', 'class'];
-
-  SvgLabel.layers = [];
-
-  kartograph.Label = SvgLabel;
-
-  Icon = (function() {
-
-    __extends(Icon, Symbol);
-
-    function Icon(opts) {
-      var me, _ref13, _ref14, _ref15, _ref16, _ref17;
-      me = this;
-      Icon.__super__.constructor.call(this, opts);
-      me.icon = (_ref13 = opts.icon) != null ? _ref13 : '';
-      me.offset = (_ref14 = opts.offset) != null ? _ref14 : [0, 0];
-      me.iconsize = (_ref15 = opts.iconsize) != null ? _ref15 : [10, 10];
-      me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : '';
-      me.title = (_ref17 = opts.title) != null ? _ref17 : '';
-    }
-
-    Icon.prototype.render = function(layers) {
-      var cont, me;
-      me = this;
-      cont = me.map.container;
-      me.img = $('<img />');
-      me.img.attr({
-        src: me.icon,
-        title: me.title,
-        alt: me.title,
-        width: me.iconsize[0],
-        height: me.iconsize[1]
-      });
-      me.img.addClass(me["class"]);
-      me.img.css({
-        position: 'absolute',
-        'z-index': 1000,
-        cursor: 'pointer'
-      });
-      me.img[0].symbol = me;
-      cont.append(me.img);
-      return me.update();
-    };
-
-    Icon.prototype.update = function() {
-      var me;
-      me = this;
-      return me.img.css({
-        left: (me.x + me.offset[0]) + 'px',
-        top: (me.y + me.offset[1]) + 'px'
-      });
-    };
-
-    Icon.prototype.clear = function() {
-      var me;
-      me = this;
-      me.img.remove();
-      return me;
-    };
-
-    Icon.prototype.nodes = function() {
-      var me;
-      me = this;
-      return [me.img];
-    };
-
-    return Icon;
-
-  })();
-
-  Icon.props = ['icon', 'offset', 'class', 'title', 'iconsize'];
-
-  Icon.layers = [];
-
-  kartograph.Icon = Icon;
-
-  /*
-      kartograph - a svg mapping library 
-      Copyright (C) 2011  Gregor Aisch
-  
-      This program is free software: you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation, either version 3 of the License, or
-      (at your option) any later version.
-  
-      This program is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
-  
-      You should have received a copy of the GNU General Public License
-      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
-
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  kartograph = (_ref13 = root.kartograph) != null ? _ref13 : root.kartograph = {};
-
   /*
       This is a reduced version of Danial Wachsstocks jQuery based CSS parser
       Everything is removed but the core css-to-object parsing
@@ -1984,12 +1386,12 @@
   */
 
   kartograph.parsecss = function(str, callback) {
-    var css, k, props, ret, v, _i, _len, _ref14;
+    var css, k, props, ret, v, _i, _len, _ref12;
     ret = {};
     str = munge(str);
-    _ref14 = str.split('`b%');
-    for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
-      css = _ref14[_i];
+    _ref12 = str.split('`b%');
+    for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+      css = _ref12[_i];
       css = css.split('%b`');
       if (css.length < 2) continue;
       css[0] = restore(css[0]);
@@ -2013,13 +1415,13 @@
   munged = {};
 
   parsedeclarations = function(index) {
-    var decl, parsed, str, _i, _len, _ref14;
+    var decl, parsed, str, _i, _len, _ref12;
     str = munged[index].replace(/^{|}$/g, '');
     str = munge(str);
     parsed = {};
-    _ref14 = str.split(';');
-    for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
-      decl = _ref14[_i];
+    _ref12 = str.split(';');
+    for (_i = 0, _len = _ref12.length; _i < _len; _i++) {
+      decl = _ref12[_i];
       decl = decl.split(':');
       if (decl.length < 2) continue;
       parsed[restore(decl[0])] = restore(decl.slice(1).join(':'));
@@ -2084,9 +1486,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  kartograph = (_ref14 = root.kartograph) != null ? _ref14 : root.kartograph = {};
+  kartograph = (_ref12 = root.kartograph) != null ? _ref12 : root.kartograph = {};
 
-  if ((_ref15 = kartograph.geom) == null) kartograph.geom = {};
+  if ((_ref13 = kartograph.geom) == null) kartograph.geom = {};
 
   Path = (function() {
 
@@ -2116,17 +1518,17 @@
     };
 
     Path.prototype.svgString = function() {
-      var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref16, _ref17;
+      var contour, fst, glue, me, str, x, y, _i, _j, _len, _len2, _ref14, _ref15;
       me = this;
       str = "";
       glue = me.closed ? "Z M" : "M";
-      _ref16 = me.contours;
-      for (_i = 0, _len = _ref16.length; _i < _len; _i++) {
-        contour = _ref16[_i];
+      _ref14 = me.contours;
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        contour = _ref14[_i];
         fst = true;
         str += str === "" ? "M" : glue;
         for (_j = 0, _len2 = contour.length; _j < _len2; _j++) {
-          _ref17 = contour[_j], x = _ref17[0], y = _ref17[1];
+          _ref15 = contour[_j], x = _ref15[0], y = _ref15[1];
           if (!fst) str += "L";
           str += x + ',' + y;
           fst = false;
@@ -2137,16 +1539,16 @@
     };
 
     Path.prototype.area = function() {
-      var area, cnt, i, me, _i, _len, _ref16, _ref17;
+      var area, cnt, i, me, _i, _len, _ref14, _ref15;
       me = this;
       if (me.areas != null) return me._area;
       me.areas = [];
       me._area = 0;
-      _ref16 = me.contours;
-      for (_i = 0, _len = _ref16.length; _i < _len; _i++) {
-        cnt = _ref16[_i];
+      _ref14 = me.contours;
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        cnt = _ref14[_i];
         area = 0;
-        for (i = 0, _ref17 = cnt.length - 2; 0 <= _ref17 ? i <= _ref17 : i >= _ref17; 0 <= _ref17 ? i++ : i--) {
+        for (i = 0, _ref15 = cnt.length - 2; 0 <= _ref15 ? i <= _ref15 : i >= _ref15; 0 <= _ref15 ? i++ : i--) {
           area += cnt[i][0] * cnt[i + 1][1] - cnt[i + 1][0] * cnt[i][1];
         }
         area *= .5;
@@ -2158,16 +1560,16 @@
     };
 
     Path.prototype.centroid = function() {
-      var a, area, cnt, cx, cy, i, j, k, me, x, y, _ref16, _ref17;
+      var a, area, cnt, cx, cy, i, j, k, me, x, y, _ref14, _ref15;
       me = this;
       if (me._centroid != null) return me._centroid;
       area = me.area();
       cx = cy = 0;
-      for (i = 0, _ref16 = me.contours.length - 1; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
+      for (i = 0, _ref14 = me.contours.length - 1; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
         cnt = me.contours[i];
         a = me.areas[i];
         x = y = 0;
-        for (j = 0, _ref17 = cnt.length - 2; 0 <= _ref17 ? j <= _ref17 : j >= _ref17; 0 <= _ref17 ? j++ : j--) {
+        for (j = 0, _ref15 = cnt.length - 2; 0 <= _ref15 ? j <= _ref15 : j >= _ref15; 0 <= _ref15 ? j++ : j--) {
           k = cnt[j][0] * cnt[j + 1][1] - cnt[j + 1][0] * cnt[j][1];
           x += (cnt[j][0] + cnt[j + 1][0]) * k;
           y += (cnt[j][1] + cnt[j + 1][1]) * k;
@@ -2184,11 +1586,11 @@
     };
 
     Path.prototype.isInside = function(x, y) {
-      var bbox, cnt, i, me, _ref16;
+      var bbox, cnt, i, me, _ref14;
       me = this;
       bbox = me._bbox;
       if (x < bbox[0] || x > bbox[2] || y < bbox[1] || y > bbox[3]) return false;
-      for (i = 0, _ref16 = me.contours.length - 1; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
+      for (i = 0, _ref14 = me.contours.length - 1; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
         cnt = me.contours[i];
         if (__point_in_polygon(cnt, [x, y])) return true;
       }
@@ -2240,7 +1642,7 @@
     /*
     	loads a path from a SVG path string
     */
-    var closed, contour, contour_str, contours, cx, cy, path_str, pt_str, r, res, sep, type, x, y, _i, _j, _len, _len2, _ref16, _ref17, _ref18;
+    var closed, contour, contour_str, contours, cx, cy, path_str, pt_str, r, res, sep, type, x, y, _i, _j, _len, _len2, _ref14, _ref15, _ref16;
     contours = [];
     type = path.nodeName;
     res = null;
@@ -2249,15 +1651,15 @@
       closed = path_str[path_str.length - 1] === "Z";
       sep = closed ? "Z M" : "M";
       path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
-      _ref16 = path_str.split(sep);
-      for (_i = 0, _len = _ref16.length; _i < _len; _i++) {
-        contour_str = _ref16[_i];
+      _ref14 = path_str.split(sep);
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        contour_str = _ref14[_i];
         contour = [];
         if (contour_str !== "") {
-          _ref17 = contour_str.split('L');
-          for (_j = 0, _len2 = _ref17.length; _j < _len2; _j++) {
-            pt_str = _ref17[_j];
-            _ref18 = pt_str.split(','), x = _ref18[0], y = _ref18[1];
+          _ref15 = contour_str.split('L');
+          for (_j = 0, _len2 = _ref15.length; _j < _len2; _j++) {
+            pt_str = _ref15[_j];
+            _ref16 = pt_str.split(','), x = _ref16[0], y = _ref16[1];
             contour.push([Number(x), Number(y)]);
           }
           contours.push(contour);
@@ -2284,17 +1686,17 @@
     }
 
     Line.prototype.clipToBBox = function(bbox) {
-      var clip, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _ref16, _ref17, _ref18, _ref19;
+      var clip, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _ref14, _ref15, _ref16, _ref17;
       self = this;
       clip = new kartograph.geom.clipping.CohenSutherland().clip;
       pts = [];
       lines = [];
       last_in = false;
-      for (i = 0, _ref16 = self.points.length - 2; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
-        _ref17 = self.points[i], p0x = _ref17[0], p0y = _ref17[1];
-        _ref18 = self.points[i + 1], p1x = _ref18[0], p1y = _ref18[1];
+      for (i = 0, _ref14 = self.points.length - 2; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
+        _ref15 = self.points[i], p0x = _ref15[0], p0y = _ref15[1];
+        _ref16 = self.points[i + 1], p1x = _ref16[0], p1y = _ref16[1];
         try {
-          _ref19 = clip(bbox, p0x, p0y, p1x, p1y), x0 = _ref19[0], y0 = _ref19[1], x1 = _ref19[2], y1 = _ref19[3];
+          _ref17 = clip(bbox, p0x, p0y, p1x, p1y), x0 = _ref17[0], y0 = _ref17[1], x1 = _ref17[2], y1 = _ref17[3];
           last_in = true;
           pts.push([x0, y0]);
           if (p1x !== x1 || p1y !== y0 || i === len(self.points) - 2) {
@@ -2313,12 +1715,12 @@
     };
 
     Line.prototype.toSVG = function() {
-      var pts, self, x, y, _i, _len, _ref16, _ref17;
+      var pts, self, x, y, _i, _len, _ref14, _ref15;
       self = this;
       pts = [];
-      _ref16 = self.points;
-      for (_i = 0, _len = _ref16.length; _i < _len; _i++) {
-        _ref17 = _ref16[_i], x = _ref17[0], y = _ref17[1];
+      _ref14 = self.points;
+      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
+        _ref15 = _ref14[_i], x = _ref15[0], y = _ref15[1];
         pts.push(x + ',' + y);
       }
       return 'M' + pts.join('L');
@@ -2331,13 +1733,13 @@
   kartograph.geom.Line = Line;
 
   __point_in_polygon = function(polygon, p) {
-    var angle, atan2, dtheta, i, n, pi, theta1, theta2, twopi, x1, x2, y1, y2, _ref16;
+    var angle, atan2, dtheta, i, n, pi, theta1, theta2, twopi, x1, x2, y1, y2, _ref14;
     pi = Math.PI;
     atan2 = Math.atan2;
     twopi = pi * 2;
     n = polygon.length;
     angle = 0;
-    for (i = 0, _ref16 = n - 1; 0 <= _ref16 ? i <= _ref16 : i >= _ref16; 0 <= _ref16 ? i++ : i--) {
+    for (i = 0, _ref14 = n - 1; 0 <= _ref14 ? i <= _ref14 : i >= _ref14; 0 <= _ref14 ? i++ : i--) {
       x1 = polygon[i][0] - p[0];
       y1 = polygon[i][1] - p[1];
       x2 = polygon[(i + 1) % n][0] - p[0];
@@ -2376,7 +1778,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  kartograph = (_ref16 = root.kartograph) != null ? _ref16 : root.kartograph = {};
+  kartograph = (_ref14 = root.kartograph) != null ? _ref14 : root.kartograph = {};
 
   __proj = kartograph.proj = {};
 
@@ -2391,10 +1793,10 @@
   Proj = (function() {
 
     function Proj(opts) {
-      var me, _ref17, _ref18;
+      var me, _ref15, _ref16;
       me = this;
-      me.lon0 = (_ref17 = opts.lon0) != null ? _ref17 : 0;
-      me.lat0 = (_ref18 = opts.lat0) != null ? _ref18 : 0;
+      me.lon0 = (_ref15 = opts.lon0) != null ? _ref15 : 0;
+      me.lat0 = (_ref16 = opts.lat0) != null ? _ref16 : 0;
       me.PI = Math.PI;
       me.HALFPI = me.PI * .5;
       me.QUARTERPI = me.PI * .25;
@@ -2415,15 +1817,15 @@
     };
 
     Proj.prototype.plot = function(polygon, truncate) {
-      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref17, _ref18;
+      var ignore, lat, lon, points, vis, x, y, _i, _len, _ref15, _ref16;
       if (truncate == null) truncate = true;
       points = [];
       ignore = true;
       for (_i = 0, _len = polygon.length; _i < _len; _i++) {
-        _ref17 = polygon[_i], lon = _ref17[0], lat = _ref17[1];
+        _ref15 = polygon[_i], lon = _ref15[0], lat = _ref15[1];
         vis = this._visible(lon, lat);
         if (vis) ignore = false;
-        _ref18 = this.project(lon, lat), x = _ref18[0], y = _ref18[1];
+        _ref16 = this.project(lon, lat), x = _ref16[0], y = _ref16[1];
         if (!vis && truncate) {
           points.push(this._truncate(x, y));
         } else {
@@ -2438,7 +1840,7 @@
     };
 
     Proj.prototype.sea = function() {
-      var l0, lat, lon, o, p, s, _ref17, _ref18, _ref19, _ref20;
+      var l0, lat, lon, o, p, s, _ref15, _ref16, _ref17, _ref18;
       s = this;
       p = s.project.bind(this);
       o = [];
@@ -2447,13 +1849,13 @@
       for (lon = -180; lon <= 180; lon++) {
         o.push(p(lon, s.maxLat));
       }
-      for (lat = _ref17 = s.maxLat, _ref18 = s.minLat; _ref17 <= _ref18 ? lat <= _ref18 : lat >= _ref18; _ref17 <= _ref18 ? lat++ : lat--) {
+      for (lat = _ref15 = s.maxLat, _ref16 = s.minLat; _ref15 <= _ref16 ? lat <= _ref16 : lat >= _ref16; _ref15 <= _ref16 ? lat++ : lat--) {
         o.push(p(180, lat));
       }
       for (lon = 180; lon >= -180; lon--) {
         o.push(p(lon, s.minLat));
       }
-      for (lat = _ref19 = s.minLat, _ref20 = s.maxLat; _ref19 <= _ref20 ? lat <= _ref20 : lat >= _ref20; _ref19 <= _ref20 ? lat++ : lat--) {
+      for (lat = _ref17 = s.minLat, _ref18 = s.maxLat; _ref17 <= _ref18 ? lat <= _ref18 : lat >= _ref18; _ref17 <= _ref18 ? lat++ : lat--) {
         o.push(p(-180, lat));
       }
       s.lon0 = l0;
@@ -2486,10 +1888,10 @@
     /*
     	reconstructs a projection from xml description
     */
-    var attr, i, id, opts, proj, _ref17;
+    var attr, i, id, opts, proj, _ref15;
     id = xml.getAttribute('id');
     opts = {};
-    for (i = 0, _ref17 = xml.attributes.length - 1; 0 <= _ref17 ? i <= _ref17 : i >= _ref17; 0 <= _ref17 ? i++ : i--) {
+    for (i = 0, _ref15 = xml.attributes.length - 1; 0 <= _ref15 ? i <= _ref15 : i >= _ref15; 0 <= _ref15 ? i++ : i--) {
       attr = xml.attributes[i];
       if (attr.name !== "id") opts[attr.name] = attr.value;
     }
@@ -2509,10 +1911,10 @@
     */
 
     function Cylindrical(opts) {
-      var me, _ref17;
+      var me, _ref15;
       me = this;
       me.flip = Number(opts.flip) || 0;
-      if (me.flip === 1) opts.lon0 = (_ref17 = -opts.lon0) != null ? _ref17 : 0;
+      if (me.flip === 1) opts.lon0 = (_ref15 = -opts.lon0) != null ? _ref15 : 0;
       Cylindrical.__super__.constructor.call(this, opts);
     }
 
@@ -2555,8 +1957,8 @@
     */
 
     Equirectangular.prototype.project = function(lon, lat) {
-      var _ref17;
-      _ref17 = this.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      var _ref15;
+      _ref15 = this.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       lon = this.clon(lon);
       return [lon * Math.cos(this.phi0) * 1000, lat * -1 * 1000];
     };
@@ -2572,9 +1974,9 @@
     __extends(CEA, Cylindrical);
 
     function CEA(opts) {
-      var _ref17;
+      var _ref15;
       CEA.__super__.constructor.call(this, opts);
-      this.lat1 = (_ref17 = opts.lat1) != null ? _ref17 : 0;
+      this.lat1 = (_ref15 = opts.lat1) != null ? _ref15 : 0;
       this.phi1 = this.rad(this.lat1);
     }
 
@@ -2583,8 +1985,8 @@
     */
 
     CEA.prototype.project = function(lon, lat) {
-      var lam, phi, x, y, _ref17;
-      _ref17 = this.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      var lam, phi, x, y, _ref15;
+      _ref15 = this.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       lam = this.rad(this.clon(lon));
       phi = this.rad(lat * -1);
       x = lam * Math.cos(this.phi1);
@@ -2688,9 +2090,9 @@
     }
 
     Mercator.prototype.project = function(lon, lat) {
-      var lam, math, phi, s, x, y, _ref17;
+      var lam, math, phi, s, x, y, _ref15;
       s = this;
-      _ref17 = s.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = s.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       math = Math;
       lam = s.rad(s.clon(lon));
       phi = s.rad(lat * -1);
@@ -2755,9 +2157,9 @@
     }
 
     NaturalEarth.prototype.project = function(lon, lat) {
-      var lplam, lpphi, phi2, phi4, s, x, y, _ref17;
+      var lplam, lpphi, phi2, phi4, s, x, y, _ref15;
       s = this;
-      _ref17 = s.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = s.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       lplam = s.rad(s.clon(lon));
       lpphi = s.rad(lat * -1);
       phi2 = lpphi * lpphi;
@@ -2802,9 +2204,9 @@
     };
 
     Robinson.prototype.project = function(lon, lat) {
-      var i, lplam, lpphi, phi, s, x, y, _ref17;
+      var i, lplam, lpphi, phi, s, x, y, _ref15;
       s = this;
-      _ref17 = s.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = s.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       lon = s.clon(lon);
       lplam = s.rad(lon);
       lpphi = s.rad(lat * -1);
@@ -2847,9 +2249,9 @@
     }
 
     EckertIV.prototype.project = function(lon, lat) {
-      var V, c, i, lplam, lpphi, me, p, s, x, y, _ref17;
+      var V, c, i, lplam, lpphi, me, p, s, x, y, _ref15;
       me = this;
-      _ref17 = me.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = me.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       lplam = me.rad(me.clon(lon));
       lpphi = me.rad(lat * -1);
       p = me.C_p * Math.sin(lpphi);
@@ -2893,9 +2295,9 @@
     */
 
     Sinusoidal.prototype.project = function(lon, lat) {
-      var lam, me, phi, x, y, _ref17;
+      var lam, me, phi, x, y, _ref15;
       me = this;
-      _ref17 = me.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = me.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat * -1);
       x = lam * Math.cos(phi);
@@ -2944,9 +2346,9 @@
     }
 
     Mollweide.prototype.project = function(lon, lat) {
-      var abs, i, k, lam, math, me, phi, v, x, y, _ref17;
+      var abs, i, k, lam, math, me, phi, v, x, y, _ref15;
       me = this;
-      _ref17 = me.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = me.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       math = Math;
       abs = math.abs;
       lam = me.rad(me.clon(lon));
@@ -3025,9 +2427,9 @@
     maxLat = 89;
 
     Loximuthal.prototype.project = function(lon, lat) {
-      var lam, math, me, phi, x, y, _ref17;
+      var lam, math, me, phi, x, y, _ref15;
       me = this;
-      _ref17 = me.ll(lon, lat), lon = _ref17[0], lat = _ref17[1];
+      _ref15 = me.ll(lon, lat), lon = _ref15[0], lat = _ref15[1];
       math = Math;
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat);
@@ -3246,14 +2648,14 @@
     */
 
     function Satellite(opts) {
-      var lat, lon, xmax, xmin, xy, _ref17, _ref18, _ref19;
+      var lat, lon, xmax, xmin, xy, _ref15, _ref16, _ref17;
       Satellite.__super__.constructor.call(this, {
         lon0: 0,
         lat0: 0
       });
-      this.dist = (_ref17 = opts.dist) != null ? _ref17 : 3;
-      this.up = this.rad((_ref18 = opts.up) != null ? _ref18 : 0);
-      this.tilt = this.rad((_ref19 = opts.tilt) != null ? _ref19 : 0);
+      this.dist = (_ref15 = opts.dist) != null ? _ref15 : 3;
+      this.up = this.rad((_ref16 = opts.up) != null ? _ref16 : 0);
+      this.tilt = this.rad((_ref17 = opts.tilt) != null ? _ref17 : 0);
       this.scale = 1;
       xmin = Number.MAX_VALUE;
       xmax = Number.MAX_VALUE * -1;
@@ -3400,12 +2802,12 @@
     __extends(Conic, Proj);
 
     function Conic(opts) {
-      var self, _ref17, _ref18;
+      var self, _ref15, _ref16;
       self = this;
       Conic.__super__.constructor.call(this, opts);
-      self.lat1 = (_ref17 = opts.lat1) != null ? _ref17 : 30;
+      self.lat1 = (_ref15 = opts.lat1) != null ? _ref15 : 30;
       self.phi1 = self.rad(self.lat1);
-      self.lat2 = (_ref18 = opts.lat2) != null ? _ref18 : 50;
+      self.lat2 = (_ref16 = opts.lat2) != null ? _ref16 : 50;
       self.phi2 = self.rad(self.lat2);
     }
 
@@ -3438,11 +2840,11 @@
     "Lambert Conformal Conic Projection (spherical)";
 
     function LCC(opts) {
-      var abs, c, cos, cosphi, m, n, pow, secant, self, sin, sinphi, tan, _ref17;
+      var abs, c, cos, cosphi, m, n, pow, secant, self, sin, sinphi, tan, _ref15;
       self = this;
       LCC.__super__.constructor.call(this, opts);
       m = Math;
-      _ref17 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref17[0], cos = _ref17[1], abs = _ref17[2], log = _ref17[3], tan = _ref17[4], pow = _ref17[5];
+      _ref15 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref15[0], cos = _ref15[1], abs = _ref15[2], log = _ref15[3], tan = _ref15[4], pow = _ref15[5];
       self.n = n = sinphi = sin(self.phi1);
       cosphi = cos(self.phi1);
       secant = abs(self.phi1 - self.phi2) >= 1e-10;
@@ -3460,12 +2862,12 @@
     }
 
     LCC.prototype.project = function(lon, lat) {
-      var abs, cos, lam, lam_, m, n, phi, pow, rho, self, sin, tan, x, y, _ref17;
+      var abs, cos, lam, lam_, m, n, phi, pow, rho, self, sin, tan, x, y, _ref15;
       self = this;
       phi = self.rad(lat);
       lam = self.rad(self.clon(lon));
       m = Math;
-      _ref17 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref17[0], cos = _ref17[1], abs = _ref17[2], log = _ref17[3], tan = _ref17[4], pow = _ref17[5];
+      _ref15 = [m.sin, m.cos, m.abs, m.log, m.tan, m.pow], sin = _ref15[0], cos = _ref15[1], abs = _ref15[2], log = _ref15[3], tan = _ref15[4], pow = _ref15[5];
       n = self.n;
       if (abs(abs(phi) - self.HALFPI) < 1e-10) {
         rho = 0.0;
@@ -3551,18 +2953,18 @@
     };
 
     View.prototype.projectPath = function(path) {
-      var bbox, cont, contours, me, new_path, pcont, r, x, y, _i, _j, _len, _len2, _ref17, _ref18, _ref19, _ref20;
+      var bbox, cont, contours, me, new_path, pcont, r, x, y, _i, _j, _len, _len2, _ref15, _ref16, _ref17, _ref18;
       me = this;
       if (path.type === "path") {
         contours = [];
         bbox = [99999, 99999, -99999, -99999];
-        _ref17 = path.contours;
-        for (_i = 0, _len = _ref17.length; _i < _len; _i++) {
-          pcont = _ref17[_i];
+        _ref15 = path.contours;
+        for (_i = 0, _len = _ref15.length; _i < _len; _i++) {
+          pcont = _ref15[_i];
           cont = [];
           for (_j = 0, _len2 = pcont.length; _j < _len2; _j++) {
-            _ref18 = pcont[_j], x = _ref18[0], y = _ref18[1];
-            _ref19 = me.project(x, y), x = _ref19[0], y = _ref19[1];
+            _ref16 = pcont[_j], x = _ref16[0], y = _ref16[1];
+            _ref17 = me.project(x, y), x = _ref17[0], y = _ref17[1];
             cont.push([x, y]);
             bbox[0] = Math.min(bbox[0], x);
             bbox[1] = Math.min(bbox[1], y);
@@ -3575,7 +2977,7 @@
         new_path._bbox = bbox;
         return new_path;
       } else if (path.type === "circle") {
-        _ref20 = me.project(path.x, path.y), x = _ref20[0], y = _ref20[1];
+        _ref18 = me.project(path.x, path.y), x = _ref18[0], y = _ref18[1];
         r = path.r * me.scale;
         return new kartograph.geom.Circle(x, y, r);
       }
@@ -3606,7 +3008,7 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  if ((_ref17 = root.kartograph) == null) root.kartograph = {};
+  if ((_ref15 = root.kartograph) == null) root.kartograph = {};
 
   root.kartograph.View = View;
 
@@ -3631,7 +3033,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var LinearScale, LogScale, PanAndZoomControl, QuantileScale, Scale;
+  var Bubble, HtmlLabel, Icon, LinearScale, LogScale, PanAndZoomControl, QuantileScale, Scale, SvgLabel, Symbol, SymbolGroup, kartograph, root, _ref, _ref2;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   kartograph.Kartograph.prototype.choropleth = function(opts) {
@@ -4040,5 +3442,603 @@
   kartograph.scale.quantile = function(domain, prop) {
     return new QuantileScale(domain, prop).scale;
   };
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
+
+  if ((_ref2 = kartograph.marker) == null) kartograph.marker = {};
+
+  /*
+  New API
+  
+  sg = new SymbolGroup({
+  	data: crimeRatesPerCity,
+  	location: function(d) {
+  		return [d.lon, d.lat]];
+  	},
+  	filter: function(d) {
+  		return !isNaN(d.pop);
+  	},
+  	layout: 'group',
+  	group: function(list) {
+  		var s=0,p=0,i,d,g = {},lat=0,lon=0;
+  		for (i in list) {
+  			d = list[i];
+  			s += d.murder;
+  			p += d.pop;
+  		}
+  		for (i in list) {
+  			d = list[i];
+  			lon += d.ll[0] * d.pop/p;
+  			lat += d.ll[1] * d.pop/p;
+  		}
+  		g.murder = s;
+  		g.pop = p;
+  		g.ll = [lon,lat];
+  		return g;
+  	},
+  	// type specific options
+  	type: 'Bubble',
+  	radius: function(d) {
+  		return Math.sqrt(d.murder/d.pop)*5;
+  	},
+  	color: '#c00'
+  })
+  */
+
+  SymbolGroup = (function() {
+
+    function SymbolGroup(opts) {
+      var SymbolType, d, i, id, l, layer, me, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _len7, _m, _n, _o, _ref3, _ref4, _ref5, _ref6, _ref7;
+      var _this = this;
+      me = this;
+      required = ['data', 'location', 'type', 'map'];
+      optional = ['filter', 'tooltip', 'layout', 'group', 'click'];
+      for (_i = 0, _len = required.length; _i < _len; _i++) {
+        p = required[_i];
+        if (opts[p] != null) {
+          me[p] = opts[p];
+        } else {
+          throw "SymbolGroup: missing argument " + p;
+        }
+      }
+      for (_j = 0, _len2 = optional.length; _j < _len2; _j++) {
+        p = optional[_j];
+        if (opts[p] != null) me[p] = opts[p];
+      }
+      if (__type(me.type) === "string") {
+        SymbolType = kartograph[me.type];
+      } else {
+        SymbolType = me.type;
+      }
+      if (!(SymbolType != null)) {
+        warn('could not resolve symbol type', me.type);
+        return;
+      }
+      _ref3 = SymbolType.props;
+      for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
+        p = _ref3[_k];
+        if (opts[p] != null) me[p] = opts[p];
+      }
+      me.layers = {
+        mapcanvas: me.map.paper
+      };
+      _ref4 = SymbolType.layers;
+      for (_l = 0, _len4 = _ref4.length; _l < _len4; _l++) {
+        l = _ref4[_l];
+        nid = SymbolGroup._layerid++;
+        id = 'sl_' + nid;
+        if (l.type === 'svg') {
+          layer = me.map.createSVGLayer(id);
+        } else if (l.type === 'html') {
+          layer = me.map.createHTMLLayer(id);
+        }
+        me.layers[l.id] = layer;
+      }
+      me.symbols = [];
+      for (i in me.data) {
+        d = me.data[i];
+        if (__type(me.filter) === "function") {
+          if (me.filter(d)) me.addSymbol(d);
+        } else {
+          me.addSymbol(d);
+        }
+      }
+      me.layoutSymbols();
+      _ref5 = me.symbols;
+      for (_m = 0, _len5 = _ref5.length; _m < _len5; _m++) {
+        s = _ref5[_m];
+        s.render();
+      }
+      if (__type(me.tooltip) === "function") me.initTooltips();
+      if (__type(me.click) === "function") {
+        _ref6 = me.symbols;
+        for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
+          s = _ref6[_n];
+          _ref7 = s.nodes();
+          for (_o = 0, _len7 = _ref7.length; _o < _len7; _o++) {
+            node = _ref7[_o];
+            node.symbol = s;
+            $(node).click(function(e) {
+              e.stopPropagation();
+              return me.click(e.target.symbol.data);
+            });
+          }
+        }
+      }
+      me.map.addSymbolGroup(me);
+    }
+
+    SymbolGroup.prototype.addSymbol = function(data) {
+      /*
+      		adds a new symbol to this group
+      */
+      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref3;
+      me = this;
+      SymbolType = me.type;
+      ll = me.evaluate(me.location, data);
+      if (__type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
+      sprops = {
+        layers: me.layers,
+        location: ll,
+        data: data,
+        map: me.map
+      };
+      _ref3 = SymbolType.props;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        p = _ref3[_i];
+        if (me[p] != null) sprops[p] = me.evaluate(me[p], data);
+      }
+      symbol = new SymbolType(sprops);
+      me.symbols.push(symbol);
+      return symbol;
+    };
+
+    SymbolGroup.prototype.evaluate = function(prop, data) {
+      /*
+      		evaluates a property function or returns a static value
+      */
+      var val;
+      if (__type(prop) === 'function') {
+        return val = prop(data);
+      } else {
+        return val = prop;
+      }
+    };
+
+    SymbolGroup.prototype.layoutSymbols = function() {
+      var layer_id, ll, me, path, path_id, s, xy, _i, _len, _ref3, _ref4;
+      me = this;
+      _ref3 = me.symbols;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        ll = s.location;
+        if (__type(ll) === 'string') {
+          _ref4 = ll.split('.'), layer_id = _ref4[0], path_id = _ref4[1];
+          path = me.map.getLayerPath(layer_id, path_id);
+          if (path != null) {
+            xy = me.map.viewBC.project(path.path.centroid());
+          } else {
+            continue;
+          }
+        } else {
+          xy = me.map.lonlat2xy(ll);
+        }
+        s.x = xy[0];
+        s.y = xy[1];
+      }
+      if (me.layout === 'group') return me.groupLayout();
+    };
+
+    SymbolGroup.prototype.groupLayout = function() {
+      /*
+      		layouts symbols in this group, eventually adds new 'grouped' symbols
+      */
+      var me, overlap, _ref3;
+      me = this;
+      if ((_ref3 = me.gsymbols) == null) me.gsymbols = [];
+      return overlap = true;
+    };
+
+    SymbolGroup.prototype.initTooltips = function() {
+      var cfg, me, node, s, tooltips, tt, _i, _j, _len, _len2, _ref3, _ref4;
+      me = this;
+      tooltips = me.tooltip;
+      _ref3 = me.symbols;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        cfg = {
+          position: {
+            target: 'mouse',
+            viewport: $(window),
+            adjust: {
+              x: 7,
+              y: 7
+            }
+          },
+          show: {
+            delay: 20
+          },
+          content: {}
+        };
+        tt = tooltips(s.data);
+        if (__type(tt) === "string") {
+          cfg.content.text = tt;
+        } else if (__type(tt) === "array") {
+          cfg.content.title = tt[0];
+          cfg.content.text = tt[1];
+        }
+        _ref4 = s.nodes();
+        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+          node = _ref4[_j];
+          $(node).qtip(cfg);
+        }
+      }
+    };
+
+    SymbolGroup.prototype.remove = function() {
+      var id, layer, me, s, _i, _len, _ref3, _ref4, _results;
+      me = this;
+      _ref3 = me.symbols;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        s.clear();
+      }
+      _ref4 = me.layers;
+      _results = [];
+      for (id in _ref4) {
+        layer = _ref4[id];
+        if (id !== "mapcanvas") {
+          _results.push(layer.remove());
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    SymbolGroup.prototype.onResize = function() {
+      var me, s, _i, _len, _ref3, _results;
+      me = this;
+      me.layoutSymbols();
+      _ref3 = me.symbols;
+      _results = [];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        s = _ref3[_i];
+        _results.push(s.update());
+      }
+      return _results;
+    };
+
+    return SymbolGroup;
+
+  })();
+
+  SymbolGroup._layerid = 0;
+
+  kartograph.SymbolGroup = SymbolGroup;
+
+  Symbol = (function() {
+
+    function Symbol(opts) {
+      var me;
+      me = this;
+      me.location = opts.location;
+      me.data = opts.data;
+      me.map = opts.map;
+      me.layers = opts.layers;
+      me.x = opts.x;
+      me.y = opts.y;
+    }
+
+    Symbol.prototype.init = function() {};
+
+    Symbol.prototype.overlaps = function(symbol) {
+      return false;
+    };
+
+    Symbol.prototype.nodes = function() {
+      return [];
+    };
+
+    Symbol.prototype.clear = function() {};
+
+    return Symbol;
+
+  })();
+
+  Bubble = (function() {
+
+    __extends(Bubble, Symbol);
+
+    function Bubble(opts) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      Bubble.__super__.constructor.call(this, opts);
+      me.radius = (_ref3 = opts.radius) != null ? _ref3 : 4;
+      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+    }
+
+    Bubble.prototype.overlaps = function(bubble) {
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref3, _ref4;
+      me = this;
+      _ref3 = [me.x, me.y, me.radius], x1 = _ref3[0], y1 = _ref3[1], r1 = _ref3[2];
+      _ref4 = [bubble.x, bubble.y, bubble.radius], x2 = _ref4[0], y2 = _ref4[1], r2 = _ref4[2];
+      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
+        return false;
+      }
+      dx = x1 - x2;
+      dy = y1 - y2;
+      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
+      return true;
+    };
+
+    Bubble.prototype.render = function(layers) {
+      var me;
+      me = this;
+      me.path = me.layers.a.circle(me.x, me.y, me.radius);
+      me.update();
+      me.map.applyStyles(me.path);
+      return me;
+    };
+
+    Bubble.prototype.update = function() {
+      var me, path;
+      me = this;
+      me.path.attr({
+        x: me.x,
+        y: me.y,
+        r: me.radius
+      });
+      path = me.path;
+      path.node.setAttribute('style', me.style);
+      path.node.setAttribute('class', me["class"]);
+      return me;
+    };
+
+    Bubble.prototype.clear = function() {
+      var me;
+      me = this;
+      me.path.remove();
+      return me;
+    };
+
+    Bubble.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.path.node];
+    };
+
+    return Bubble;
+
+  })();
+
+  Bubble.props = ['radius', 'style', 'class'];
+
+  Bubble.layers = [
+    {
+      id: 'a',
+      type: 'svg'
+    }
+  ];
+
+  kartograph.Bubble = Bubble;
+
+  HtmlLabel = (function() {
+
+    __extends(HtmlLabel, Symbol);
+
+    function HtmlLabel(opts) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      HtmlLabel.__super__.constructor.call(this, opts);
+      me.text = (_ref3 = opts.text) != null ? _ref3 : '';
+      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+    }
+
+    HtmlLabel.prototype.render = function(layers) {
+      var l, lbl, me;
+      me = this;
+      l = $('<div>' + me.text + '</div>');
+      l.css({
+        width: '50px',
+        position: 'absolute',
+        left: '-25px',
+        'text-align': 'center'
+      });
+      me.lbl = lbl = $('<div class="label" />');
+      lbl.append(l);
+      me.layers.lbl.append(lbl);
+      l.css({
+        height: l.height() + 'px',
+        top: (l.height() * -.4) + 'px'
+      });
+      me.update();
+      return me;
+    };
+
+    HtmlLabel.prototype.update = function() {
+      var me;
+      me = this;
+      return me.lbl.css({
+        position: 'absolute',
+        left: me.x + 'px',
+        top: me.y + 'px'
+      });
+    };
+
+    HtmlLabel.prototype.clear = function() {
+      var me;
+      me = this;
+      me.lbl.remove();
+      return me;
+    };
+
+    HtmlLabel.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.lbl[0]];
+    };
+
+    return HtmlLabel;
+
+  })();
+
+  HtmlLabel.props = ['text', 'style', 'class'];
+
+  HtmlLabel.layers = [
+    {
+      id: 'lbl',
+      type: 'html'
+    }
+  ];
+
+  kartograph.HtmlLabel = HtmlLabel;
+
+  SvgLabel = (function() {
+
+    __extends(SvgLabel, Symbol);
+
+    function SvgLabel(opts) {
+      var me, _ref3, _ref4, _ref5;
+      me = this;
+      SvgLabel.__super__.constructor.call(this, opts);
+      me.text = (_ref3 = opts.text) != null ? _ref3 : '';
+      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
+      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+    }
+
+    SvgLabel.prototype.render = function(layers) {
+      var lbl, me;
+      me = this;
+      me.lbl = lbl = me.layers.mapcanvas.text(me.x, me.y, me.text);
+      me.update();
+      return me;
+    };
+
+    SvgLabel.prototype.update = function() {
+      var me;
+      me = this;
+      me.lbl.attr({
+        x: me.x,
+        y: me.y
+      });
+      me.lbl.node.setAttribute('style', me.style);
+      return me.lbl.node.setAttribute('class', me["class"]);
+    };
+
+    SvgLabel.prototype.clear = function() {
+      var me;
+      me = this;
+      me.lbl.remove();
+      return me;
+    };
+
+    SvgLabel.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.lbl.node];
+    };
+
+    return SvgLabel;
+
+  })();
+
+  SvgLabel.props = ['text', 'style', 'class'];
+
+  SvgLabel.layers = [];
+
+  kartograph.Label = SvgLabel;
+
+  Icon = (function() {
+
+    __extends(Icon, Symbol);
+
+    function Icon(opts) {
+      var me, _ref3, _ref4, _ref5, _ref6, _ref7;
+      me = this;
+      Icon.__super__.constructor.call(this, opts);
+      me.icon = (_ref3 = opts.icon) != null ? _ref3 : '';
+      me.offset = (_ref4 = opts.offset) != null ? _ref4 : [0, 0];
+      me.iconsize = (_ref5 = opts.iconsize) != null ? _ref5 : [10, 10];
+      me["class"] = (_ref6 = opts["class"]) != null ? _ref6 : '';
+      me.title = (_ref7 = opts.title) != null ? _ref7 : '';
+    }
+
+    Icon.prototype.render = function(layers) {
+      var cont, me;
+      me = this;
+      cont = me.map.container;
+      me.img = $('<img />');
+      me.img.attr({
+        src: me.icon,
+        title: me.title,
+        alt: me.title,
+        width: me.iconsize[0],
+        height: me.iconsize[1]
+      });
+      me.img.addClass(me["class"]);
+      me.img.css({
+        position: 'absolute',
+        'z-index': 1000,
+        cursor: 'pointer'
+      });
+      me.img[0].symbol = me;
+      cont.append(me.img);
+      return me.update();
+    };
+
+    Icon.prototype.update = function() {
+      var me;
+      me = this;
+      return me.img.css({
+        left: (me.x + me.offset[0]) + 'px',
+        top: (me.y + me.offset[1]) + 'px'
+      });
+    };
+
+    Icon.prototype.clear = function() {
+      var me;
+      me = this;
+      me.img.remove();
+      return me;
+    };
+
+    Icon.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.img];
+    };
+
+    return Icon;
+
+  })();
+
+  Icon.props = ['icon', 'offset', 'class', 'title', 'iconsize'];
+
+  Icon.layers = [];
+
+  kartograph.Icon = Icon;
 
 }).call(this);
