@@ -266,7 +266,7 @@ class Bubble extends Symbol
 		super opts
 		me.radius = opts.radius ? 4
 		me.style = opts.style ? ''
-		me.class = opts.class ? ''
+		me.class = opts.class ? 'bubble'
 				
 	overlaps: (bubble) ->
 		me = @
