@@ -21,14 +21,21 @@
 
 class Scale
 	### scales map values to [0..1] ###
-	constructor: (domain=[0,1], prop=null) ->
+	constructor: (domain=[0,1], prop=null, filter=null) ->
 		me = @
 		values = []
 		for i of domain
+			if __type(filter) == "function"
+				if filter(domain[i]) == false
+					continue
 			if prop? 
-				values.push domain[i][prop]
+				if __type(prop) == "function"
+					val = prop domain[i]
+				else
+					val = domain[i][prop]
 			else
-				values.push domain[i]
+				val = domain[i]
+			values.push val if not isNaN val
 		values = values.sort (a,b)->
 			a-b
 		me.values = values
@@ -73,15 +80,15 @@ class QuantileScale extends Scale
 
 kartograph.scale = {}
 
-kartograph.scale.identity = (domain, prop) ->
-	new Scale(domain, prop).scale	
+kartograph.scale.identity = (s) ->
+	new Scale(domain, prop, filter).scale	
 
-kartograph.scale.linear = (domain, prop) ->
-	new LinearScale(domain, prop).scale
+kartograph.scale.linear = (domain, prop, filter) ->
+	new LinearScale(domain, prop, filter).scale
 
-kartograph.scale.log = (domain, prop) ->
-	new LogScale(domain, prop).scale
+kartograph.scale.log = (domain, prop, filter) ->
+	new LogScale(domain, prop, filter).scale
 
-kartograph.scale.quantile = (domain, prop) ->
-	new QuantileScale(domain, prop).scale
+kartograph.scale.quantile = (domain, prop, filter) ->
+	new QuantileScale(domain, prop, filter).scale
 

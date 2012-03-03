@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
 
+root = (exports ? this)	
+kartograph = root.$K = root.kartograph ?= {}
 
 kartograph.Kartograph::choropleth = (opts) ->
 		me = @	
@@ -66,4 +68,5 @@ kartograph.Kartograph::choropleth = (opts) ->
 					path.svgPath.attr('fill', col)
 				#path.svgPath.node.setAttribute('style', 'fill:'+col) 
 		return
+
 

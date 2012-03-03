@@ -77,18 +77,39 @@ class Path
 		if me._centroid?
 			return me._centroid
 		area = me.area()
+		
 		cx = cy = 0
 		for i in [0..me.contours.length-1]
 			cnt = me.contours[i]
 			a = me.areas[i]
 			x = y = 0
-			for j in [0..cnt.length-2]
-				k = (cnt[j][0]*cnt[j+1][1] - cnt[j+1][0]*cnt[j][1])
-				x += (cnt[j][0]+cnt[j+1][0]) * k
-				y += (cnt[j][1]+cnt[j+1][1]) * k
-			k = 1/(6*a)
-			x *= k
-			y *= k
+			l = cnt.length
+			# at first compute total edge length
+			_lengths = []
+			total_len = 0
+			for j in [0..l-1]
+				p0 = cnt[j]
+				p1 = cnt[(j+1)%l]
+				dx = p1[0]-p0[0]
+				dy = p1[1]-p0[1]
+				len = Math.sqrt(dx*dx + dy*dy)
+				_lengths.push(len)
+				total_len += len
+			
+			for j in [0..l-1]
+				p0 = cnt[j]
+				p1 = cnt[(j+1)%l]
+				w = _lengths[j]/total_len
+				x += w*p0[0]
+				y += w*p0[1]
+				# centroid
+				# k = (p0[0]*p1[1] - p1[0]*p0[1])
+				# x += (p0[0]+p1[0]) * k
+				# y += (p0[1]+p1[1]) * k
+				
+			# k = 1/(6*a)
+			# x *= k
+			# y *= k
 			k = a/area
 			cx += x * k
 			cy += y * k
@@ -231,3 +252,4 @@ __point_in_polygon = (polygon, p) ->
 			dtheta += twopi
 		angle += dtheta
 	return Math.abs(angle) >= pi
+

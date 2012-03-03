@@ -449,7 +449,7 @@
 
   /*
       kartograph - a svg mapping library 
-      Copyright (C) 2011  Gregor Aisch
+      Copyright (C) 2011,2012  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
@@ -469,7 +469,7 @@
 
   kartograph = root.$K = (_ref7 = root.kartograph) != null ? _ref7 : root.kartograph = {};
 
-  kartograph.version = "0.4.6";
+  kartograph.version = "0.0.0";
 
   warn = function(s) {
     return console.warn('kartograph (' + kartograph.version + '): ' + s);
@@ -896,23 +896,6 @@
       }
       a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt);
       return me.viewBC.project(me.viewAB.project(a));
-    };
-
-    Kartograph.prototype.addGeoPath = function(points, cmds, className) {
-      var cmd, i, me, path, path_str, pt, xy, _ref9;
-      if (cmds == null) cmds = [];
-      if (className == null) className = '';
-      me = this;
-      if (cmds.length === 0) cmds.push('M');
-      path_str = '';
-      for (i in points) {
-        pt = points[i];
-        cmd = (_ref9 = cmds[i]) != null ? _ref9 : 'L';
-        xy = me.lonlat2xy(pt);
-        path_str += cmd + xy[0] + ',' + xy[1];
-      }
-      path = me.paper.path(path_str);
-      path.node.setAttribute('class', className);
     };
 
     Kartograph.prototype.showZoomControls = function() {
@@ -1560,7 +1543,7 @@
     };
 
     Path.prototype.centroid = function() {
-      var a, area, cnt, cx, cy, i, j, k, me, x, y, _ref14, _ref15;
+      var a, area, cnt, cx, cy, dx, dy, i, j, k, l, len, me, p0, p1, total_len, w, x, y, _lengths, _ref14, _ref15, _ref16;
       me = this;
       if (me._centroid != null) return me._centroid;
       area = me.area();
@@ -1569,14 +1552,25 @@
         cnt = me.contours[i];
         a = me.areas[i];
         x = y = 0;
-        for (j = 0, _ref15 = cnt.length - 2; 0 <= _ref15 ? j <= _ref15 : j >= _ref15; 0 <= _ref15 ? j++ : j--) {
-          k = cnt[j][0] * cnt[j + 1][1] - cnt[j + 1][0] * cnt[j][1];
-          x += (cnt[j][0] + cnt[j + 1][0]) * k;
-          y += (cnt[j][1] + cnt[j + 1][1]) * k;
+        l = cnt.length;
+        _lengths = [];
+        total_len = 0;
+        for (j = 0, _ref15 = l - 1; 0 <= _ref15 ? j <= _ref15 : j >= _ref15; 0 <= _ref15 ? j++ : j--) {
+          p0 = cnt[j];
+          p1 = cnt[(j + 1) % l];
+          dx = p1[0] - p0[0];
+          dy = p1[1] - p0[1];
+          len = Math.sqrt(dx * dx + dy * dy);
+          _lengths.push(len);
+          total_len += len;
         }
-        k = 1 / (6 * a);
-        x *= k;
-        y *= k;
+        for (j = 0, _ref16 = l - 1; 0 <= _ref16 ? j <= _ref16 : j >= _ref16; 0 <= _ref16 ? j++ : j--) {
+          p0 = cnt[j];
+          p1 = cnt[(j + 1) % l];
+          w = _lengths[j] / total_len;
+          x += w * p0[0];
+          y += w * p0[1];
+        }
         k = a / area;
         cx += x * k;
         cy += y * k;
@@ -3033,13 +3027,17 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Bubble, HtmlLabel, Icon, LinearScale, LogScale, PanAndZoomControl, QuantileScale, Scale, SvgLabel, Symbol, SymbolGroup, kartograph, root, _ref, _ref2;
+  var HtmlLabel, LinearScale, LogScale, PanAndZoomControl, QuantileScale, Scale, SvgLabel, Symbol, SymbolGroup, kartograph, root, _ref, _ref2, _ref3, _ref4;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
+
   kartograph.Kartograph.prototype.choropleth = function(opts) {
-    var anim, col, colors, data, data_col, data_key, delay, dur, id, layer_id, me, ncol, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref, _ref2, _ref3;
+    var anim, col, colors, data, data_col, data_key, delay, dur, id, layer_id, me, ncol, path, pathData, paths, pd, row, _i, _j, _len, _len2, _ref2, _ref3, _ref4;
     me = this;
-    layer_id = (_ref = opts.layer) != null ? _ref : me.layerIds[me.layerIds.length - 1];
+    layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
     if (!me.layers.hasOwnProperty(layer_id)) {
       warn('choropleth error: layer "' + layer_ihad + '" not found');
       return;
@@ -3061,12 +3059,12 @@
         pathData[String(id)] = row;
       }
     }
-    _ref2 = me.layers[layer_id].pathsById;
-    for (id in _ref2) {
-      paths = _ref2[id];
+    _ref3 = me.layers[layer_id].pathsById;
+    for (id in _ref3) {
+      paths = _ref3[id];
       for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
         path = paths[_j];
-        pd = (_ref3 = pathData[id]) != null ? _ref3 : null;
+        pd = (_ref4 = pathData[id]) != null ? _ref4 : null;
         col = colors(pd);
         if (opts.duration != null) {
           if (__type(opts.duration) === "function") {
@@ -3117,9 +3115,9 @@
   */
 
   kartograph.Kartograph.prototype.dotgrid = function(opts) {
-    var anim, data, data_col, data_key, delay, dly, dotgrid, dotstyle, ds, dur, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref10, _ref11, _ref12, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    var anim, data, data_col, data_key, delay, dly, dotgrid, dotstyle, ds, dur, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     me = this;
-    layer_id = (_ref = opts.layer) != null ? _ref : me.layerIds[me.layerIds.length - 1];
+    layer_id = (_ref2 = opts.layer) != null ? _ref2 : me.layerIds[me.layerIds.length - 1];
     if (!me.layers.hasOwnProperty(layer_id)) {
       warn('dotgrid error: layer "' + layer_id + '" not found');
       return;
@@ -3141,20 +3139,20 @@
         pathData[String(id)] = row;
       }
     }
-    dotstyle = (_ref2 = opts.style) != null ? _ref2 : {
+    dotstyle = (_ref3 = opts.style) != null ? _ref3 : {
       fill: 'black',
       stroke: 'none'
     };
     sizes = opts.size;
-    gridsize = (_ref3 = opts.gridsize) != null ? _ref3 : 15;
-    dotgrid = (_ref4 = layer.dotgrid) != null ? _ref4 : layer.dotgrid = {
+    gridsize = (_ref4 = opts.gridsize) != null ? _ref4 : 15;
+    dotgrid = (_ref5 = layer.dotgrid) != null ? _ref5 : layer.dotgrid = {
       gridsize: gridsize,
       grid: []
     };
     if (dotgrid.gridsize !== gridsize) {
-      _ref5 = dotgrid.grid;
-      for (_j = 0, _len2 = _ref5.length; _j < _len2; _j++) {
-        g = _ref5[_j];
+      _ref6 = dotgrid.grid;
+      for (_j = 0, _len2 = _ref6.length; _j < _len2; _j++) {
+        g = _ref6[_j];
         if (g.shape != null) {
           g.shape.remove();
           g.shape = null;
@@ -3164,17 +3162,17 @@
     if (gridsize > 0) {
       if (dotgrid.grid.length === 0) {
         console.log('initialize new grid', dotgrid.grid.length);
-        for (x = 0, _ref6 = me.viewport.width; 0 <= _ref6 ? x <= _ref6 : x >= _ref6; x += gridsize) {
-          for (y = 0, _ref7 = me.viewport.height; 0 <= _ref7 ? y <= _ref7 : y >= _ref7; y += gridsize) {
+        for (x = 0, _ref7 = me.viewport.width; 0 <= _ref7 ? x <= _ref7 : x >= _ref7; x += gridsize) {
+          for (y = 0, _ref8 = me.viewport.height; 0 <= _ref8 ? y <= _ref8 : y >= _ref8; y += gridsize) {
             g = {
               x: x + (Math.random() - 0.5) * gridsize * 0.2,
               y: y + (Math.random() - 0.5) * gridsize * 0.2,
               pathid: false
             };
             f = false;
-            _ref8 = layer.pathsById;
-            for (id in _ref8) {
-              paths = _ref8[id];
+            _ref9 = layer.pathsById;
+            for (id in _ref9) {
+              paths = _ref9[id];
               for (_k = 0, _len3 = paths.length; _k < _len3; _k++) {
                 path = paths[_k];
                 if (path.vpath.isInside(g.x, g.y)) {
@@ -3190,14 +3188,14 @@
           }
         }
       }
-      _ref9 = dotgrid.grid;
-      for (_l = 0, _len4 = _ref9.length; _l < _len4; _l++) {
-        g = _ref9[_l];
+      _ref10 = dotgrid.grid;
+      for (_l = 0, _len4 = _ref10.length; _l < _len4; _l++) {
+        g = _ref10[_l];
         if (g.pathid) {
-          pd = (_ref10 = pathData[g.pathid]) != null ? _ref10 : null;
+          pd = (_ref11 = pathData[g.pathid]) != null ? _ref11 : null;
           size = sizes(pd);
-          dur = (_ref11 = opts.duration) != null ? _ref11 : 0;
-          delay = (_ref12 = opts.delay) != null ? _ref12 : 0;
+          dur = (_ref12 = opts.duration) != null ? _ref12 : 0;
+          delay = (_ref13 = opts.delay) != null ? _ref13 : 0;
           if (__type(delay) === "function") {
             dly = delay(pd);
           } else {
@@ -3241,6 +3239,57 @@
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  kartograph = root.$K = (_ref2 = root.kartograph) != null ? _ref2 : root.kartograph = {};
+
+  kartograph.Kartograph.prototype.addGeoPath = function(points, cmds, className) {
+    var me, path, path_str;
+    if (cmds == null) cmds = [];
+    if (className == null) className = '';
+    /* converts a set of
+    */
+    me = this;
+    path_str = me.getGeoPathStr(points, cmds);
+    path = me.paper.path(path_str);
+    if (className !== '') path.node.setAttribute('class', className);
+    return path;
+  };
+
+  kartograph.Kartograph.prototype.getGeoPathStr = function(points, cmds) {
+    var cmd, i, me, path_str, pt, xy, _ref3;
+    if (cmds == null) cmds = [];
+    /* converts a set of
+    */
+    me = this;
+    if (cmds.length === 0) cmds.push('M');
+    path_str = '';
+    for (i in points) {
+      pt = points[i];
+      cmd = (_ref3 = cmds[i]) != null ? _ref3 : 'L';
+      xy = me.lonlat2xy(pt);
+      path_str += cmd + xy[0] + ',' + xy[1];
+    }
+    return path_str;
+    /*
+        kartograph - a svg mapping library 
+        Copyright (C) 2011  Gregor Aisch
+    
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+    
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+    
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    */
+  };
 
   PanAndZoomControl = (function() {
 
@@ -3321,19 +3370,28 @@
     /* scales map values to [0..1]
     */
 
-    function Scale(domain, prop) {
-      var i, me, values;
+    function Scale(domain, prop, filter) {
+      var i, me, val, values;
       if (domain == null) domain = [0, 1];
       if (prop == null) prop = null;
+      if (filter == null) filter = null;
       this.scale = __bind(this.scale, this);
       me = this;
       values = [];
       for (i in domain) {
-        if (prop != null) {
-          values.push(domain[i][prop]);
-        } else {
-          values.push(domain[i]);
+        if (__type(filter) === "function") {
+          if (filter(domain[i]) === false) continue;
         }
+        if (prop != null) {
+          if (__type(prop) === "function") {
+            val = prop(domain[i]);
+          } else {
+            val = domain[i][prop];
+          }
+        } else {
+          val = domain[i];
+        }
+        if (!isNaN(val)) values.push(val);
       }
       values = values.sort(function(a, b) {
         return a - b;
@@ -3427,25 +3485,25 @@
 
   kartograph.scale = {};
 
-  kartograph.scale.identity = function(domain, prop) {
-    return new Scale(domain, prop).scale;
+  kartograph.scale.identity = function(s) {
+    return new Scale(domain, prop, filter).scale;
   };
 
-  kartograph.scale.linear = function(domain, prop) {
-    return new LinearScale(domain, prop).scale;
+  kartograph.scale.linear = function(domain, prop, filter) {
+    return new LinearScale(domain, prop, filter).scale;
   };
 
-  kartograph.scale.log = function(domain, prop) {
-    return new LogScale(domain, prop).scale;
+  kartograph.scale.log = function(domain, prop, filter) {
+    return new LogScale(domain, prop, filter).scale;
   };
 
-  kartograph.scale.quantile = function(domain, prop) {
-    return new QuantileScale(domain, prop).scale;
+  kartograph.scale.quantile = function(domain, prop, filter) {
+    return new QuantileScale(domain, prop, filter).scale;
   };
 
   /*
       kartograph - a svg mapping library 
-      Copyright (C) 2011  Gregor Aisch
+      Copyright (C) 2011,2012  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
@@ -3463,9 +3521,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
+  kartograph = (_ref3 = root.kartograph) != null ? _ref3 : root.kartograph = {};
 
-  if ((_ref2 = kartograph.marker) == null) kartograph.marker = {};
+  if ((_ref4 = kartograph.marker) == null) kartograph.marker = {};
 
   /*
   New API
@@ -3497,18 +3555,22 @@
   		return g;
   	},
   	// type specific options
-  	type: 'Bubble',
+  	type: kartograph.Bubble,
   	radius: function(d) {
   		return Math.sqrt(d.murder/d.pop)*5;
   	},
   	color: '#c00'
   })
+  
+  Instead of passing lonlat coords as location you may
+  pass a string LAYERID.PATHID in order to attach the symbol
+  to the center of a certain path.
   */
 
   SymbolGroup = (function() {
 
     function SymbolGroup(opts) {
-      var SymbolType, d, i, id, l, layer, me, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _len7, _m, _n, _o, _ref3, _ref4, _ref5, _ref6, _ref7;
+      var SymbolType, d, i, id, l, layer, me, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _len7, _m, _n, _o, _ref5, _ref6, _ref7, _ref8, _ref9;
       var _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
@@ -3525,26 +3587,22 @@
         p = optional[_j];
         if (opts[p] != null) me[p] = opts[p];
       }
-      if (__type(me.type) === "string") {
-        SymbolType = kartograph[me.type];
-      } else {
-        SymbolType = me.type;
-      }
+      SymbolType = me.type;
       if (!(SymbolType != null)) {
         warn('could not resolve symbol type', me.type);
         return;
       }
-      _ref3 = SymbolType.props;
-      for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-        p = _ref3[_k];
+      _ref5 = SymbolType.props;
+      for (_k = 0, _len3 = _ref5.length; _k < _len3; _k++) {
+        p = _ref5[_k];
         if (opts[p] != null) me[p] = opts[p];
       }
       me.layers = {
         mapcanvas: me.map.paper
       };
-      _ref4 = SymbolType.layers;
-      for (_l = 0, _len4 = _ref4.length; _l < _len4; _l++) {
-        l = _ref4[_l];
+      _ref6 = SymbolType.layers;
+      for (_l = 0, _len4 = _ref6.length; _l < _len4; _l++) {
+        l = _ref6[_l];
         nid = SymbolGroup._layerid++;
         id = 'sl_' + nid;
         if (l.type === 'svg') {
@@ -3564,19 +3622,19 @@
         }
       }
       me.layoutSymbols();
-      _ref5 = me.symbols;
-      for (_m = 0, _len5 = _ref5.length; _m < _len5; _m++) {
-        s = _ref5[_m];
+      _ref7 = me.symbols;
+      for (_m = 0, _len5 = _ref7.length; _m < _len5; _m++) {
+        s = _ref7[_m];
         s.render();
       }
       if (__type(me.tooltip) === "function") me.initTooltips();
       if (__type(me.click) === "function") {
-        _ref6 = me.symbols;
-        for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
-          s = _ref6[_n];
-          _ref7 = s.nodes();
-          for (_o = 0, _len7 = _ref7.length; _o < _len7; _o++) {
-            node = _ref7[_o];
+        _ref8 = me.symbols;
+        for (_n = 0, _len6 = _ref8.length; _n < _len6; _n++) {
+          s = _ref8[_n];
+          _ref9 = s.nodes();
+          for (_o = 0, _len7 = _ref9.length; _o < _len7; _o++) {
+            node = _ref9[_o];
             node.symbol = s;
             $(node).click(function(e) {
               e.stopPropagation();
@@ -3592,7 +3650,7 @@
       /*
       		adds a new symbol to this group
       */
-      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref3;
+      var SymbolType, ll, me, p, sprops, symbol, _i, _len, _ref5;
       me = this;
       SymbolType = me.type;
       ll = me.evaluate(me.location, data);
@@ -3603,9 +3661,9 @@
         data: data,
         map: me.map
       };
-      _ref3 = SymbolType.props;
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        p = _ref3[_i];
+      _ref5 = SymbolType.props;
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        p = _ref5[_i];
         if (me[p] != null) sprops[p] = me.evaluate(me[p], data);
       }
       symbol = new SymbolType(sprops);
@@ -3626,18 +3684,19 @@
     };
 
     SymbolGroup.prototype.layoutSymbols = function() {
-      var layer_id, ll, me, path, path_id, s, xy, _i, _len, _ref3, _ref4;
+      var layer_id, ll, me, path, path_id, s, xy, _i, _len, _ref5, _ref6;
       me = this;
-      _ref3 = me.symbols;
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        s = _ref3[_i];
+      _ref5 = me.symbols;
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        s = _ref5[_i];
         ll = s.location;
         if (__type(ll) === 'string') {
-          _ref4 = ll.split('.'), layer_id = _ref4[0], path_id = _ref4[1];
+          _ref6 = ll.split('.'), layer_id = _ref6[0], path_id = _ref6[1];
           path = me.map.getLayerPath(layer_id, path_id);
           if (path != null) {
             xy = me.map.viewBC.project(path.path.centroid());
           } else {
+            console.warn('could not find layer path ' + layer_id + '.' + path_id);
             continue;
           }
         } else {
@@ -3653,19 +3712,19 @@
       /*
       		layouts symbols in this group, eventually adds new 'grouped' symbols
       */
-      var me, overlap, _ref3;
+      var me, overlap, _ref5;
       me = this;
-      if ((_ref3 = me.gsymbols) == null) me.gsymbols = [];
+      if ((_ref5 = me.gsymbols) == null) me.gsymbols = [];
       return overlap = true;
     };
 
     SymbolGroup.prototype.initTooltips = function() {
-      var cfg, me, node, s, tooltips, tt, _i, _j, _len, _len2, _ref3, _ref4;
+      var cfg, me, node, s, tooltips, tt, _i, _j, _len, _len2, _ref5, _ref6;
       me = this;
       tooltips = me.tooltip;
-      _ref3 = me.symbols;
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        s = _ref3[_i];
+      _ref5 = me.symbols;
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        s = _ref5[_i];
         cfg = {
           position: {
             target: 'mouse',
@@ -3687,26 +3746,26 @@
           cfg.content.title = tt[0];
           cfg.content.text = tt[1];
         }
-        _ref4 = s.nodes();
-        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
-          node = _ref4[_j];
+        _ref6 = s.nodes();
+        for (_j = 0, _len2 = _ref6.length; _j < _len2; _j++) {
+          node = _ref6[_j];
           $(node).qtip(cfg);
         }
       }
     };
 
     SymbolGroup.prototype.remove = function() {
-      var id, layer, me, s, _i, _len, _ref3, _ref4, _results;
+      var id, layer, me, s, _i, _len, _ref5, _ref6, _results;
       me = this;
-      _ref3 = me.symbols;
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        s = _ref3[_i];
+      _ref5 = me.symbols;
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        s = _ref5[_i];
         s.clear();
       }
-      _ref4 = me.layers;
+      _ref6 = me.layers;
       _results = [];
-      for (id in _ref4) {
-        layer = _ref4[id];
+      for (id in _ref6) {
+        layer = _ref6[id];
         if (id !== "mapcanvas") {
           _results.push(layer.remove());
         } else {
@@ -3717,13 +3776,13 @@
     };
 
     SymbolGroup.prototype.onResize = function() {
-      var me, s, _i, _len, _ref3, _results;
+      var me, s, _i, _len, _ref5, _results;
       me = this;
       me.layoutSymbols();
-      _ref3 = me.symbols;
+      _ref5 = me.symbols;
       _results = [];
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        s = _ref3[_i];
+      for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+        s = _ref5[_i];
         _results.push(s.update());
       }
       return _results;
@@ -3766,95 +3825,19 @@
 
   })();
 
-  Bubble = (function() {
-
-    __extends(Bubble, Symbol);
-
-    function Bubble(opts) {
-      var me, _ref3, _ref4, _ref5;
-      me = this;
-      Bubble.__super__.constructor.call(this, opts);
-      me.radius = (_ref3 = opts.radius) != null ? _ref3 : 4;
-      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
-      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
-    }
-
-    Bubble.prototype.overlaps = function(bubble) {
-      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref3, _ref4;
-      me = this;
-      _ref3 = [me.x, me.y, me.radius], x1 = _ref3[0], y1 = _ref3[1], r1 = _ref3[2];
-      _ref4 = [bubble.x, bubble.y, bubble.radius], x2 = _ref4[0], y2 = _ref4[1], r2 = _ref4[2];
-      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
-        return false;
-      }
-      dx = x1 - x2;
-      dy = y1 - y2;
-      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
-      return true;
-    };
-
-    Bubble.prototype.render = function(layers) {
-      var me;
-      me = this;
-      me.path = me.layers.a.circle(me.x, me.y, me.radius);
-      me.update();
-      me.map.applyStyles(me.path);
-      return me;
-    };
-
-    Bubble.prototype.update = function() {
-      var me, path;
-      me = this;
-      me.path.attr({
-        x: me.x,
-        y: me.y,
-        r: me.radius
-      });
-      path = me.path;
-      path.node.setAttribute('style', me.style);
-      path.node.setAttribute('class', me["class"]);
-      return me;
-    };
-
-    Bubble.prototype.clear = function() {
-      var me;
-      me = this;
-      me.path.remove();
-      return me;
-    };
-
-    Bubble.prototype.nodes = function() {
-      var me;
-      me = this;
-      return [me.path.node];
-    };
-
-    return Bubble;
-
-  })();
-
-  Bubble.props = ['radius', 'style', 'class'];
-
-  Bubble.layers = [
-    {
-      id: 'a',
-      type: 'svg'
-    }
-  ];
-
-  kartograph.Bubble = Bubble;
+  kartograph.Symbol = Symbol;
 
   HtmlLabel = (function() {
 
     __extends(HtmlLabel, Symbol);
 
     function HtmlLabel(opts) {
-      var me, _ref3, _ref4, _ref5;
+      var me, _ref5, _ref6, _ref7;
       me = this;
       HtmlLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref3 = opts.text) != null ? _ref3 : '';
-      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
-      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+      me.text = (_ref5 = opts.text) != null ? _ref5 : '';
+      me.style = (_ref6 = opts.style) != null ? _ref6 : '';
+      me["class"] = (_ref7 = opts["class"]) != null ? _ref7 : '';
     }
 
     HtmlLabel.prototype.render = function(layers) {
@@ -3921,12 +3904,12 @@
     __extends(SvgLabel, Symbol);
 
     function SvgLabel(opts) {
-      var me, _ref3, _ref4, _ref5;
+      var me, _ref5, _ref6, _ref7;
       me = this;
       SvgLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref3 = opts.text) != null ? _ref3 : '';
-      me.style = (_ref4 = opts.style) != null ? _ref4 : '';
-      me["class"] = (_ref5 = opts["class"]) != null ? _ref5 : '';
+      me.text = (_ref5 = opts.text) != null ? _ref5 : '';
+      me.style = (_ref6 = opts.style) != null ? _ref6 : '';
+      me["class"] = (_ref7 = opts["class"]) != null ? _ref7 : '';
     }
 
     SvgLabel.prototype.render = function(layers) {
@@ -3971,19 +3954,136 @@
 
   kartograph.Label = SvgLabel;
 
+}).call(this);
+(function() {
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011,2012  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  var Bubble, Icon, PieChart, StackedBarChart;
+  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  Bubble = (function() {
+
+    __extends(Bubble, kartograph.Symbol);
+
+    function Bubble(opts) {
+      var me, _ref, _ref2, _ref3;
+      me = this;
+      Bubble.__super__.constructor.call(this, opts);
+      me.radius = (_ref = opts.radius) != null ? _ref : 4;
+      me.style = (_ref2 = opts.style) != null ? _ref2 : '';
+      me.title = opts.title;
+      me["class"] = (_ref3 = opts["class"]) != null ? _ref3 : 'bubble';
+    }
+
+    Bubble.prototype.overlaps = function(bubble) {
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref, _ref2;
+      me = this;
+      _ref = [me.x, me.y, me.radius], x1 = _ref[0], y1 = _ref[1], r1 = _ref[2];
+      _ref2 = [bubble.x, bubble.y, bubble.radius], x2 = _ref2[0], y2 = _ref2[1], r2 = _ref2[2];
+      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
+        return false;
+      }
+      dx = x1 - x2;
+      dy = y1 - y2;
+      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
+      return true;
+    };
+
+    Bubble.prototype.render = function(layers) {
+      var me;
+      me = this;
+      me.path = me.layers.mapcanvas.circle(me.x, me.y, me.radius);
+      me.update();
+      me.map.applyStyles(me.path);
+      return me;
+    };
+
+    Bubble.prototype.update = function() {
+      var me, path;
+      me = this;
+      me.path.attr({
+        x: me.x,
+        y: me.y,
+        r: me.radius
+      });
+      path = me.path;
+      path.node.setAttribute('style', me.style);
+      path.node.setAttribute('class', me["class"]);
+      if (me.title != null) path.attr('title', me.title);
+      return me;
+    };
+
+    Bubble.prototype.clear = function() {
+      var me;
+      me = this;
+      me.path.remove();
+      return me;
+    };
+
+    Bubble.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.path.node];
+    };
+
+    return Bubble;
+
+  })();
+
+  Bubble.props = ['radius', 'style', 'class', 'title'];
+
+  Bubble.layers = [];
+
+  kartograph.Bubble = Bubble;
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011,2012  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
   Icon = (function() {
 
-    __extends(Icon, Symbol);
+    __extends(Icon, kartograph.Symbol);
 
     function Icon(opts) {
-      var me, _ref3, _ref4, _ref5, _ref6, _ref7;
+      var me, _ref, _ref2, _ref3, _ref4, _ref5;
       me = this;
       Icon.__super__.constructor.call(this, opts);
-      me.icon = (_ref3 = opts.icon) != null ? _ref3 : '';
-      me.offset = (_ref4 = opts.offset) != null ? _ref4 : [0, 0];
-      me.iconsize = (_ref5 = opts.iconsize) != null ? _ref5 : [10, 10];
-      me["class"] = (_ref6 = opts["class"]) != null ? _ref6 : '';
-      me.title = (_ref7 = opts.title) != null ? _ref7 : '';
+      me.icon = (_ref = opts.icon) != null ? _ref : '';
+      me.offset = (_ref2 = opts.offset) != null ? _ref2 : [0, 0];
+      me.iconsize = (_ref3 = opts.iconsize) != null ? _ref3 : [10, 10];
+      me["class"] = (_ref4 = opts["class"]) != null ? _ref4 : '';
+      me.title = (_ref5 = opts.title) != null ? _ref5 : '';
     }
 
     Icon.prototype.render = function(layers) {
@@ -4040,5 +4140,336 @@
   Icon.layers = [];
 
   kartograph.Icon = Icon;
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011,2012  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  
+
+drawPieChart = function (cx, cy, r, values, labels, colors, stroke) {
+    var paper = this,
+        rad = Math.PI / 180,
+        chart = this.set();
+    function sector(cx, cy, r, startAngle, endAngle, params) {
+        var x1 = cx + r * Math.cos(-startAngle * rad),
+            x2 = cx + r * Math.cos(-endAngle * rad),
+            y1 = cy + r * Math.sin(-startAngle * rad),
+            y2 = cy + r * Math.sin(-endAngle * rad);
+        return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle > 180), 0, x2, y2, "z"]).attr(params);
+    }
+    var angle = -270,
+        total = 0,
+        start = 1,
+        process = function (j) {
+            var value = values[j],
+                angleplus = 360 * value / total,
+                popangle = angle + (angleplus / 2),
+                color = colors[j],
+                ms = 500,
+                delta = 30,
+                bcolor = Raphael.hsb(start, .6, 1),
+                p = sector(cx, cy, r, angle, angle + angleplus, {fill: color, stroke: stroke, "stroke-width": 1}),
+                txt = paper.text(cx + (r*1.5) * Math.cos(-popangle * rad), cy + (r *1.5) * Math.sin(-popangle * rad), labels[j]).attr({fill: "#000", stroke: "none", opacity: 0, "font-size": 13});
+            p.mouseover(function () {
+                p.stop().animate({transform: "s1.1 1.1 " + cx + " " + cy}, ms, "elastic");
+                txt.stop().animate({opacity: 1}, ms, "elastic");
+            }).mouseout(function () {
+                p.stop().animate({transform: ""}, ms, "elastic");
+                txt.stop().animate({opacity: 0}, ms);
+            });
+            angle += angleplus;
+            chart.push(p);
+            chart.push(txt);
+            start -= .4;
+        };
+    for (var i = 0, ii = values.length; i < ii; i++) {
+        total += values[i];
+    }
+    for (i = ii-1; i >= 0; i--) {
+        process(i);
+    }
+    return chart;
+};
+
+;
+
+  PieChart = (function() {
+
+    __extends(PieChart, kartograph.Symbol);
+
+    /*
+    	usage:
+    	new SymbolMap({
+    		map: map,
+    		radius: 10
+    		data: [25,75],
+    		colors: ['red', 'blue'],
+    		titles: ['red pie', 'blue pie']
+    	})
+    */
+
+    function PieChart(opts) {
+      var me, _base, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+      me = this;
+      PieChart.__super__.constructor.call(this, opts);
+      me.radius = (_ref = opts.radius) != null ? _ref : 4;
+      me.styles = (_ref2 = opts.styles) != null ? _ref2 : '';
+      me.colors = (_ref3 = opts.colors) != null ? _ref3 : [];
+      me.titles = (_ref4 = opts.titles) != null ? _ref4 : ['', '', '', '', ''];
+      me.values = (_ref5 = opts.values) != null ? _ref5 : [];
+      me["class"] = (_ref6 = opts["class"]) != null ? _ref6 : 'piechart';
+      if ((_ref7 = (_base = Raphael.fn).pieChart) == null) {
+        _base.pieChart = drawPieChart;
+      }
+    }
+
+    PieChart.prototype.overlaps = function(bubble) {
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref, _ref2;
+      me = this;
+      _ref = [me.x, me.y, me.radius], x1 = _ref[0], y1 = _ref[1], r1 = _ref[2];
+      _ref2 = [bubble.x, bubble.y, bubble.radius], x2 = _ref2[0], y2 = _ref2[1], r2 = _ref2[2];
+      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
+        return false;
+      }
+      dx = x1 - x2;
+      dy = y1 - y2;
+      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
+      return true;
+    };
+
+    PieChart.prototype.render = function(layers) {
+      var bg, me;
+      me = this;
+      bg = me.layers.mapcanvas.circle(me.x, me.y, me.radius + 2).attr({
+        stroke: 'none',
+        fill: '#fff'
+      });
+      me.chart = me.layers.mapcanvas.pieChart(me.x, me.y, me.radius, me.values, me.titles, me.colors, "none");
+      me.chart.push(bg);
+      return me;
+    };
+
+    PieChart.prototype.update = function() {
+      var me, path;
+      me = this;
+      return;
+      me.path.attr({
+        x: me.x,
+        y: me.y,
+        r: me.radius
+      });
+      path = me.path;
+      path.node.setAttribute('style', me.styles[0]);
+      path.node.setAttribute('class', me["class"]);
+      if (me.title != null) path.attr('title', me.titles[0]);
+      return me;
+    };
+
+    PieChart.prototype.clear = function() {
+      var me, p, _i, _len, _ref;
+      me = this;
+      _ref = me.chart;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        p = _ref[_i];
+        p.remove();
+      }
+      return me;
+    };
+
+    PieChart.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.path.node];
+    };
+
+    return PieChart;
+
+  })();
+
+  PieChart.props = ['radius', 'values', 'styles', 'class', 'titles', 'colors'];
+
+  PieChart.layers = [];
+
+  kartograph.PieChart = PieChart;
+
+  /*
+      kartograph - a svg mapping library 
+      Copyright (C) 2011,2012  Gregor Aisch
+  
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+  
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
+  
+
+drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
+    var paper = this,
+        chart = this.set();
+    function bar(x, y, w, h, params) {
+        return paper.rect(x,y,w,h).attr(params);
+    }
+    var yo = 0,
+        total = 0,
+        process = function (j) {
+            var value = values[j],
+                bh = h * value / total,
+                x = cx - w*0.5,
+                y = cy + h*0.5 - yo,
+                bw = w,
+                color = colors[j],
+                ms = 500,
+                delta = 30,
+                p = bar(x, y-bh, bw, bh, {fill: color, stroke: stroke, "stroke-width": 1});
+            
+            yo += bh;
+            
+            p.mouseover(function () {
+                p.stop().animate({transform: "s1.1 1.1 " + cx + " " + cy}, ms, "elastic");
+            }).mouseout(function () {
+                p.stop().animate({transform: ""}, ms, "elastic");
+                
+            });
+            chart.push(p);
+        };
+    for (var i = 0, ii = values.length; i < ii; i++) {
+        total += values[i];
+    }
+    for (i = 0; i < ii; i++) {
+        process(i);
+    }
+    return chart;
+};
+
+;
+
+  StackedBarChart = (function() {
+
+    __extends(StackedBarChart, kartograph.Symbol);
+
+    /*
+    	usage:
+    	new SymbolMap({
+    		map: map,
+    		radius: 10
+    		data: [25,75],
+    		colors: ['red', 'blue'],
+    		titles: ['red pie', 'blue pie']
+    	})
+    */
+
+    function StackedBarChart(opts) {
+      var me, _base, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+      me = this;
+      StackedBarChart.__super__.constructor.call(this, opts);
+      me.styles = (_ref = opts.styles) != null ? _ref : '';
+      me.colors = (_ref2 = opts.colors) != null ? _ref2 : [];
+      me.titles = (_ref3 = opts.titles) != null ? _ref3 : ['', '', '', '', ''];
+      me.values = (_ref4 = opts.values) != null ? _ref4 : [];
+      me.width = (_ref5 = opts.width) != null ? _ref5 : 17;
+      me.height = (_ref6 = opts.height) != null ? _ref6 : 30;
+      me["class"] = (_ref7 = opts["class"]) != null ? _ref7 : 'barchart';
+      if ((_ref8 = (_base = Raphael.fn).drawStackedBarChart) == null) {
+        _base.drawStackedBarChart = drawStackedBars;
+      }
+    }
+
+    StackedBarChart.prototype.overlaps = function(bubble) {
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref, _ref2;
+      me = this;
+      _ref = [me.x, me.y, me.radius], x1 = _ref[0], y1 = _ref[1], r1 = _ref[2];
+      _ref2 = [bubble.x, bubble.y, bubble.radius], x2 = _ref2[0], y2 = _ref2[1], r2 = _ref2[2];
+      if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
+        return false;
+      }
+      dx = x1 - x2;
+      dy = y1 - y2;
+      if (dx * dx + dy * dy > (r1 + r2) * (r1 + r2)) return false;
+      return true;
+    };
+
+    StackedBarChart.prototype.render = function(layers) {
+      var bg, h, me, w, x, y;
+      me = this;
+      w = me.width;
+      h = me.height;
+      x = me.x;
+      y = me.y;
+      bg = me.layers.mapcanvas.rect(x - w * 0.5 - 2, y - h * 0.5 - 2, w + 4, h + 4).attr({
+        stroke: 'none',
+        fill: '#fff'
+      });
+      me.chart = me.layers.mapcanvas.drawStackedBarChart(me.x, me.y, me.width, me.height, me.values, me.titles, me.colors, "none");
+      me.chart.push(bg);
+      return me;
+    };
+
+    StackedBarChart.prototype.update = function() {
+      var me, path;
+      me = this;
+      return;
+      me.path.attr({
+        x: me.x,
+        y: me.y,
+        r: me.radius
+      });
+      path = me.path;
+      path.node.setAttribute('style', me.styles[0]);
+      path.node.setAttribute('class', me["class"]);
+      if (me.title != null) path.attr('title', me.titles[0]);
+      return me;
+    };
+
+    StackedBarChart.prototype.clear = function() {
+      var me, p, _i, _len, _ref;
+      me = this;
+      _ref = me.chart;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        p = _ref[_i];
+        p.remove();
+      }
+      me.chart = [];
+      return me;
+    };
+
+    StackedBarChart.prototype.nodes = function() {
+      var me;
+      me = this;
+      return [me.path.node];
+    };
+
+    return StackedBarChart;
+
+  })();
+
+  StackedBarChart.props = ['values', 'styles', 'class', 'titles', 'colors', 'width', 'height'];
+
+  StackedBarChart.layers = [];
+
+  kartograph.StackedBarChart = StackedBarChart;
 
 }).call(this);

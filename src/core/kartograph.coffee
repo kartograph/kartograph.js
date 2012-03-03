@@ -1,6 +1,6 @@
 ###
     kartograph - a svg mapping library 
-    Copyright (C) 2011  Gregor Aisch
+    Copyright (C) 2011,2012  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 root = (exports ? this)	
 kartograph = root.$K = root.kartograph ?= {}
 
-kartograph.version = "0.4.6"
+kartograph.version = "0.0.0"
 
 warn = (s) ->
 	console.warn('kartograph ('+kartograph.version+'): '+s)
@@ -375,23 +375,7 @@ class Kartograph
 		lonlat = new kartograph.LonLat(lonlat[0], lonlat[1], lonlat[2]) if lonlat.length == 3
 		a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt)
 		me.viewBC.project(me.viewAB.project(a))
-		
-		
-	addGeoPath: (points, cmds=[], className = '') ->
-		me = @
-		if cmds.length == 0
-			cmds.push 'M'
-		
-		path_str = ''
-		for i of points
-			pt = points[i]
-			cmd = cmds[i] ? 'L'
-			xy = me.lonlat2xy pt
-			path_str += cmd+xy[0]+','+xy[1]
-			
-		path = me.paper.path path_str
-		path.node.setAttribute 'class', className
-		return
+
 		
 	showZoomControls: () ->
 		me = @
@@ -508,7 +492,7 @@ class MapLayer
 			me.pathsById ?= {}
 			me.pathsById[layerPath.data[me.path_id]] ?= []
 			me.pathsById[layerPath.data[me.path_id]].push(layerPath)
-		
+			
 	
 	hasPath: (id) ->
 		me = @
@@ -538,6 +522,7 @@ class MapLayer
 			path.remove()
 
 map_layer_path_uid = 0			
+
 		
 class MapLayerPath
 
@@ -568,7 +553,7 @@ class MapLayerPath
 			title = titles(data)
 		
 		if title?
-			me.svgPath.attr('title', title)
+			me.svgPath.attr 'title', title
 		
 	setView: (view) ->
 		me = @

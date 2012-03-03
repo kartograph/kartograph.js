@@ -1,6 +1,6 @@
 ###
     kartograph - a svg mapping library 
-    Copyright (C) 2011  Gregor Aisch
+    Copyright (C) 2011,2012  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,13 +50,16 @@ sg = new SymbolGroup({
 		return g;
 	},
 	// type specific options
-	type: 'Bubble',
+	type: kartograph.Bubble,
 	radius: function(d) {
 		return Math.sqrt(d.murder/d.pop)*5;
 	},
 	color: '#c00'
 })
 
+Instead of passing lonlat coords as location you may
+pass a string LAYERID.PATHID in order to attach the symbol
+to the center of a certain path.
 ###
 
 class SymbolGroup
@@ -76,11 +79,8 @@ class SymbolGroup
 			if opts[p]?
 				me[p] = opts[p]
 		
-		if __type(me.type) == "string"
-			SymbolType = kartograph[me.type]
-		else
-			SymbolType = me.type
-			
+		SymbolType = me.type
+		
 		if not SymbolType?
 			warn 'could not resolve symbol type', me.type
 			return
@@ -176,6 +176,7 @@ class SymbolGroup
 				if path?
 					xy = me.map.viewBC.project path.path.centroid()
 				else
+					console.warn 'could not find layer path '+layer_id+'.'+path_id
 					continue
 			else
 				xy = me.map.lonlat2xy ll
@@ -258,62 +259,7 @@ class Symbol
 	clear: () ->
 		return
 
-	
-class Bubble extends Symbol
-
-	constructor: (opts) ->
-		me = @
-		super opts
-		me.radius = opts.radius ? 4
-		me.style = opts.style ? ''
-		me.class = opts.class ? 'bubble'
-				
-	overlaps: (bubble) ->
-		me = @
-		# check bbox
-		[x1,y1,r1] = [me.x, me.y, me.radius]
-		[x2,y2,r2] = [bubble.x, bubble.y, bubble.radius]
-		return false if x1 - r1 > x2 + r2 or x1 + r1 < x2 - r2 or y1 - r1 > y2 + r2 or y1 + r1 < y2 - r2
-		dx = x1-x2
-		dy = y1-y2
-		if dx*dx+dy*dy > (r1+r2)*(r1+r2)
-			return false
-		true
-
-	render: (layers) ->
-		me = @
-		me.path = me.layers.a.circle(me.x,me.y,me.radius)
-		me.update()
-		me.map.applyStyles(me.path)
-		me
-		
-	update: () ->
-		me = @
-		me.path.attr 
-			x: me.x
-			y: me.y
-			r: me.radius
-		path = me.path
-		path.node.setAttribute 'style', me.style
-		path.node.setAttribute 'class', me.class
-		me
-	
-	clear: () ->
-		me = @
-		me.path.remove()
-		me
-		
-	nodes: () ->
-		me = @
-		[me.path.node]
-		
-	
-		
-
-Bubble.props = ['radius','style','class']
-Bubble.layers = [{ id:'a', type: 'svg' }]
-
-kartograph.Bubble = Bubble
+kartograph.Symbol = Symbol
 
 
 class HtmlLabel extends Symbol
@@ -402,67 +348,5 @@ SvgLabel.props = ['text', 'style', 'class']
 SvgLabel.layers = []
 
 kartograph.Label = SvgLabel
-
-
-
-
-class Icon extends Symbol
-	
-	constructor: (opts) ->
-		me = @
-		super opts
-		me.icon = opts.icon ? ''
-		me.offset = opts.offset ? [0,0]
-		me.iconsize = opts.iconsize ? [10,10]
-		me.class = opts.class ? ''
-		me.title = opts.title ? ''
-		
-	
-	render: (layers) ->
-		me = @
-		cont = me.map.container
-		me.img = $ '<img />'
-		me.img.attr
-			src: me.icon
-			title: me.title
-			alt: me.title
-			width: me.iconsize[0]
-			height: me.iconsize[1]
-		
-		me.img.addClass me.class
-		
-		me.img.css
-			position: 'absolute'
-			'z-index': 1000
-			cursor: 'pointer'
-			
-		me.img[0].symbol = me
-		cont.append me.img
-		me.update()
-	
-	update: () ->
-		me = @
-		me.img.css
-			left: (me.x+me.offset[0])+'px'
-			top: (me.y+me.offset[1])+'px'
-			
-	clear: () ->
-		me = @
-		me.img.remove()
-		me
-		
-	nodes: () ->
-		me = @
-		[me.img]
-
-
-Icon.props = ['icon','offset','class','title','iconsize']
-Icon.layers = []
-
-kartograph.Icon = Icon
-
-
-
-
 
 

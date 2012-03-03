@@ -6,6 +6,7 @@
 #
 cat src/core/*.coffee | coffee -sp > tmp
 cat src/modules/*.coffee | coffee -sp >> tmp
+cat src/modules/symbols/*.coffee | coffee -sp >> tmp
 cat src/license tmp > kartograph.js
 rm tmp
 uglifyjs kartograph.js > kartograph.min.js
