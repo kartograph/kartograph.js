@@ -59,6 +59,8 @@ to the center of a certain path.
 ###
 
 class SymbolGroup
+    ### symbol groups ###
+    me = null
 
     constructor: (opts) ->
         me = @
@@ -130,12 +132,9 @@ class SymbolGroup
 
 
     addSymbol: (data) ->
-        ###
-        adds a new symbol to this group
-        ###
-        me = @
+        ### adds a new symbol to this group ###
         SymbolType = me.type
-        ll = me.evaluate me.location,data
+        ll = me._evaluate me.location,data
         if __type(ll) == 'array'
             ll = new kartograph.LonLat ll[0],ll[1]
 
@@ -147,23 +146,20 @@ class SymbolGroup
 
         for p in SymbolType.props
             if me[p]?
-                sprops[p] = me.evaluate me[p],data
+                sprops[p] = me._evaluate me[p],data
 
         symbol = new SymbolType sprops
         me.symbols.push(symbol)
         symbol
 
-    evaluate: (prop, data) ->
-        ###
-        evaluates a property function or returns a static value
-        ###
+    _evaluate: (prop, data) ->
+        ### evaluates a property function or returns a static value ###
         if __type(prop) == 'function'
             val = prop(data)
         else
             val = prop
 
     layoutSymbols: () ->
-        me = @
         for s in me.symbols
             ll = s.location
             if __type(ll) == 'string'
@@ -185,12 +181,10 @@ class SymbolGroup
         ###
         layouts symbols in this group, eventually adds new 'grouped' symbols
         ###
-        me = @
         me.gsymbols ?= []
         overlap = true
 
     initTooltips: () ->
-        me = @
         tooltips = me.tooltip
         for s in me.symbols
             cfg =
@@ -215,7 +209,6 @@ class SymbolGroup
         return
 
     remove: () ->
-        me = @
         for s in me.symbols
             s.clear()
         for id,layer of me.layers
@@ -223,7 +216,6 @@ class SymbolGroup
                 layer.remove()
 
     onResize: () ->
-        me = @
         me.layoutSymbols()
         for s in me.symbols
             s.update()
@@ -233,93 +225,5 @@ SymbolGroup._layerid = 0
 kartograph.SymbolGroup = SymbolGroup
 
 
-
-
-class HtmlLabel extends Symbol
-
-    constructor: (opts) ->
-        me = @
-        super opts
-        me.text = opts.text ? ''
-        me.style = opts.style ? ''
-        me.class = opts.class ? ''
-
-    render: (layers) ->
-        me = @
-        l = $ '<div>'+me.text+'</div>'
-        l.css
-            width: '50px'
-            position: 'absolute'
-            left: '-25px'
-            'text-align': 'center'
-        me.lbl = lbl = $ '<div class="label" />'
-        lbl.append l
-        me.layers.lbl.append lbl
-
-        l.css
-            height: l.height()+'px'
-            top: (l.height()*-.4)+'px'
-
-        me.update()
-        me
-
-    update: () ->
-        me = @
-        me.lbl.css
-            position: 'absolute'
-            left: me.x+'px'
-            top: me.y+'px'
-
-    clear: () ->
-        me = @
-        me.lbl.remove()
-        me
-
-    nodes: () ->
-        me = @
-        [me.lbl[0]]
-
-HtmlLabel.props = ['text', 'style', 'class']
-HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
-
-kartograph.HtmlLabel = HtmlLabel
-
-
-class SvgLabel extends Symbol
-
-    constructor: (opts) ->
-        me = @
-        super opts
-        me.text = opts.text ? ''
-        me.style = opts.style ? ''
-        me.class = opts.class ? ''
-
-    render: (layers) ->
-        me = @
-        me.lbl = lbl = me.layers.mapcanvas.text me.x, me.y, me.text
-        me.update()
-        me
-
-    update: () ->
-        me = @
-        me.lbl.attr
-            x: me.x
-            y: me.y
-        me.lbl.node.setAttribute 'style',me.style
-        me.lbl.node.setAttribute 'class',me.class
-
-    clear: () ->
-        me = @
-        me.lbl.remove()
-        me
-
-    nodes: () ->
-        me = @
-        [me.lbl.node]
-
-SvgLabel.props = ['text', 'style', 'class']
-SvgLabel.layers = []
-
-kartograph.Label = SvgLabel
 
 

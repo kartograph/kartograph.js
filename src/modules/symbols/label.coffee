@@ -1,0 +1,105 @@
+###
+    kartograph - a svg mapping library
+    Copyright (C) 2011,2012  Gregor Aisch
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###
+
+class SvgLabel extends kartograph.Symbol
+
+    constructor: (opts) ->
+        me = @
+        super opts
+        me.text = opts.text ? ''
+        me.style = opts.style ? ''
+        me.class = opts.class ? ''
+
+    render: (layers) ->
+        me = @
+        me.lbl = lbl = me.layers.mapcanvas.text me.x, me.y, me.text
+        me.update()
+        me
+
+    update: () ->
+        me = @
+        me.lbl.attr
+            x: me.x
+            y: me.y
+        me.lbl.node.setAttribute 'style',me.style
+        me.lbl.node.setAttribute 'class',me.class
+
+    clear: () ->
+        me = @
+        me.lbl.remove()
+        me
+
+    nodes: () ->
+        me = @
+        [me.lbl.node]
+
+SvgLabel.props = ['text', 'style', 'class']
+SvgLabel.layers = []
+
+kartograph.Label = SvgLabel
+
+
+
+class HtmlLabel extends kartograph.Symbol
+
+    constructor: (opts) ->
+        me = @
+        super opts
+        me.text = opts.text ? ''
+        me.style = opts.style ? ''
+        me.class = opts.class ? ''
+
+    render: (layers) ->
+        me = @
+        l = $ '<div>'+me.text+'</div>'
+        l.css
+            width: '50px'
+            position: 'absolute'
+            left: '-25px'
+            'text-align': 'center'
+        me.lbl = lbl = $ '<div class="label" />'
+        lbl.append l
+        me.layers.lbl.append lbl
+
+        l.css
+            height: l.height()+'px'
+            top: (l.height()*-.4)+'px'
+
+        me.update()
+        me
+
+    update: () ->
+        me = @
+        me.lbl.css
+            position: 'absolute'
+            left: me.x+'px'
+            top: me.y+'px'
+
+    clear: () ->
+        me = @
+        me.lbl.remove()
+        me
+
+    nodes: () ->
+        me = @
+        [me.lbl[0]]
+
+HtmlLabel.props = ['text', 'style', 'class']
+HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
+
+kartograph.HtmlLabel = HtmlLabel

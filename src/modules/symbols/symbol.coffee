@@ -19,6 +19,8 @@
 
 class Symbol
     ### base class for all symbols ###
+    me = null
+
     constructor: (opts) ->
         me = @
         me.location = opts.location
@@ -29,15 +31,19 @@ class Symbol
         me.y = opts.y
 
     init: () ->
-        return
+        me
 
     overlaps: (symbol) ->
         false
+
+    update: (opts) ->
+        ### once the data has changed ###
+        me
 
     nodes: () ->
         []
 
     clear: () ->
-        return
+        me
 
 kartograph.Symbol = Symbol
