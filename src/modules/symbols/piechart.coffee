@@ -1,5 +1,5 @@
 ###
-    kartograph - a svg mapping library 
+    kartograph - a svg mapping library
     Copyright (C) 2011,2012  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -65,82 +65,81 @@ drawPieChart = function (cx, cy, r, values, labels, colors, stroke) {
 
 `
 
-	
+
 class PieChart extends kartograph.Symbol
-	###
-	usage:
-	new SymbolMap({
-		map: map,
-		radius: 10
-		data: [25,75],
-		colors: ['red', 'blue'],
-		titles: ['red pie', 'blue pie']
-	})
-	###
-	constructor: (opts) ->
-		me = @
-		super opts
-		me.radius = opts.radius ? 4
-		me.styles = opts.styles ? ''
-		me.colors = opts.colors ? []
-		me.titles = opts.titles ? ['','','','','']
-		me.values = opts.values ? [] 
-		me.class = opts.class ? 'piechart'
-		Raphael.fn.pieChart ?= drawPieChart
-				
-	overlaps: (bubble) ->
-		me = @
-		# check bbox
-		[x1,y1,r1] = [me.x, me.y, me.radius]
-		[x2,y2,r2] = [bubble.x, bubble.y, bubble.radius]
-		return false if x1 - r1 > x2 + r2 or x1 + r1 < x2 - r2 or y1 - r1 > y2 + r2 or y1 + r1 < y2 - r2
-		dx = x1-x2
-		dy = y1-y2
-		if dx*dx+dy*dy > (r1+r2)*(r1+r2)
-			return false
-		true
+    ###
+    usage:
+    new SymbolMap({
+        map: map,
+        radius: 10
+        data: [25,75],
+        colors: ['red', 'blue'],
+        titles: ['red pie', 'blue pie']
+    })
+    ###
+    constructor: (opts) ->
+        me = @
+        super opts
+        me.radius = opts.radius ? 4
+        me.styles = opts.styles ? ''
+        me.colors = opts.colors ? ['#3cc','#c3c','#33c','#cc3']
+        me.titles = opts.titles ? ['','','','','']
+        me.values = opts.values ? []
+        me.border = opts.border ? false
+        me.borderWidth = opts.borderWidth ? 2
+        me.class = opts.class ? 'piechart'
+        Raphael.fn.pieChart ?= drawPieChart
 
-	render: (layers) ->
-		me = @
-		#me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
-		bg = me.layers.mapcanvas.circle(me.x,me.y,me.radius+2).attr
-			stroke: 'none'
-			fill: '#fff'
-			
-		me.chart = me.layers.mapcanvas.pieChart me.x, me.y, me.radius, me.values, me.titles, me.colors, "none"
-		
-		me.chart.push bg
-		
-		#me.update()
-		#me.map.applyStyles(me.path)
-		me
-		
-	update: () ->
-		me = @
-		return
-		me.path.attr 
-			x: me.x
-			y: me.y
-			r: me.radius
-		path = me.path
-		path.node.setAttribute 'style', me.styles[0]
-		path.node.setAttribute 'class', me.class
-		if me.title?
-			path.attr 'title',me.titles[0]
-		me
-	
-	clear: () ->
-		me = @
-		for p in me.chart
-			p.remove()
-		me
-		
-	nodes: () ->
-		me = @
-		[me.path.node]
-		
+    overlaps: (bubble) ->
+        me = @
+        # check bbox
+        [x1,y1,r1] = [me.x, me.y, me.radius]
+        [x2,y2,r2] = [bubble.x, bubble.y, bubble.radius]
+        return false if x1 - r1 > x2 + r2 or x1 + r1 < x2 - r2 or y1 - r1 > y2 + r2 or y1 + r1 < y2 - r2
+        dx = x1-x2
+        dy = y1-y2
+        if dx*dx+dy*dy > (r1+r2)*(r1+r2)
+            return false
+        true
 
-PieChart.props = ['radius','values','styles','class','titles', 'colors']
+    render: (layers) ->
+        me = @
+        #me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
+        if me.border?
+            bg = me.layers.mapcanvas.circle(me.x,me.y,me.radius+me.borderWidth).attr
+                stroke: 'none'
+                fill: me.border
+
+        me.chart = me.layers.mapcanvas.pieChart me.x, me.y, me.radius, me.values, me.titles, me.colors, "none"
+        me.chart.push bg
+        me
+
+    update: () ->
+        me = @
+        return
+        me.path.attr
+            x: me.x
+            y: me.y
+            r: me.radius
+        path = me.path
+        path.node.setAttribute 'style', me.styles[0]
+        path.node.setAttribute 'class', me.class
+        if me.title?
+            path.attr 'title',me.titles[0]
+        me
+
+    clear: () ->
+        me = @
+        for p in me.chart
+            p.remove()
+        me
+
+    nodes: () ->
+        me = @
+        [me.path.node]
+
+
+PieChart.props = ['radius','values','styles','class','titles', 'colors','border','borderWidth']
 PieChart.layers = [] #{ id:'a', type: 'svg' }
 
 kartograph.PieChart = PieChart
