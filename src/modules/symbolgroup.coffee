@@ -59,7 +59,12 @@ to the center of a certain path.
 ###
 
 class SymbolGroup
-    ### symbol groups ###
+    ### symbol groups
+
+    Usage:
+    new $K.SymbolGroup(options);
+    map.addSymbols(options)
+    ###
     me = null
 
     constructor: (opts) ->
@@ -168,7 +173,7 @@ class SymbolGroup
                 if path?
                     xy = me.map.viewBC.project path.path.centroid()
                 else
-                    console.warn 'could not find layer path '+layer_id+'.'+path_id
+                    warn 'could not find layer path '+layer_id+'.'+path_id
                     continue
             else
                 xy = me.map.lonlat2xy ll
@@ -180,6 +185,13 @@ class SymbolGroup
     groupLayout: () ->
         ###
         layouts symbols in this group, eventually adds new 'grouped' symbols
+        map.addSymbols({
+            layout: "group",
+            group: function(data) {
+                // compresses a list of data objects into a single one
+                // typically you want to calculate the mean position, sum value or something here
+            }
+        })
         ###
         me.gsymbols ?= []
         overlap = true
@@ -224,6 +236,8 @@ class SymbolGroup
 SymbolGroup._layerid = 0
 kartograph.SymbolGroup = SymbolGroup
 
-
+kartograph.Kartograph::addSymbols = (opts) ->
+    opts.map = @
+    new SymbolGroup(opts)
 
 

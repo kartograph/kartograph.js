@@ -4,11 +4,13 @@
 # builds all coffee script sources
 # to one single minified js file
 #
-cat src/core/*.coffee | coffee -sp > tmp
-cat src/modules/*.coffee | coffee -sp >> tmp
-cat src/modules/symbols/*.coffee | coffee -sp >> tmp
-cat src/license tmp > kartograph.js
-rm tmp
+cat src/core.coffee > tmp
+cat src/core/*.coffee >> tmp
+cat src/modules/*.coffee >> tmp
+cat src/modules/symbols/*.coffee >> tmp
+cat tmp | coffee -sp > tmp2
+cat src/license tmp2 > kartograph.js
+rm tmp tmp2
 uglifyjs kartograph.js > kartograph.min.js
 cp kartograph.min.js kartograph-chroma.min.js
 uglifyjs lib/chroma.js >> kartograph-chroma.min.js
@@ -16,7 +18,7 @@ uglifyjs lib/chroma.colors.js >> kartograph-chroma.min.js
 mv kartograph*.js dist
 echo "build complete"
 
-cp dist/kartograph.* ~/Incubator/maps/unrefugee/his.locsis.com/js
-cp dist/kartograph.* ~/Incubator/maps/kenya/demo/js/lib
-cp dist/kartograph.* ~/Incubator/okfn/_yourtopia/italymap/   
+#
+# copy build to some locations
+#
 cp dist/kartograph.* ~/Incubator/libraries/kartograph/website/js/

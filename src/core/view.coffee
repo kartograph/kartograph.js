@@ -104,3 +104,4 @@ View.fromXML = (xml) ->
 root = (exports ? this)	
 root.kartograph ?= {}
 root.kartograph.View = View
+

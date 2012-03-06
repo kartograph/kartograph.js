@@ -24,6 +24,7 @@ class SvgLabel extends kartograph.Symbol
         me.text = opts.text ? ''
         me.style = opts.style ? ''
         me.class = opts.class ? ''
+        me.offset = opts.offset ? [0,0]
 
     render: (layers) ->
         me = @
@@ -34,8 +35,8 @@ class SvgLabel extends kartograph.Symbol
     update: () ->
         me = @
         me.lbl.attr
-            x: me.x
-            y: me.y
+            x: me.x + me.offset[0]
+            y: me.y + me.offset[1]
         me.lbl.node.setAttribute 'style',me.style
         me.lbl.node.setAttribute 'class',me.class
 
@@ -48,7 +49,7 @@ class SvgLabel extends kartograph.Symbol
         me = @
         [me.lbl.node]
 
-SvgLabel.props = ['text', 'style', 'class']
+SvgLabel.props = ['text', 'style', 'class', 'offset']
 SvgLabel.layers = []
 
 kartograph.Label = SvgLabel
@@ -103,3 +104,5 @@ HtmlLabel.props = ['text', 'style', 'class']
 HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
 
 kartograph.HtmlLabel = HtmlLabel
+
+

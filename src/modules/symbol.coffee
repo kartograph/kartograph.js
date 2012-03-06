@@ -47,3 +47,4 @@ class Symbol
         me
 
 kartograph.Symbol = Symbol
+

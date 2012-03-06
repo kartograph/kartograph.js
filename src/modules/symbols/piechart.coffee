@@ -16,8 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
 
-
-class PieChart extends kartograph.Symbol
+class PieChart extends Symbol
     ###
     usage:
     new SymbolMap({
@@ -56,6 +55,7 @@ class PieChart extends kartograph.Symbol
 
     render: (layers) ->
         #me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
+        me = @
         if me.border?
             bg = me.layers.mapcanvas.circle(me.x,me.y,me.radius+me.borderWidth).attr
                 stroke: 'none'
@@ -97,6 +97,7 @@ kartograph.PieChart = PieChart
 pie chart extension for RaphaelJS
 ###
 drawPieChart = (cx, cy, r, values, labels, colors, stroke) ->
+    if isNaN(cx) or isNaN(cy) or isNaN(r) then return []
     paper = @
     rad = Math.PI/180
     chart = paper.set()
@@ -121,10 +122,13 @@ drawPieChart = (cx, cy, r, values, labels, colors, stroke) ->
             'stroke-width': 1
         p.mouseover () ->
             p.stop().animate { transform: "s1.1 1.1 " + cx + " " + cy }, ms, "elastic"
+            return
         p.mouseout () ->
             p.stop().animate {transform: ""}, ms, "elastic"
+            return
         angle += angleplus
         chart.push p
+        return
     for v in values
         total += v
     for i of values
@@ -177,6 +181,7 @@ drawPieChart = function (cx, cy, r, values, labels, colors, stroke) {
     return chart;
 };
 ###
+
 
 
 

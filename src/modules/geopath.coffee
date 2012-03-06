@@ -1,5 +1,5 @@
 ###
-    kartograph - a svg mapping library 
+    kartograph - a svg mapping library
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -16,31 +16,32 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
 
-root = (exports ? this)	
+root = (exports ? this)
 kartograph = root.$K = root.kartograph ?= {}
 
 kartograph.Kartograph::addGeoPath = (points, cmds=[], className = '') ->
-	### converts a set of ###
-	me = @
-	path_str = me.getGeoPathStr points,cmds
-	path = me.paper.path path_str
-	path.node.setAttribute 'class', className if className != ''
-	return path
+    ### converts a set of ###
+    me = @
+    path_str = me.getGeoPathStr points,cmds
+    path = me.paper.path path_str
+    path.node.setAttribute 'class', className if className != ''
+    return path
 
-	
+
 kartograph.Kartograph::getGeoPathStr = (points, cmds=[]) ->
-	### converts a set of ###
-	me = @
-	if cmds.length == 0
-		cmds.push 'M'
-	
-	path_str = ''
-	for i of points
-		pt = points[i]
-		cmd = cmds[i] ? 'L'
-		xy = me.lonlat2xy pt
-		path_str += cmd+xy[0]+','+xy[1]
-		
-	return path_str
+    ### converts a set of ###
+    me = @
+    if type(cmds) == 'string'
+        cmds = cmds.split("")
+    if cmds.length == 0
+        cmds.push 'M'
 
-	
+    path_str = ''
+    for i of points
+        pt = points[i]
+        cmd = cmds[i] ? 'L'
+        xy = me.lonlat2xy pt
+        path_str += cmd+xy[0]+','+xy[1]
+
+    return path_str
+

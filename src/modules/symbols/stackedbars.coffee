@@ -145,7 +145,3 @@ StackedBarChart.layers = [] #{ id:'a', type: 'svg' }
 kartograph.StackedBarChart = StackedBarChart
 
 
-
-
-
-

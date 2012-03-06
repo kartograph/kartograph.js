@@ -56,4 +56,5 @@ class PanAndZoomControl
 		me.map.opts.zoom -= 1
 		me.map.opts.zoom = 1 if me.map.opts.zoom < 1
 		me.map.resize()
-	
+
+
