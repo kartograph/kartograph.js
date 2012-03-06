@@ -222,7 +222,10 @@ class SymbolGroup
 
     remove: () ->
         for s in me.symbols
-            s.clear()
+            try
+                s.clear()
+            catch error
+                warn 'error: symbolgroup.remove'
         for id,layer of me.layers
             if id != "mapcanvas"
                 layer.remove()
