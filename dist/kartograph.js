@@ -40,14 +40,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.0.0";
+  kartograph.version = "0.1.0";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -1676,10 +1676,11 @@
     Cylindrical.title = "Cylindrical Projection";
 
     function Cylindrical(opts) {
-      var me, _ref10;
+      var me, _ref10, _ref11;
+      if (opts == null) opts = {};
       me = this;
-      me.flip = Number(opts.flip) || 0;
-      if (me.flip === 1) opts.lon0 = (_ref10 = -opts.lon0) != null ? _ref10 : 0;
+      me.flip = Number((_ref10 = opts.flip) != null ? _ref10 : 0);
+      if (me.flip === 1) opts.lon0 = (_ref11 = -opts.lon0) != null ? _ref11 : 0;
       Cylindrical.__super__.constructor.call(this, opts);
     }
 
@@ -2249,6 +2250,56 @@
   })();
 
   __proj['loximuthal'] = Loximuthal;
+
+  CantersModifiedSinusoidalI = (function() {
+    var C1, C3, C3x3, C5, C5x5;
+
+    __extends(CantersModifiedSinusoidalI, PseudoCylindrical);
+
+    function CantersModifiedSinusoidalI() {
+      CantersModifiedSinusoidalI.__super__.constructor.apply(this, arguments);
+    }
+
+    /*
+        Canters, F. (2002) Small-scale Map projection Design. p. 218-219.
+        Modified Sinusoidal, equal-area.
+    
+        implementation borrowed from
+        http://cartography.oregonstate.edu/temp/AdaptiveProjection/src/projections/Canters1.js
+    */
+
+    CantersModifiedSinusoidalI.title = "Canters Modified Sinusoidal I";
+
+    CantersModifiedSinusoidalI.parameters = ['lon0'];
+
+    C1 = 1.1966;
+
+    C3 = -0.1290;
+
+    C3x3 = 3 * C3;
+
+    C5 = -0.0076;
+
+    C5x5 = 5 * C5;
+
+    CantersModifiedSinusoidalI.prototype.project = function(lon, lat) {
+      var me, x, y, y2, y4, _ref10;
+      me = this;
+      _ref10 = me.ll(lon, lat), lon = _ref10[0], lat = _ref10[1];
+      lon = me.rad(me.clon(lon));
+      lat = me.rad(lat);
+      y2 = lat * lat;
+      y4 = y2 * y2;
+      x = 1000 * lon * Math.cos(lat) / (C1 + C3x3 * y2 + C5x5 * y4);
+      y = 1000 * lat * (C1 + C3 * y2 + C5 * y4);
+      return [x, y * -1];
+    };
+
+    return CantersModifiedSinusoidalI;
+
+  })();
+
+  __proj['canters1'] = CantersModifiedSinusoidalI;
 
   Azimuthal = (function() {
 
@@ -3828,6 +3879,7 @@
       /* adds a new symbol to this group
       */
       var SymbolType, ll, p, sprops, symbol, _i, _len, _ref14;
+      me = this;
       SymbolType = me.type;
       ll = me._evaluate(me.location, data);
       if (__type(ll) === 'array') ll = new kartograph.LonLat(ll[0], ll[1]);
@@ -3894,12 +3946,14 @@
               })
       */
       var overlap, _ref14;
+      me = this;
       if ((_ref14 = me.gsymbols) == null) me.gsymbols = [];
       return overlap = true;
     };
 
     SymbolGroup.prototype.initTooltips = function() {
       var cfg, node, s, tooltips, tt, _i, _j, _len, _len2, _ref14, _ref15;
+      me = this;
       tooltips = me.tooltip;
       _ref14 = me.symbols;
       for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
@@ -3935,6 +3989,7 @@
 
     SymbolGroup.prototype.remove = function() {
       var id, layer, s, _i, _len, _ref14, _ref15, _results;
+      me = this;
       _ref14 = me.symbols;
       for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
         s = _ref14[_i];
@@ -3959,6 +4014,7 @@
 
     SymbolGroup.prototype.onResize = function() {
       var s, _i, _len, _ref14, _results;
+      me = this;
       me.layoutSymbols();
       _ref14 = me.symbols;
       _results = [];
@@ -4406,6 +4462,7 @@
 
     PieChart.prototype.clear = function() {
       var p, _i, _len, _ref14;
+      me = this;
       _ref14 = me.chart;
       for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
         p = _ref14[_i];

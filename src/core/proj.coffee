@@ -119,9 +119,9 @@ class Cylindrical extends Proj
     @parameters = ['lon0', 'flip']
     @title = "Cylindrical Projection"
 
-    constructor: (opts) ->
+    constructor: (opts = {}) ->
         me = @
-        me.flip = Number(opts.flip) || 0
+        me.flip = Number(opts.flip ? 0)
         if me.flip == 1
             opts.lon0 = -opts.lon0 ? 0
 
@@ -526,6 +526,39 @@ class Loximuthal extends PseudoCylindrical
 
 __proj['loximuthal'] = Loximuthal
 
+
+class CantersModifiedSinusoidalI extends PseudoCylindrical
+    ###
+    Canters, F. (2002) Small-scale Map projection Design. p. 218-219.
+    Modified Sinusoidal, equal-area.
+
+    implementation borrowed from
+    http://cartography.oregonstate.edu/temp/AdaptiveProjection/src/projections/Canters1.js
+    ###
+
+    @title = "Canters Modified Sinusoidal I"
+    @parameters = ['lon0']
+
+    C1 = 1.1966
+    C3 = -0.1290
+    C3x3 = 3 * C3
+    C5 = -0.0076
+    C5x5 = 5 * C5
+
+    project: (lon, lat) ->
+        me = @
+        [lon, lat] = me.ll(lon,lat)
+
+        lon = me.rad(me.clon(lon))
+        lat = me.rad(lat)
+
+        y2 = lat * lat
+        y4 = y2 * y2
+        x = 1000 * lon * Math.cos(lat) / (C1 + C3x3 * y2 + C5x5 * y4)
+        y = 1000 * lat * (C1 + C3 * y2 + C5 * y4)
+        [x,y*-1]
+
+__proj['canters1'] = CantersModifiedSinusoidalI
 
 # -------------------------------
 # Family of Azimuthal Projecitons
