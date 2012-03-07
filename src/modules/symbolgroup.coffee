@@ -138,6 +138,7 @@ class SymbolGroup
 
     addSymbol: (data) ->
         ### adds a new symbol to this group ###
+        me = @
         SymbolType = me.type
         ll = me._evaluate me.location,data
         if __type(ll) == 'array'
@@ -193,10 +194,12 @@ class SymbolGroup
             }
         })
         ###
+        me = @
         me.gsymbols ?= []
         overlap = true
 
     initTooltips: () ->
+        me = @
         tooltips = me.tooltip
         for s in me.symbols
             cfg =
@@ -221,6 +224,7 @@ class SymbolGroup
         return
 
     remove: () ->
+        me = @
         for s in me.symbols
             try
                 s.clear()
@@ -231,6 +235,7 @@ class SymbolGroup
                 layer.remove()
 
     onResize: () ->
+        me = @
         me.layoutSymbols()
         for s in me.symbols
             s.update()

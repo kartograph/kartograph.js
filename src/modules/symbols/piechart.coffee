@@ -79,6 +79,7 @@ class PieChart extends Symbol
         me
 
     clear: () ->
+        me = @
         for p in me.chart
             p.remove()
         me
