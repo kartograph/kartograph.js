@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -2092,8 +2092,8 @@
       _ref10 = me.ll(lon, lat), lon = _ref10[0], lat = _ref10[1];
       lam = me.rad(me.clon(lon));
       phi = me.rad(lat * -1);
-      x = lam * Math.cos(phi);
-      y = phi;
+      x = 1032 * lam * Math.cos(phi);
+      y = 1032 * phi;
       return [x, y];
     };
 
@@ -2135,7 +2135,7 @@
         me.cy = cy;
         me.cp = cp;
       } else {
-        console.error('kartograph.proj.Mollweide: either p or cx,cy,cp must be defined');
+        warn('kartograph.proj.Mollweide: either p or cx,cy,cp must be defined');
       }
     }
 
@@ -2300,6 +2300,41 @@
   })();
 
   __proj['canters1'] = CantersModifiedSinusoidalI;
+
+  GoodeHomolosine = (function() {
+
+    __extends(GoodeHomolosine, PseudoCylindrical);
+
+    GoodeHomolosine.title = "Goode Homolosine Projection (non-interupted)";
+
+    GoodeHomolosine.parameters = ['lon0'];
+
+    function GoodeHomolosine(opts) {
+      var me;
+      GoodeHomolosine.__super__.constructor.call(this, opts);
+      me = this;
+      me.lat1 = 41.737;
+      me.p1 = new Mollweide();
+      me.p0 = new Sinusoidal();
+    }
+
+    GoodeHomolosine.prototype.project = function(lon, lat) {
+      var me, _ref10;
+      me = this;
+      _ref10 = me.ll(lon, lat), lon = _ref10[0], lat = _ref10[1];
+      lon = me.clon(lon);
+      if (Math.abs(lat) > me.lat1) {
+        return me.p1.project(lon, lat);
+      } else {
+        return me.p0.project(lon, lat);
+      }
+    };
+
+    return GoodeHomolosine;
+
+  })();
+
+  __proj['goodehomolosine'] = GoodeHomolosine;
 
   Azimuthal = (function() {
 
@@ -2942,7 +2977,7 @@
         path = paths[_j];
         pd = (_ref14 = pathData[id]) != null ? _ref14 : null;
         col = colors(pd);
-        if (opts.duration != null) {
+        if ((opts.duration != null) && opts.duration > 0) {
           if (__type(opts.duration) === "function") {
             dur = opts.duration(pd);
           } else {
@@ -2973,7 +3008,7 @@
   };
 
   /*
-      kartograph - a svg mapping library 
+      kartograph - a svg mapping library
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -2991,7 +3026,7 @@
   */
 
   kartograph.Kartograph.prototype.dotgrid = function(opts) {
-    var anim, data, data_col, data_key, delay, dly, dotgrid, dotstyle, ds, dur, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref20, _ref21, _ref22, _ref23;
+    var anim, data, data_col, data_key, delay, dly, dotgrid, dotstyle, ds, dur, f, g, gridsize, id, layer, layer_id, me, path, pathData, paths, pd, row, size, sizes, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref20, _ref21, _ref22, _ref23, _ref24;
     me = this;
     layer_id = (_ref12 = opts.layer) != null ? _ref12 : me.layerIds[me.layerIds.length - 1];
     if (!me.layers.hasOwnProperty(layer_id)) {
@@ -3037,7 +3072,6 @@
     }
     if (gridsize > 0) {
       if (dotgrid.grid.length === 0) {
-        console.log('initialize new grid', dotgrid.grid.length);
         for (x = 0, _ref17 = me.viewport.width; 0 <= _ref17 ? x <= _ref17 : x >= _ref17; x += gridsize) {
           for (y = 0, _ref18 = me.viewport.height; 0 <= _ref18 ? y <= _ref18 : y >= _ref18; y += gridsize) {
             g = {
@@ -3053,6 +3087,8 @@
                 path = paths[_k];
                 if (path.vpath.isInside(g.x, g.y)) {
                   f = true;
+                  pd = (_ref20 = pathData[id]) != null ? _ref20 : null;
+                  size = sizes(pd);
                   g.pathid = id;
                   g.shape = layer.paper.circle(g.x, g.y, 1);
                   break;
@@ -3064,20 +3100,20 @@
           }
         }
       }
-      _ref20 = dotgrid.grid;
-      for (_l = 0, _len4 = _ref20.length; _l < _len4; _l++) {
-        g = _ref20[_l];
+      _ref21 = dotgrid.grid;
+      for (_l = 0, _len4 = _ref21.length; _l < _len4; _l++) {
+        g = _ref21[_l];
         if (g.pathid) {
-          pd = (_ref21 = pathData[g.pathid]) != null ? _ref21 : null;
+          pd = (_ref22 = pathData[g.pathid]) != null ? _ref22 : null;
           size = sizes(pd);
-          dur = (_ref22 = opts.duration) != null ? _ref22 : 0;
-          delay = (_ref23 = opts.delay) != null ? _ref23 : 0;
+          dur = (_ref23 = opts.duration) != null ? _ref23 : 0;
+          delay = (_ref24 = opts.delay) != null ? _ref24 : 0;
           if (__type(delay) === "function") {
             dly = delay(pd);
           } else {
             dly = delay;
           }
-          if (dur > 0) {
+          if (dur > 0 && Raphael.svg) {
             anim = Raphael.animation({
               r: size * 0.5
             }, dur);
@@ -3428,6 +3464,7 @@
       pt = points[i];
       cmd = (_ref14 = cmds[i]) != null ? _ref14 : 'L';
       xy = me.lonlat2xy(pt);
+      if (isNaN(xy[0]) || isNaN(xy[1])) continue;
       path_str += cmd + xy[0] + ',' + xy[1];
     }
     return path_str;

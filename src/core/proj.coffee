@@ -413,8 +413,8 @@ class Sinusoidal extends PseudoCylindrical
         [lon, lat] = me.ll(lon,lat)
         lam = me.rad(me.clon(lon))
         phi = me.rad(lat*-1)
-        x = lam * Math.cos(phi)
-        y = phi
+        x = 1032 * lam * Math.cos(phi)
+        y = 1032 * phi
         [x,y]
 
 __proj['sinusoidal'] = Sinusoidal
@@ -444,7 +444,7 @@ class Mollweide extends PseudoCylindrical
             me.cy = cy
             me.cp = cp
         else
-            console.error('kartograph.proj.Mollweide: either p or cx,cy,cp must be defined')
+            warn('kartograph.proj.Mollweide: either p or cx,cy,cp must be defined')
 
     project: (lon, lat) ->
         me = @
@@ -559,6 +559,31 @@ class CantersModifiedSinusoidalI extends PseudoCylindrical
         [x,y*-1]
 
 __proj['canters1'] = CantersModifiedSinusoidalI
+
+
+class GoodeHomolosine extends PseudoCylindrical
+
+    @title = "Goode Homolosine Projection (non-interupted)"
+    @parameters = ['lon0']
+
+    constructor: (opts) ->
+        super opts
+        me = @
+        me.lat1 = 41.737
+        me.p1 = new Mollweide()
+        me.p0 = new Sinusoidal()
+
+    project: (lon, lat) ->
+        me = @
+        [lon, lat] = me.ll(lon,lat)
+        lon = me.clon(lon)
+        if Math.abs(lat) > me.lat1
+            return me.p1.project(lon, lat)
+        else
+            return me.p0.project(lon, lat)
+
+__proj['goodehomolosine'] = GoodeHomolosine
+
 
 # -------------------------------
 # Family of Azimuthal Projecitons
