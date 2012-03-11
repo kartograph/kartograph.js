@@ -41,6 +41,8 @@ kartograph.Kartograph::getGeoPathStr = (points, cmds=[]) ->
         pt = points[i]
         cmd = cmds[i] ? 'L'
         xy = me.lonlat2xy pt
+        if isNaN(xy[0]) or isNaN(xy[1])
+            continue
         path_str += cmd+xy[0]+','+xy[1]
 
     return path_str
