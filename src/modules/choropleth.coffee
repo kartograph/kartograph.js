@@ -47,7 +47,7 @@ kartograph.Kartograph::choropleth = (opts) ->
             pd = pathData[id] ? null
             col = colors(pd)
 
-            if opts.duration?
+            if opts.duration? and opts.duration > 0
                 if __type(opts.duration) == "function"
                     dur = opts.duration(pd)
                 else
