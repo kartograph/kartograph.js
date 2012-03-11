@@ -2305,7 +2305,7 @@
 
     __extends(GoodeHomolosine, PseudoCylindrical);
 
-    GoodeHomolosine.title = "Goode Homolosine Projection (non-interupted)";
+    GoodeHomolosine.title = "Goode Homolosine Projection";
 
     GoodeHomolosine.parameters = ['lon0'];
 

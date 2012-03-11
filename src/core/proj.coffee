@@ -563,7 +563,7 @@ __proj['canters1'] = CantersModifiedSinusoidalI
 
 class GoodeHomolosine extends PseudoCylindrical
 
-    @title = "Goode Homolosine Projection (non-interupted)"
+    @title = "Goode Homolosine Projection"
     @parameters = ['lon0']
 
     constructor: (opts) ->
