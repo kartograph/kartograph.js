@@ -84,7 +84,8 @@ class Proj
         sea = @sea()
         bbox = new kartograph.BBox()
         for s in sea
-            bbox.update(s[0],s[1])
+            if s?
+                bbox.update(s[0],s[1])
         bbox
 
     toString: ->
@@ -563,7 +564,7 @@ __proj['canters1'] = CantersModifiedSinusoidalI
 
 class GoodeHomolosine extends PseudoCylindrical
 
-    @title = "Goode Homolosine Projection"
+    @title = "Goode Homolosine Projection"  
     @parameters = ['lon0']
 
     constructor: (opts) ->
@@ -951,6 +952,79 @@ class LCC extends Conic
 
 #too buggy
 #__proj['lcc'] = LCC
+
+
+class InterruptedProjection extends Proj
+
+    constructor: (parts) ->
+        ###
+        parts should be a list of dictionaries in the format
+        { poly: [], bbox: [], proj: [], dx: 0, dy: 0 }
+        ###
+        me = @
+        me.parts = parts
+
+    _pointInPolygon: (x, y, poly) ->
+        ###
+        performs point in polygon check
+        code attributed to Randolph Franklin, found here:
+        http://paulbourke.net/geometry/insidepoly/
+        ###
+        c = false
+        npol = poly.length
+        for i in [0..npol-1]
+            j = (i+1)%npol
+            if (((poly[i][1] <= y) and (y < poly[j][1])) or
+            ((poly[j][1] <= y) and (y < poly[i][1]))) and
+            (x < (poly[j][0] - poly[i][0]) * (y - poly[i][1]) /
+            (poly[j][1] - poly[i][1]) + poly[i][0])
+                c = !c
+        c
+
+    _visible: (lon, lat) ->
+        true
+
+    project: (lon, lat) ->
+        me = @
+        # 1) find the polygon the pt lies in
+        p = 0
+        for part in me.parts
+            bbox = part.bbox
+            lon0 = part.lon0 ? 0
+            lon_ = lon - lon0
+            if lon_ < -180
+                lon_ += 360
+            else if lon_ > 180
+                lon_ -= 360
+            if lon_ >= bbox[0] and lon_ <= bbox[2] and lat >= bbox[1] and lat <= bbox[3]
+                poly = part.poly
+                if me._pointInPolygon(lon_, lat, poly)
+                    [x, y] = part.proj.project(lon, lat)
+                    return [x, y]
+            p += 1
+        return null
+
+
+class InterruptedMollweide extends InterruptedProjection
+
+    @title = "Interrupted Mollweide Projection"
+
+    constructor: () ->
+        parts = []
+        parts.push
+            lon0: 70
+            poly: [[-90, -90], [-90, 90], [90, 90], [90, -90]]
+            bbox: [-90,-90,90,90]
+            proj: new Mollweide({ lon0: 70 })
+        parts.push
+            lon0: -110
+            poly: [[-90, -90], [-90, 90], [90, 90], [90, -90]]
+            bbox: [-90,-90,90,90]
+            proj: new Mollweide({ lon0: -110 })
+        super parts
+
+
+__proj['imollweide'] = InterruptedMollweide
 
 
 

@@ -40,7 +40,7 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, HoboDyer, HtmlLabel, Icon, InterruptedMollweide, InterruptedProjection, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
@@ -1630,7 +1630,7 @@
       bbox = new kartograph.BBox();
       for (_i = 0, _len = sea.length; _i < _len; _i++) {
         s = sea[_i];
-        bbox.update(s[0], s[1]);
+        if (s != null) bbox.update(s[0], s[1]);
       }
       return bbox;
     };
@@ -2796,6 +2796,107 @@
     return LCC;
 
   })();
+
+  InterruptedProjection = (function() {
+
+    __extends(InterruptedProjection, Proj);
+
+    function InterruptedProjection(parts) {
+      /*
+              parts should be a list of dictionaries in the format
+              { poly: [], bbox: [], proj: [], dx: 0, dy: 0 }
+      */
+      var me;
+      me = this;
+      me.parts = parts;
+    }
+
+    InterruptedProjection.prototype._pointInPolygon = function(x, y, poly) {
+      /*
+              performs point in polygon check
+              code attributed to Randolph Franklin, found here:
+              http://paulbourke.net/geometry/insidepoly/
+      */
+      var c, i, j, npol, _ref10;
+      c = false;
+      npol = poly.length;
+      for (i = 0, _ref10 = npol - 1; 0 <= _ref10 ? i <= _ref10 : i >= _ref10; 0 <= _ref10 ? i++ : i--) {
+        j = (i + 1) % npol;
+        if ((((poly[i][1] <= y) && (y < poly[j][1])) || ((poly[j][1] <= y) && (y < poly[i][1]))) && (x < (poly[j][0] - poly[i][0]) * (y - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0])) {
+          c = !c;
+        }
+      }
+      return c;
+    };
+
+    InterruptedProjection.prototype._visible = function(lon, lat) {
+      return true;
+    };
+
+    InterruptedProjection.prototype.project = function(lon, lat) {
+      var bbox, lon0, lon_, me, p, part, poly, x, y, _i, _len, _ref10, _ref11, _ref12;
+      me = this;
+      p = 0;
+      _ref10 = me.parts;
+      for (_i = 0, _len = _ref10.length; _i < _len; _i++) {
+        part = _ref10[_i];
+        bbox = part.bbox;
+        lon0 = (_ref11 = part.lon0) != null ? _ref11 : 0;
+        lon_ = lon - lon0;
+        if (lon_ < -180) {
+          lon_ += 360;
+        } else if (lon_ > 180) {
+          lon_ -= 360;
+        }
+        if (lon_ >= bbox[0] && lon_ <= bbox[2] && lat >= bbox[1] && lat <= bbox[3]) {
+          poly = part.poly;
+          if (me._pointInPolygon(lon_, lat, poly)) {
+            _ref12 = part.proj.project(lon, lat), x = _ref12[0], y = _ref12[1];
+            return [x, y];
+          }
+        }
+        p += 1;
+      }
+      return null;
+    };
+
+    return InterruptedProjection;
+
+  })();
+
+  InterruptedMollweide = (function() {
+
+    __extends(InterruptedMollweide, InterruptedProjection);
+
+    InterruptedMollweide.title = "Interrupted Mollweide Projection";
+
+    function InterruptedMollweide() {
+      var parts;
+      parts = [];
+      parts.push({
+        lon0: 70,
+        poly: [[-90, -90], [-90, 90], [90, 90], [90, -90]],
+        bbox: [-90, -90, 90, 90],
+        proj: new Mollweide({
+          lon0: 70
+        })
+      });
+      parts.push({
+        lon0: -110,
+        poly: [[-90, -90], [-90, 90], [90, 90], [90, -90]],
+        bbox: [-90, -90, 90, 90],
+        proj: new Mollweide({
+          lon0: -110
+        })
+      });
+      InterruptedMollweide.__super__.constructor.call(this, parts);
+    }
+
+    return InterruptedMollweide;
+
+  })();
+
+  __proj['imollweide'] = InterruptedMollweide;
 
   PseudoConic = (function() {
 
