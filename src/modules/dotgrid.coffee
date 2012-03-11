@@ -1,5 +1,5 @@
 ###
-    kartograph - a svg mapping library 
+    kartograph - a svg mapping library
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -18,34 +18,34 @@
 
 
 kartograph.Kartograph::dotgrid = (opts) ->
-		me = @	
+		me = @
 		# use specified layer or the last added
 		layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
-		
+
 		if not me.layers.hasOwnProperty layer_id
 			warn 'dotgrid error: layer "'+layer_id+'" not found'
 			return
 
 		layer = me.layers[layer_id]
-		
+
 		# initialize path data dictionary
-		
+
 		data = opts.data
 		data_col = opts.value
 		data_key = opts.key
-		
+
 		pathData = {}
 		if data_key? and __type(data) == "array"
 			for row in data
 				id = row[data_key]
 				pathData[String(id)] = row
-		else 
+		else
 			for id, row of data
 				pathData[String(id)] = row
 
-		
+
 		# initialize grid
-		
+
 		dotstyle = opts.style ? { fill: 'black', stroke: 'none' }
 		sizes = opts.size
 		gridsize = opts.gridsize ? 15
@@ -58,16 +58,15 @@ kartograph.Kartograph::dotgrid = (opts) ->
 				if g.shape?
 					g.shape.remove()
 					g.shape = null
-			
+
 		if gridsize > 0
 			# a grid size of 0 will be ignored
-			
+
 			if dotgrid.grid.length == 0
-				console.log 'initialize new grid',dotgrid.grid.length
 				# the grid was not yet initialised
 				for x in [0..me.viewport.width] by gridsize
-					for y in [0..me.viewport.height] by gridsize	
-						g = 
+					for y in [0..me.viewport.height] by gridsize
+						g =
 							x: x+(Math.random()-0.5)*gridsize*0.2
 							y: y+(Math.random()-0.5)*gridsize*0.2
 							pathid: false
@@ -77,12 +76,14 @@ kartograph.Kartograph::dotgrid = (opts) ->
 							for path in paths
 								if path.vpath.isInside g.x,g.y
 									f = true
+									pd = pathData[id] ? null
+									size = sizes(pd)
 									g.pathid = id
 									g.shape = layer.paper.circle(g.x,g.y,1)
 									break
-							if f then break		
+							if f then break
 						dotgrid.grid.push g
-			
+
 			for g in dotgrid.grid
 				if g.pathid
 					pd = pathData[g.pathid] ? null
@@ -93,17 +94,17 @@ kartograph.Kartograph::dotgrid = (opts) ->
 						dly = delay(pd)
 					else
 						dly = delay
-					if dur > 0
+					if dur > 0 and Raphael.svg
 						anim = Raphael.animation({r: size*0.5}, dur)
 						g.shape.animate(anim.delay(dly))
 					else
-						g.shape.attr {r: size*0.5}
+						g.shape.attr {r: size * 0.5}
 					if __type(dotstyle) == "function"
 						ds = dotstyle(pd)
 					else
 						ds = dotstyle
 					g.shape.attr ds
-						
+
 		return
 
 
