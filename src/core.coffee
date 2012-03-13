@@ -1,5 +1,5 @@
 ###
-    kartograph - a svg mapping library 
+    kartograph - a svg mapping library
     Copyright (C) 2011,2012  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 ###
 
 
-root = (exports ? this)	
+root = (exports ? this)
 kartograph = root.$K = root.kartograph ?= {}
 kartograph.version = "0.1.0"
 
@@ -28,11 +28,11 @@ warn = (s) ->
         console.warn 'kartograph ('+kartograph.version+'): ',s
 
 log = (s) ->
-	if __verbose__ 
+    if __verbose__
         console.log 'kartograph ('+kartograph.version+'): ',s
 
 String::trim ?= () ->
-	this.replace /^\s+|\s+$/g,""
+    this.replace /^\s+|\s+$/g,""
 
 `if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
