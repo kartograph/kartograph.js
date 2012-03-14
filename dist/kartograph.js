@@ -23,7 +23,7 @@
 (function() {
 
   /*
-      kartograph - a svg mapping library 
+      kartograph - a svg mapping library
       Copyright (C) 2011,2012  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.0";
+  kartograph.version = "0.1.1";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -1782,8 +1782,11 @@
 
     GallPeters.title = "Gall-Peters Projection";
 
-    function GallPeters(lon0, lat0) {
-      GallPeters.__super__.constructor.call(this, lon0, 45);
+    GallPeters.parameters = ['lon0', 'flip'];
+
+    function GallPeters(opts) {
+      opts.lat1 = 45;
+      GallPeters.__super__.constructor.call(this, opts);
     }
 
     return GallPeters;
@@ -1802,8 +1805,10 @@
 
     HoboDyer.title = "Hobo-Dyer Projection";
 
+    HoboDyer.parameters = ['lon0', 'flip'];
+
     function HoboDyer(opts) {
-      opts.lat0 = 37.7;
+      opts.lat1 = 37.7;
       HoboDyer.__super__.constructor.call(this, opts);
     }
 
@@ -1823,8 +1828,10 @@
 
     Behrmann.title = "Behrmann Projection";
 
+    Behrmann.parameters = ['lon0', 'flip'];
+
     function Behrmann(opts) {
-      opts.lat0 = 30;
+      opts.lat1 = 30;
       Behrmann.__super__.constructor.call(this, opts);
     }
 
@@ -1844,8 +1851,10 @@
 
     Balthasart.title = "Balthasart Projection";
 
+    Balthasart.parameters = ['lon0', 'flip'];
+
     function Balthasart(opts) {
-      opts.lat0 = 50;
+      opts.lat1 = 50;
       Balthasart.__super__.constructor.call(this, opts);
     }
 
