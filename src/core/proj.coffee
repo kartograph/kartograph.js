@@ -187,8 +187,10 @@ class GallPeters extends CEA
     Gall-Peters Projection
     ###
     @title = "Gall-Peters Projection"
-    constructor: (lon0, lat0) ->
-        super lon0,45
+    @parameters = ['lon0', 'flip']
+    constructor: (opts) ->
+        opts.lat1 = 45
+        super opts
 
 __proj['gallpeters'] = GallPeters
 
@@ -198,8 +200,9 @@ class HoboDyer extends CEA
     Hobo-Dyer Projection
     ###
     @title = "Hobo-Dyer Projection"
+    @parameters = ['lon0', 'flip']
     constructor: (opts) ->
-        opts.lat0 = 37.7
+        opts.lat1 = 37.7
         super opts
 
 __proj['hobodyer'] = HoboDyer
@@ -210,8 +213,9 @@ class Behrmann extends CEA
     Behrmann Projection
     ###
     @title = "Behrmann Projection"
+    @parameters = ['lon0', 'flip']
     constructor: (opts) ->
-        opts.lat0 = 30
+        opts.lat1 = 30
         super opts
 
 __proj['behrmann'] = Behrmann
@@ -222,8 +226,9 @@ class Balthasart extends CEA
     Balthasart Projection
     ###
     @title = "Balthasart Projection"
+    @parameters = ['lon0', 'flip']
     constructor: (opts) ->
-        opts.lat0 = 50
+        opts.lat1 = 50
         super opts
 
 __proj['balthasart'] = Balthasart
