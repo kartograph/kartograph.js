@@ -874,8 +874,9 @@ class EquidistantAzimuthal extends Azimuthal
     @title = "Equidistant Azimuthal Projection"
 
     project: (lon, lat) ->
-        phi = @rad(lat)
-        lam = @rad(lon)
+        me = @
+        phi = me.rad(lat)
+        lam = me.rad(lon)
         math = Math
         sin = math.sin
         cos = math.cos
@@ -898,7 +899,7 @@ __proj['equi'] = EquidistantAzimuthal
 
 
 
-class Aitoff extends EquidistantAzimuthal
+class Aitoff extends PseudoCylindrical
     ###
     Aitoff projection
 
@@ -908,6 +909,8 @@ class Aitoff extends EquidistantAzimuthal
     @title = "Aitoff Projection"
     @parameters = ['lon0']
 
+    COSPHI1 = 0.636619772367581343
+
     constructor: (opts) ->
         me = @
         opts.lat0 = 0
@@ -915,37 +918,40 @@ class Aitoff extends EquidistantAzimuthal
         me.lam0 = 0
 
     project: (lon, lat) ->
-        #[lon, lat] = me.ll(lon,lat)
         me = @
+        [lon, lat] = me.ll(lon,lat)
         lon = me.clon(lon)
-        [x,y] = super lon*0.5,lat
-        [x,y*0.5]
+        lam = me.rad(lon)
+        phi = me.rad(lat)
+        c = 0.5 * lam
+        d = Math.acos(Math.cos(phi) * Math.cos(c))
+        if d != 0
+            y = 1.0 / Math.sin(d)
+            x = 2.0 * d * Math.cos(phi) * Math.sin(c) * y
+            y *= d * Math.sin(phi)
+        else
+            x = y = 0
+        if me.winkel
+            x = (x + lam * COSPHI1) * 0.5
+            y = (y + phi) * 0.5
+        [x*1000, y*-1000]
 
     _visible: (lon, lat) ->
         true
 
-    sea: ->
-        out = []
-        r = @r
-        math = Math
-        for phi in [0..360]
-            out.push([r + math.cos(@rad(phi)) * r * 0.51, r*0.5 + math.sin(@rad(phi)) * r*0.258])
-        out
-
-    world_bbox: ->
-        r = @r
-        new kartograph.BBox(r*0.5,r*0.25,r, r*0.5)
-
-    clon: (lon) ->
-        lon -= @lon0
-        if lon < -180
-            lon += 360
-        else if lon > 180
-            lon -= 360
-        lon
-
-
 __proj['aitoff'] = Aitoff
+
+
+class Winkel3 extends Aitoff
+
+    @title = "Winkel Tripel Projection"
+
+    constructor: (opts) ->
+        super opts
+        @winkel = true
+
+
+__proj['winkel3'] = Winkel3
 
 # -------------------------------
 # Family of Conic Projecitons

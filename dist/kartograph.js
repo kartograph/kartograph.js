@@ -40,14 +40,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.2";
+  kartograph.version = "0.1.3";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -2714,9 +2714,10 @@
     EquidistantAzimuthal.title = "Equidistant Azimuthal Projection";
 
     EquidistantAzimuthal.prototype.project = function(lon, lat) {
-      var c, cos, cos_c, k, lam, math, phi, sin, x, xo, y, yo;
-      phi = this.rad(lat);
-      lam = this.rad(lon);
+      var c, cos, cos_c, k, lam, math, me, phi, sin, x, xo, y, yo;
+      me = this;
+      phi = me.rad(lat);
+      lam = me.rad(lon);
       math = Math;
       sin = math.sin;
       cos = math.cos;
@@ -2741,8 +2742,9 @@
   __proj['equi'] = EquidistantAzimuthal;
 
   Aitoff = (function() {
+    var COSPHI1;
 
-    __extends(Aitoff, EquidistantAzimuthal);
+    __extends(Aitoff, PseudoCylindrical);
 
     /*
         Aitoff projection
@@ -2755,6 +2757,8 @@
 
     Aitoff.parameters = ['lon0'];
 
+    COSPHI1 = 0.636619772367581343;
+
     function Aitoff(opts) {
       var me;
       me = this;
@@ -2764,42 +2768,30 @@
     }
 
     Aitoff.prototype.project = function(lon, lat) {
-      var me, x, y, _ref10;
+      var c, d, lam, me, phi, x, y, _ref10;
       me = this;
+      _ref10 = me.ll(lon, lat), lon = _ref10[0], lat = _ref10[1];
       lon = me.clon(lon);
-      _ref10 = Aitoff.__super__.project.call(this, lon * 0.5, lat), x = _ref10[0], y = _ref10[1];
-      return [x, y * 0.5];
+      lam = me.rad(lon);
+      phi = me.rad(lat);
+      c = 0.5 * lam;
+      d = Math.acos(Math.cos(phi) * Math.cos(c));
+      if (d !== 0) {
+        y = 1.0 / Math.sin(d);
+        x = 2.0 * d * Math.cos(phi) * Math.sin(c) * y;
+        y *= d * Math.sin(phi);
+      } else {
+        x = y = 0;
+      }
+      if (me.winkel) {
+        x = (x + lam * COSPHI1) * 0.5;
+        y = (y + phi) * 0.5;
+      }
+      return [x * 1000, y * -1000];
     };
 
     Aitoff.prototype._visible = function(lon, lat) {
       return true;
-    };
-
-    Aitoff.prototype.sea = function() {
-      var math, out, phi, r;
-      out = [];
-      r = this.r;
-      math = Math;
-      for (phi = 0; phi <= 360; phi++) {
-        out.push([r + math.cos(this.rad(phi)) * r * 0.51, r * 0.5 + math.sin(this.rad(phi)) * r * 0.258]);
-      }
-      return out;
-    };
-
-    Aitoff.prototype.world_bbox = function() {
-      var r;
-      r = this.r;
-      return new kartograph.BBox(r * 0.5, r * 0.25, r, r * 0.5);
-    };
-
-    Aitoff.prototype.clon = function(lon) {
-      lon -= this.lon0;
-      if (lon < -180) {
-        lon += 360;
-      } else if (lon > 180) {
-        lon -= 360;
-      }
-      return lon;
     };
 
     return Aitoff;
@@ -2807,6 +2799,23 @@
   })();
 
   __proj['aitoff'] = Aitoff;
+
+  Winkel3 = (function() {
+
+    __extends(Winkel3, Aitoff);
+
+    Winkel3.title = "Winkel Tripel Projection";
+
+    function Winkel3(opts) {
+      Winkel3.__super__.constructor.call(this, opts);
+      this.winkel = true;
+    }
+
+    return Winkel3;
+
+  })();
+
+  __proj['winkel3'] = Winkel3;
 
   Conic = (function() {
 
