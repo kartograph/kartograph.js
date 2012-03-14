@@ -867,13 +867,44 @@ class Aitoff extends EquidistantAzimuthal
     Snyder, Map projections - A working manual
     ###
     @title = "Aitoff Projection"
+    @parameters = ['lon0']
+
+    constructor: (opts) ->
+        me = @
+        opts.lat0 = 0
+        super opts
+        me.lam0 = 0
 
     project: (lon, lat) ->
-
-        [x,y]
+        #[lon, lat] = me.ll(lon,lat)
+        me = @
+        lon = me.clon(lon)
+        [x,y] = super lon*0.5,lat
+        [x,y*0.5]
 
     _visible: (lon, lat) ->
         true
+
+    sea: ->
+        out = []
+        r = @r
+        math = Math
+        for phi in [0..360]
+            out.push([r + math.cos(@rad(phi)) * r * 0.51, r*0.5 + math.sin(@rad(phi)) * r*0.258])
+        out
+
+    world_bbox: ->
+        r = @r
+        new kartograph.BBox(r*0.5,r*0.25,r, r*0.5)
+
+    clon: (lon) ->
+        lon -= @lon0
+        if lon < -180
+            lon += 360
+        else if lon > 180
+            lon -= 360
+        lon
+
 
 __proj['aitoff'] = Aitoff
 

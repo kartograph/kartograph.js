@@ -2684,10 +2684,6 @@
 
     __extends(Aitoff, EquidistantAzimuthal);
 
-    function Aitoff() {
-      Aitoff.__super__.constructor.apply(this, arguments);
-    }
-
     /*
         Aitoff projection
     
@@ -2697,12 +2693,53 @@
 
     Aitoff.title = "Aitoff Projection";
 
+    Aitoff.parameters = ['lon0'];
+
+    function Aitoff(opts) {
+      var me;
+      me = this;
+      opts.lat0 = 0;
+      Aitoff.__super__.constructor.call(this, opts);
+      me.lam0 = 0;
+    }
+
     Aitoff.prototype.project = function(lon, lat) {
-      return [x, y];
+      var me, x, y, _ref10;
+      me = this;
+      lon = me.clon(lon);
+      _ref10 = Aitoff.__super__.project.call(this, lon * 0.5, lat), x = _ref10[0], y = _ref10[1];
+      return [x, y * 0.5];
     };
 
     Aitoff.prototype._visible = function(lon, lat) {
       return true;
+    };
+
+    Aitoff.prototype.sea = function() {
+      var math, out, phi, r;
+      out = [];
+      r = this.r;
+      math = Math;
+      for (phi = 0; phi <= 360; phi++) {
+        out.push([r + math.cos(this.rad(phi)) * r * 0.51, r * 0.5 + math.sin(this.rad(phi)) * r * 0.258]);
+      }
+      return out;
+    };
+
+    Aitoff.prototype.world_bbox = function() {
+      var r;
+      r = this.r;
+      return new kartograph.BBox(r * 0.5, r * 0.25, r, r * 0.5);
+    };
+
+    Aitoff.prototype.clon = function(lon) {
+      lon -= this.lon0;
+      if (lon < -180) {
+        lon += 360;
+      } else if (lon > 180) {
+        lon -= 360;
+      }
+      return lon;
     };
 
     return Aitoff;
