@@ -18,7 +18,3 @@ uglifyjs lib/chroma.colors.js >> kartograph-chroma.min.js
 mv kartograph*.js dist
 echo "build complete"
 
-#
-# copy build to some locations
-#
-cp dist/kartograph.* ~/Incubator/libraries/kartograph/website/js/
