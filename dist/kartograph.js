@@ -40,14 +40,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.1";
+  kartograph.version = "0.1.2";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -2309,6 +2309,66 @@
   })();
 
   __proj['canters1'] = CantersModifiedSinusoidalI;
+
+  Hatano = (function() {
+    var CN, CS, EPS, FXC, FYCN, FYCS, NITER, ONETOL, RCN, RCS, RXC, RYCN, RYCS;
+
+    __extends(Hatano, PseudoCylindrical);
+
+    Hatano.title = "Hatano Projection";
+
+    NITER = 20;
+
+    EPS = 1e-7;
+
+    ONETOL = 1.000001;
+
+    CN = 2.67595;
+
+    CS = 2.43763;
+
+    RCN = 0.37369906014686373063;
+
+    RCS = 0.41023453108141924738;
+
+    FYCN = 1.75859;
+
+    FYCS = 1.93052;
+
+    RYCN = 0.56863737426006061674;
+
+    RYCS = 0.51799515156538134803;
+
+    FXC = 0.85;
+
+    RXC = 1.17647058823529411764;
+
+    function Hatano(opts) {
+      Hatano.__super__.constructor.call(this, opts);
+    }
+
+    Hatano.prototype.project = function(lon, lat) {
+      var c, i, lam, me, phi, th1, x, y, _ref10;
+      me = this;
+      _ref10 = me.ll(lon, lat), lon = _ref10[0], lat = _ref10[1];
+      lam = me.rad(me.clon(lon));
+      phi = me.rad(lat);
+      c = Math.sin(phi) * (phi < 0.0 ? CS : CN);
+      for (i = NITER; i >= 1; i += -1) {
+        th1 = (phi + Math.sin(phi) - c) / (1.0 + Math.cos(phi));
+        phi -= th1;
+        if (Math.abs(th1) < EPS) break;
+      }
+      x = FXC * lam * Math.cos(phi *= 0.5);
+      y = Math.sin(phi) * (phi < 0.0 ? FYCS : FYCN);
+      return [x, y * -1];
+    };
+
+    return Hatano;
+
+  })();
+
+  __proj['hatano'] = Hatano;
 
   GoodeHomolosine = (function() {
 

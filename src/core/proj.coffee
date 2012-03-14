@@ -566,6 +566,45 @@ class CantersModifiedSinusoidalI extends PseudoCylindrical
 __proj['canters1'] = CantersModifiedSinusoidalI
 
 
+class Hatano extends PseudoCylindrical
+
+    @title = "Hatano Projection"
+
+    NITER = 20
+    EPS = 1e-7
+    ONETOL = 1.000001
+    CN = 2.67595
+    CS = 2.43763
+    RCN = 0.37369906014686373063
+    RCS = 0.41023453108141924738
+    FYCN = 1.75859
+    FYCS = 1.93052
+    RYCN = 0.56863737426006061674
+    RYCS = 0.51799515156538134803
+    FXC = 0.85
+    RXC = 1.17647058823529411764
+
+    constructor: (opts) ->
+        super opts
+
+    project: (lon, lat) ->
+        me = @
+        [lon, lat] = me.ll(lon,lat)
+        lam = me.rad(me.clon(lon))
+        phi = me.rad(lat)
+        c = Math.sin(phi) * (if phi < 0.0 then CS else CN)
+        for i in [NITER..1] by -1
+            th1 = (phi + Math.sin(phi) - c) / (1.0 + Math.cos(phi))
+            phi -= th1
+            if Math.abs(th1) < EPS
+                break
+        x = FXC * lam * Math.cos(phi *= 0.5)
+        y = Math.sin(phi) * (if phi < 0.0 then FYCS else FYCN)
+        return [x, y*-1]
+
+__proj['hatano'] = Hatano
+
+
 class GoodeHomolosine extends PseudoCylindrical
 
     @title = "Goode Homolosine Projection"
