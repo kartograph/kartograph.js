@@ -961,7 +961,7 @@ __proj['winkel3'] = Winkel3
 class Conic extends Proj
 
     @title = "Conic Projection"
-    @parameters = ['lon0', 'lat0', 'lat1']
+    @parameters = ['lon0', 'lat0', 'lat1', 'lat2']
 
     constructor: (opts) ->
         self = @
@@ -972,7 +972,8 @@ class Conic extends Proj
         self.phi2 = self.rad(self.lat2)
 
     _visible: (lon, lat) ->
-        true
+        self = @
+        lat > self.minLat and lat < self.maxLat
 
     _truncate: (x,y) ->
         [x,y]
@@ -990,7 +991,7 @@ class LCC extends Conic
     ###
     Lambert Conformal Conic Projection (spherical)
     ###
-    @title = "Lambert Conformal Conic Projection (spherical)"
+    @title = "Lambert Conformal Conic Projection"
     constructor: (opts) ->
         self = @
         super opts
@@ -1004,7 +1005,7 @@ class LCC extends Conic
             n = log(cosphi / cos(self.phi2)) / log(tan(self.QUARTERPI + 0.5 * self.phi2) / tan(self.QUARTERPI + 0.5 * self.phi1))
         self.c = c = cosphi * pow(tan(self.QUARTERPI + .5 * self.phi1), n) / n
         if abs(abs(self.phi0) - self.HALFPI) < 1e-10
-            self.rho0 = 0
+            self.rho0 = 0.0
         else
             self.rho0 = c * pow(tan(self.QUARTERPI + .5 * self.phi0), -n)
 
@@ -1026,12 +1027,12 @@ class LCC extends Conic
             rho = self.c * pow(tan(self.QUARTERPI + 0.5 * phi), -n)
         lam_ = (lam) * n
         x = 1000 * rho * sin(lam_)
-        y = 1000 * self.rho0 - rho * cos(lam_)
+        y = 1000 * (self.rho0 - rho * cos(lam_))
 
         [x,y*-1]
 
 #too buggy
-#__proj['lcc'] = LCC
+__proj['lcc'] = LCC
 
 
 
