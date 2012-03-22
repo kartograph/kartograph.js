@@ -38,7 +38,11 @@ class MapLayerPath
         for i in [0..svg_path.attributes.length-1]
             attr = svg_path.attributes[i]
             if attr.name.substr(0,5) == "data-"
-                data[attr.name.substr(5)] = attr.value
+                v = attr.value
+                vn = Number(v)
+                if v.trim() != "" and vn == v and not isNaN(vn)
+                    v = vn
+                data[attr.name.substr(5)] = v
         me.data = data
         if __type(titles) == 'string'
             title = titles
