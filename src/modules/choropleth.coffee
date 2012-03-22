@@ -66,7 +66,7 @@ kartograph.Kartograph::choropleth = (opts) ->
                 else
                     delay = 0
                 if path.svgPath.attrs['fill'] == "none"
-                    ncol = colors(null)
+                    ncol = colors(null, path.data)
                     path.svgPath.attr('fill',ncol)
                 anim = Raphael.animation({fill: col}, dur)
                 path.svgPath.animate(anim.delay(delay))
