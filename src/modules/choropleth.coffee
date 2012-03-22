@@ -38,14 +38,20 @@ kartograph.Kartograph::choropleth = (opts) ->
         for row in data
             id = row[data_key]
             pathData[String(id)] = row
-    else
+    else if __type(data) == "object"
         for id, row of data
             pathData[String(id)] = row
 
     for id, paths of me.layers[layer_id].pathsById
         for path in paths
-            pd = pathData[id] ? null
-            col = colors(pd)
+            if not data?
+                pd = path.data
+            if __type(data) == "function"
+                pd = data(path.data)
+            else
+                pd = pathData[id] ? null
+
+            col = colors(pd, path.data)
 
             if opts.duration? and opts.duration > 0
                 if __type(opts.duration) == "function"

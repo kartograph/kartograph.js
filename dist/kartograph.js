@@ -47,7 +47,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.3";
+  kartograph.version = "0.1.5";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -2359,8 +2359,8 @@
         phi -= th1;
         if (Math.abs(th1) < EPS) break;
       }
-      x = FXC * lam * Math.cos(phi *= 0.5);
-      y = Math.sin(phi) * (phi < 0.0 ? FYCS : FYCN);
+      x = 1000 * FXC * lam * Math.cos(phi *= 0.5);
+      y = 1000 * Math.sin(phi) * (phi < 0.0 ? FYCS : FYCN);
       return [x, y * -1];
     };
 
@@ -3079,7 +3079,7 @@
         id = row[data_key];
         pathData[String(id)] = row;
       }
-    } else {
+    } else if (__type(data) === "object") {
       for (id in data) {
         row = data[id];
         pathData[String(id)] = row;
@@ -3090,8 +3090,13 @@
       paths = _ref13[id];
       for (_j = 0, _len2 = paths.length; _j < _len2; _j++) {
         path = paths[_j];
-        pd = (_ref14 = pathData[id]) != null ? _ref14 : null;
-        col = colors(pd);
+        if (!(data != null)) pd = path.data;
+        if (__type(data) === "function") {
+          pd = data(path.data);
+        } else {
+          pd = (_ref14 = pathData[id]) != null ? _ref14 : null;
+        }
+        col = colors(pd, path.data);
         if ((opts.duration != null) && opts.duration > 0) {
           if (__type(opts.duration) === "function") {
             dur = opts.duration(pd);

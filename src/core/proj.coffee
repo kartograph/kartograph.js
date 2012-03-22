@@ -598,8 +598,8 @@ class Hatano extends PseudoCylindrical
             phi -= th1
             if Math.abs(th1) < EPS
                 break
-        x = FXC * lam * Math.cos(phi *= 0.5)
-        y = Math.sin(phi) * (if phi < 0.0 then FYCS else FYCN)
+        x = 1000 * FXC * lam * Math.cos(phi *= 0.5)
+        y = 1000 * Math.sin(phi) * (if phi < 0.0 then FYCS else FYCN)
         return [x, y*-1]
 
 __proj['hatano'] = Hatano
