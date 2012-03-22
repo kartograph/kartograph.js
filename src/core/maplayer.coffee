@@ -49,6 +49,16 @@ class MapLayer
         me = @
         me.pathsById? and me.pathsById[id]?
 
+
+    getPathsData: () ->
+        ### returns a list of all shape data dictionaries ###
+        me = @
+        pd = []
+        for path in me.paths
+            pd.push path.data
+        pd
+
+
     getPath: (id) ->
         me = @
         if me.hasPath id
