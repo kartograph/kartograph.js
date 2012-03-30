@@ -47,7 +47,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.6";
+  kartograph.version = "0.1.7";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
