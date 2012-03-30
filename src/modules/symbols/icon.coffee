@@ -17,7 +17,7 @@
 ###
 
 class Icon extends kartograph.Symbol
-	
+
 	constructor: (opts) ->
 		me = @
 		super opts
@@ -26,8 +26,7 @@ class Icon extends kartograph.Symbol
 		me.iconsize = opts.iconsize ? [10,10]
 		me.class = opts.class ? ''
 		me.title = opts.title ? ''
-		
-	
+
 	render: (layers) ->
 		me = @
 		cont = me.map.container
@@ -38,29 +37,29 @@ class Icon extends kartograph.Symbol
 			alt: me.title
 			width: me.iconsize[0]
 			height: me.iconsize[1]
-		
+
 		me.img.addClass me.class
-		
+
 		me.img.css
 			position: 'absolute'
 			'z-index': 1000
 			cursor: 'pointer'
-			
+
 		me.img[0].symbol = me
 		cont.append me.img
 		me.update()
-	
+
 	update: () ->
 		me = @
 		me.img.css
 			left: (me.x+me.offset[0])+'px'
 			top: (me.y+me.offset[1])+'px'
-			
+
 	clear: () ->
 		me = @
 		me.img.remove()
 		me
-		
+
 	nodes: () ->
 		me = @
 		[me.img]

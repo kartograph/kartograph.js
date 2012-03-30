@@ -76,7 +76,7 @@ class SymbolGroup
             if opts[p]?
                 me[p] = opts[p]
             else
-                throw "SymbolGroup: missing argument "+p
+                throw "SymbolGroup: missing argument '"+p+"'"
 
         for p in optional
             if opts[p]?
