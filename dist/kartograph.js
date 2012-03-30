@@ -40,14 +40,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.5";
+  kartograph.version = "0.1.6";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -2422,6 +2422,88 @@
 
   __proj['goodehomolosine'] = GoodeHomolosine;
 
+  Nicolosi = (function() {
+    var EPS;
+
+    __extends(Nicolosi, PseudoCylindrical);
+
+    Nicolosi.title = "Nicolosi Globular Projection";
+
+    Nicolosi.parameters = ['lon0'];
+
+    EPS = 1e-10;
+
+    function Nicolosi(opts) {
+      Nicolosi.__super__.constructor.call(this, opts);
+      this.r = this.HALFPI * 100;
+    }
+
+    Nicolosi.prototype._visible = function(lon, lat) {
+      var me;
+      me = this;
+      lon = me.clon(lon);
+      return lon > -90 && lon < 90;
+    };
+
+    Nicolosi.prototype.project = function(lon, lat) {
+      var c, d, lam, m, me, n, phi, r2, sp, tb, x, y, _ref10;
+      me = this;
+      _ref10 = me.ll(lon, lat), lon = _ref10[0], lat = _ref10[1];
+      lam = me.rad(me.clon(lon));
+      phi = me.rad(lat);
+      if (Math.abs(lam) < EPS) {
+        x = 0;
+        y = phi;
+      } else if (Math.abs(phi) < EPS) {
+        x = lam;
+        y = 0;
+      } else if (Math.abs(Math.abs(lam) - me.HALFPI) < EPS) {
+        x = lam * Math.cos(phi);
+        y = me.HALFPI * Math.sin(phi);
+      } else if (Math.abs(Math.abs(phi) - me.HALFPI) < EPS) {
+        x = 0;
+        y = phi;
+      } else {
+        tb = me.HALFPI / lam - lam / me.HALFPI;
+        c = phi / me.HALFPI;
+        sp = Math.sin(phi);
+        d = (1 - c * c) / (sp - c);
+        r2 = tb / d;
+        r2 *= r2;
+        m = (tb * sp / d - 0.5 * tb) / (1.0 + r2);
+        n = (sp / r2 + 0.5 * d) / (1.0 + 1.0 / r2);
+        x = Math.cos(phi);
+        x = Math.sqrt(m * m + x * x / (1.0 + r2));
+        x = me.HALFPI * (m + (lam < 0 ? -x : x));
+        y = Math.sqrt(n * n - (sp * sp / r2 + d * sp - 1.0) / (1.0 + 1.0 / r2));
+        y = me.HALFPI * (n + (phi < 0 ? y : -y));
+      }
+      return [x * 100, y * -100];
+    };
+
+    Nicolosi.prototype.sea = function() {
+      var math, out, phi, r;
+      out = [];
+      r = this.r;
+      math = Math;
+      for (phi = 0; phi <= 360; phi++) {
+        out.push([math.cos(this.rad(phi)) * r, math.sin(this.rad(phi)) * r]);
+      }
+      return out;
+    };
+
+    Nicolosi.prototype.world_bbox = function() {
+      var r;
+      r = this.r;
+      return new kartograph.BBox(-r, -r, r * 2, r * 2);
+    };
+
+    return Nicolosi;
+
+  })();
+
+  __proj['nicolosi'] = Nicolosi;
+
   Azimuthal = (function() {
 
     __extends(Azimuthal, Proj);
@@ -2900,7 +2982,7 @@
       }
       self.c = c = cosphi * pow(tan(self.QUARTERPI + .5 * self.phi1), n) / n;
       if (abs(abs(self.phi0) - self.HALFPI) < 1e-10) {
-        self.rho0 = 0;
+        self.rho0 = 0.0;
       } else {
         self.rho0 = c * pow(tan(self.QUARTERPI + .5 * self.phi0), -n);
       }
@@ -3987,7 +4069,7 @@
         if (opts[p] != null) {
           me[p] = opts[p];
         } else {
-          throw "SymbolGroup: missing argument " + p;
+          throw "SymbolGroup: missing argument '" + p + "'";
         }
       }
       for (_j = 0, _len2 = optional.length; _j < _len2; _j++) {
