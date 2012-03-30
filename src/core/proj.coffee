@@ -629,6 +629,69 @@ class GoodeHomolosine extends PseudoCylindrical
 __proj['goodehomolosine'] = GoodeHomolosine
 
 
+class Nicolosi extends PseudoCylindrical
+
+    @title = "Nicolosi Globular Projection"
+    @parameters = ['lon0']
+
+    EPS = 1e-10
+
+    constructor: (opts) ->
+        super opts
+        @r = @HALFPI*100
+
+    _visible: (lon, lat) ->
+        me = @
+        lon = me.clon(lon)
+        lon > -90 and lon < 90
+
+    project: (lon, lat) ->
+        me = @
+        [lon, lat] = me.ll(lon,lat)
+        lam = me.rad(me.clon(lon))
+        phi = me.rad(lat)
+        if Math.abs(lam) < EPS
+            x = 0
+            y = phi
+        else if Math.abs(phi) < EPS
+            x = lam
+            y = 0
+        else if Math.abs(Math.abs(lam) - me.HALFPI) < EPS
+            x = lam * Math.cos(phi)
+            y = me.HALFPI * Math.sin(phi)
+        else if Math.abs(Math.abs(phi) - me.HALFPI) < EPS
+            x = 0
+            y = phi
+        else
+            tb = me.HALFPI / lam - lam / me.HALFPI
+            c = phi / me.HALFPI
+            sp = Math.sin(phi)
+            d = (1 - c * c) / (sp - c)
+            r2 = tb / d
+            r2 *= r2
+            m = (tb * sp / d - 0.5 * tb)/(1.0 + r2)
+            n = (sp / r2 + 0.5 * d)/(1.0 + 1.0/r2)
+            x = Math.cos(phi)
+            x = Math.sqrt(m * m + x * x / (1.0 + r2))
+            x = me.HALFPI * (m + if lam < 0 then -x else x)
+            y = Math.sqrt(n * n - (sp * sp / r2 + d * sp - 1.0) / (1.0 + 1.0/r2))
+            y = me.HALFPI * (n + if phi < 0 then y else -y)
+        return [x*100,y*-100]
+
+    sea: ->
+        out = []
+        r = @r
+        math = Math
+        for phi in [0..360]
+            out.push([math.cos(@rad(phi)) * r, math.sin(@rad(phi)) * r])
+        out
+
+    world_bbox: ->
+        r = @r
+        new kartograph.BBox(-r,-r,r*2, r*2)
+
+__proj['nicolosi'] = Nicolosi
+
 # -------------------------------
 # Family of Azimuthal Projecitons
 # -------------------------------
@@ -1035,9 +1098,7 @@ class LCC extends Conic
 __proj['lcc'] = LCC
 
 
-
 class PseudoConic extends Conic
-
 
 
 
