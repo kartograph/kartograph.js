@@ -1055,6 +1055,9 @@ class LCC extends Conic
     Lambert Conformal Conic Projection (spherical)
     ###
     @title = "Lambert Conformal Conic Projection"
+
+    EPS10 = 1e-10
+
     constructor: (opts) ->
         self = @
         super opts
@@ -1098,10 +1101,28 @@ class LCC extends Conic
 __proj['lcc'] = LCC
 
 
-class PseudoConic extends Conic
 
+class Proj4 extends Proj
+    ###
+    wrapper around proj4js
+    ###
+    @title = ['PROJ.4']
+    @parameters = ['projstr']
 
+    constructor: (opts) ->
+        self = @
+        if not Proj4js?
+            raise 'Proj4js is missing. Have you included the proj4js-compressed.js?'
+        self.src = new Proj4js.Proj('EPSG:4236')
+        Proj4js.defs['K'] = opts.projstr
+        self.dest = new Proj4js.Proj('K')
 
+    project: (lon, lat) ->
+        self = @
+        p = new Proj4js.Point(lon, lat)
+        Proj4js.transform(self.src, self.dest, p)
+        [p.x, p.y]
 
+__proj['proj4'] = Proj4
 
 
