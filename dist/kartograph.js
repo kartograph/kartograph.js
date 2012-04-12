@@ -40,14 +40,14 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, Proj4, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base2, _ref, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.7";
+  kartograph.version = "0.1.8";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -2959,7 +2959,6 @@
   })();
 
   LCC = (function() {
-    var EPS10;
 
     __extends(LCC, Conic);
 
@@ -2968,8 +2967,6 @@
     */
 
     LCC.title = "Lambert Conformal Conic Projection";
-
-    EPS10 = 1e-10;
 
     function LCC(opts) {
       var abs, c, cos, cosphi, m, n, pow, secant, self, sin, sinphi, tan, _ref10;
@@ -3018,42 +3015,17 @@
 
   __proj['lcc'] = LCC;
 
-  Proj4 = (function() {
+  PseudoConic = (function() {
 
-    __extends(Proj4, Proj);
+    __extends(PseudoConic, Conic);
 
-    /*
-        wrapper around proj4js
-    */
-
-    Proj4.title = ['PROJ.4'];
-
-    Proj4.parameters = ['projstr'];
-
-    function Proj4(opts) {
-      var self;
-      self = this;
-      if (!(typeof Proj4js !== "undefined" && Proj4js !== null)) {
-        raise('Proj4js is missing. Have you included the proj4js-compressed.js?');
-      }
-      self.src = new Proj4js.Proj('EPSG:4236');
-      Proj4js.defs['K'] = opts.projstr;
-      self.dest = new Proj4js.Proj('K');
+    function PseudoConic() {
+      PseudoConic.__super__.constructor.apply(this, arguments);
     }
 
-    Proj4.prototype.project = function(lon, lat) {
-      var p, self;
-      self = this;
-      p = new Proj4js.Point(lon, lat);
-      Proj4js.transform(self.src, self.dest, p);
-      return [p.x, p.y];
-    };
-
-    return Proj4;
+    return PseudoConic;
 
   })();
-
-  __proj['proj4'] = Proj4;
 
   /*
       kartograph - a svg mapping library 
