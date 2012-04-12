@@ -24,7 +24,7 @@ kartograph.Kartograph::choropleth = (opts) ->
     layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
 
     if not me.layers.hasOwnProperty layer_id
-        warn 'choropleth error: layer "'+layer_ihad+'" not found'
+        warn 'choropleth error: layer "'+layer_id+'" not found'
         return
 
     data = opts.data
