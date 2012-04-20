@@ -1,5 +1,5 @@
 ###
-    kartograph - a svg mapping library 
+    kartograph - a svg mapping library
     Copyright (C) 2011  Gregor Aisch
 
     This program is free software: you can redistribute it and/or modify
@@ -16,9 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###
 
-root = (exports ? this)	
+root = (exports ? this)
 kartograph = root.kartograph ?= {}
-kartograph.geom ?= {} 
+kartograph.geom ?= {}
 
 class Path
 	###
@@ -29,16 +29,16 @@ class Path
 		self.type = type
 		self.contours = contours
 		self.closed = closed
-	
+
 	clipToBBox: (bbox) ->
 		# still needs to be implemented
 		throw "path clipping is not implemented yet"
-	
+
 	toSVG: (paper) ->
 		### translates this path to a SVG path string ###
 		str = @svgString()
 		paper.path(str)
-		
+
 	svgString: ->
 		# returns this path as svg string
 		me = @
@@ -53,7 +53,7 @@ class Path
 				fst = false
 		str += "Z" if me.closed
 		str
-		
+
 	area: ->
 		# computes the area of this path
 		me = @
@@ -70,14 +70,14 @@ class Path
 			me.areas.push area
 			me._area += area
 		me._area
-		
+
 	centroid: ->
 		# computes the center of this path
 		me = @
 		if me._centroid?
 			return me._centroid
 		area = me.area()
-		
+
 		cx = cy = 0
 		for i in [0..me.contours.length-1]
 			cnt = me.contours[i]
@@ -95,7 +95,7 @@ class Path
 				len = Math.sqrt(dx*dx + dy*dy)
 				_lengths.push(len)
 				total_len += len
-			
+
 			for j in [0..l-1]
 				p0 = cnt[j]
 				p1 = cnt[(j+1)%l]
@@ -106,7 +106,7 @@ class Path
 				# k = (p0[0]*p1[1] - p1[0]*p0[1])
 				# x += (p0[0]+p1[0]) * k
 				# y += (p0[1]+p1[1]) * k
-				
+
 			# k = 1/(6*a)
 			# x *= k
 			# y *= k
@@ -116,21 +116,21 @@ class Path
 		me._centroid = [cx,cy]
 		me._centroid
 
-		
+
 	isInside: (x,y) ->
 		# checks wether a given point is inside this path or not
 		me = @
 		bbox = me._bbox
 		if x < bbox[0] or x > bbox[2] or y < bbox[1] or y > bbox[3]
 			return false
-			
+
 		for i in [0..me.contours.length-1]
 			cnt = me.contours[i]
 			if __point_in_polygon(cnt, [x,y])
 				return true
 		return false
-		
-				
+
+
 
 kartograph.geom.Path = Path
 
@@ -138,15 +138,15 @@ class Circle extends Path
 
 	constructor: (@x,@y,@r) ->
 		super 'circle',null,true
-		
+
 	toSVG: (paper) ->
 		me = @
 		paper.circle(me.x, me.y, me.r)
-		
+
 	centroid: ->
 		me = @
 		[me.x, me.y]
-	
+
 	area: ->
 		me = @
 		Math.PI * me.r*m.r
@@ -166,28 +166,28 @@ Path.fromSVG = (path) ->
 		path_str = path.getAttribute('d').trim()
 		closed = path_str[path_str.length-1] == "Z"
 		sep = if closed then "Z M" else "M"
-		path_str = path_str.substring(1, path_str.length-(if closed then 1 else 0)) 
-		
+		path_str = path_str.substring(1, path_str.length-(if closed then 1 else 0))
+
 		for contour_str in path_str.split(sep)
 			contour = []
 			if contour_str != ""
 				for pt_str in contour_str.split('L')
 					[x,y] = pt_str.split(',')
 					contour.push([Number(x), Number(y)])
-				contours.push(contour)	
-		
-		res = new kartograph.geom.Path(type, contours, closed)	
-		
+				contours.push(contour)
+
+		res = new kartograph.geom.Path(type, contours, closed)
+
 	else if type == "circle"
-		
+
 		cx = path.getAttribute "cx"
 		cy = path.getAttribute "cy"
 		r = path.getAttribute "r"
-		
+
 		res = new kartograph.geom.Circle(cx,cy,r)
-		
+
 	res
-		
+
 
 
 class Line
@@ -195,7 +195,7 @@ class Line
 	represents simple lines
 	###
 	constructor: (@points) ->
-		
+
 	clipToBBox: (bbox) ->
 		self = @
 		# line clipping here
@@ -213,7 +213,7 @@ class Line
 				if p1x != x1 or p1y != y0 or i == len(self.points)-2
 					pts.push([x1, y1])
 			catch err
-				if last_in and pts.length > 1 
+				if last_in and pts.length > 1
 					lines.push(new Line(pts))
 					pts = []
 				last_in = false
@@ -221,14 +221,14 @@ class Line
 		if pts.length > 1
 			lines.push(new Line(pts))
 		lines
-		
+
 	toSVG: ->
 		self = @
 		pts = []
 		for [x,y] in self.points
-			pts.push x+','+y 
+			pts.push x+','+y
 		'M' + pts.join 'L'
-		
+
 kartograph.geom.Line = Line
 
 
