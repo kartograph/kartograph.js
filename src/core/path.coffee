@@ -164,17 +164,29 @@ Path.fromSVG = (path) ->
 	res = null
 	if type == "path"
 		path_str = path.getAttribute('d').trim()
-		closed = path_str[path_str.length-1] == "Z"
+		path_data = Raphael.parsePathString path_str
+		closed = path_data[path_data.length-1] == "Z"
+		#closed = path_str[path_str.length-1] == "Z"
 		sep = if closed then "Z M" else "M"
-		path_str = path_str.substring(1, path_str.length-(if closed then 1 else 0))
-
-		for contour_str in path_str.split(sep)
+		#path_str = path_str.substring(1, path_str.length-(if closed then 1 else 0))
+		contour = []
+		for cmd in path_data
+			if cmd.length == 0
+				continue
+			if cmd[0] == "M"
+				if contour.length > 2
+					contours.push contour
+					contour = []
+				contour.push [cmd[1], cmd[2]]
+			else if cmd[0] == "L"
+				contour.push [cmd[1], cmd[2]]
+			else if cmd[0] == "Z"
+				if contour.length > 2
+					contours.push contour
+					contour = []
+		if contour.length > 2
+			contours.push contour
 			contour = []
-			if contour_str != ""
-				for pt_str in contour_str.split('L')
-					[x,y] = pt_str.split(',')
-					contour.push([Number(x), Number(y)])
-				contours.push(contour)
 
 		res = new kartograph.geom.Path(type, contours, closed)
 

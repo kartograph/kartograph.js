@@ -47,7 +47,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.1.8";
+  kartograph.version = "0.1.9";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -1230,7 +1230,7 @@
   };
 
   /*
-      kartograph - a svg mapping library 
+      kartograph - a svg mapping library
       Copyright (C) 2011  Gregor Aisch
   
       This program is free software: you can redistribute it and/or modify
@@ -1416,28 +1416,37 @@
     /*
     	loads a path from a SVG path string
     */
-    var closed, contour, contour_str, contours, cx, cy, path_str, pt_str, r, res, sep, type, x, y, _i, _j, _len, _len2, _ref10, _ref11, _ref9;
+    var closed, cmd, contour, contours, cx, cy, path_data, path_str, r, res, sep, type, _i, _len;
     contours = [];
     type = path.nodeName;
     res = null;
     if (type === "path") {
       path_str = path.getAttribute('d').trim();
-      closed = path_str[path_str.length - 1] === "Z";
+      path_data = Raphael.parsePathString(path_str);
+      closed = path_data[path_data.length - 1] === "Z";
       sep = closed ? "Z M" : "M";
-      path_str = path_str.substring(1, path_str.length - (closed ? 1 : 0));
-      _ref9 = path_str.split(sep);
-      for (_i = 0, _len = _ref9.length; _i < _len; _i++) {
-        contour_str = _ref9[_i];
-        contour = [];
-        if (contour_str !== "") {
-          _ref10 = contour_str.split('L');
-          for (_j = 0, _len2 = _ref10.length; _j < _len2; _j++) {
-            pt_str = _ref10[_j];
-            _ref11 = pt_str.split(','), x = _ref11[0], y = _ref11[1];
-            contour.push([Number(x), Number(y)]);
+      contour = [];
+      for (_i = 0, _len = path_data.length; _i < _len; _i++) {
+        cmd = path_data[_i];
+        if (cmd.length === 0) continue;
+        if (cmd[0] === "M") {
+          if (contour.length > 2) {
+            contours.push(contour);
+            contour = [];
           }
-          contours.push(contour);
+          contour.push([cmd[1], cmd[2]]);
+        } else if (cmd[0] === "L") {
+          contour.push([cmd[1], cmd[2]]);
+        } else if (cmd[0] === "Z") {
+          if (contour.length > 2) {
+            contours.push(contour);
+            contour = [];
+          }
         }
+      }
+      if (contour.length > 2) {
+        contours.push(contour);
+        contour = [];
       }
       res = new kartograph.geom.Path(type, contours, closed);
     } else if (type === "circle") {
