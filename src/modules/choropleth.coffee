@@ -28,7 +28,7 @@ kartograph.Kartograph::choropleth = (opts) ->
         return
 
     data = opts.data
-    data_col = opts.value
+    # data_col = opts.value
     data_key = opts.key
     colors = opts.colors
 

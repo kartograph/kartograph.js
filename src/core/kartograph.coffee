@@ -218,44 +218,6 @@ class Kartograph
         me.markers = []
 
 
-    tooltips: (opts) ->
-        me = @
-        tooltips = opts.content
-        layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
-        if not me.layers.hasOwnProperty layer_id
-            warn 'tooltips error: layer "'+layer_id+'" not found'
-            return
-
-        for id, paths of me.layers[layer_id].pathsById
-            for path in paths
-                if $.isFunction tooltips
-                    tt = tooltips(id, path)
-                else
-                    tt = tooltips[id]
-
-                cfg = {
-                    position: {
-                        target: 'mouse',
-                        viewport: $(window),
-                        adjust: { x:7, y:7}
-                    },
-                    show: {
-                        delay: opts.delay ? 20
-                    },
-                    content: {}
-                };
-
-                if tt?
-                    if typeof(tt) == "string"
-                        cfg.content.text = tt
-                    else if $.isArray tt
-                        cfg.content.title = tt[0]
-                        cfg.content.text = tt[1]
-                else
-                    cfg.content.text = 'n/a'
-                $(path.svgPath.node).qtip(cfg);
-
-
     fadeIn: (opts = {}) ->
         me = @
         layer_id = opts.layer ? me.layerIds[me.layerIds.length-1]
