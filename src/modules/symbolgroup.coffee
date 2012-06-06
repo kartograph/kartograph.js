@@ -238,7 +238,7 @@ class SymbolGroup
         me = @
         me.layoutSymbols()
         for s in me.symbols
-            s.clean()
+            s.clear()
             s.render()
 
 

@@ -40,7 +40,7 @@
 
 
 (function() {
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4495,7 +4495,8 @@
       _results = [];
       for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
         s = _ref13[_i];
-        _results.push(s.update());
+        s.clear();
+        _results.push(s.render());
       }
       return _results;
     };
@@ -4511,96 +4512,6 @@
   kartograph.Kartograph.prototype.addSymbols = function(opts) {
     opts.map = this;
     return new SymbolGroup(opts);
-  };
-
-  /*
-      kartograph - a svg mapping library
-      Copyright (C) 2011  Gregor Aisch
-  
-      This program is free software: you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation, either version 3 of the License, or
-      (at your option) any later version.
-  
-      This program is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
-  
-      You should have received a copy of the GNU General Public License
-      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
-
-
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  kartograph = root.$K = (_ref13 = root.kartograph) != null ? _ref13 : root.kartograph = {};
-
-  kartograph.Kartograph.prototype.tooltips = function(opts) {
-    var content, id, layer, layer_id, me, path, paths, setTooltip, tt, _i, _len, _ref14, _ref15, _ref16, _results, _results1;
-    me = this;
-    content = opts.content;
-    layer_id = (_ref14 = opts.layer) != null ? _ref14 : me.layerIds[me.layerIds.length - 1];
-    if (!me.layers.hasOwnProperty(layer_id)) {
-      warn('tooltips error: layer "' + layer_id + '" not found');
-      return;
-    }
-    layer = me.layers[layer_id];
-    setTooltip = function(path, tt) {
-      var cfg, _ref15;
-      cfg = {
-        position: {
-          target: 'mouse',
-          viewport: $(window),
-          adjust: {
-            x: 7,
-            y: 7
-          }
-        },
-        show: {
-          delay: (_ref15 = opts.delay) != null ? _ref15 : 20
-        },
-        content: {}
-      };
-      if (tt != null) {
-        if (typeof tt === "string") {
-          cfg.content.text = tt;
-        } else if ($.isArray(tt)) {
-          cfg.content.title = tt[0];
-          cfg.content.text = tt[1];
-        }
-      } else {
-        cfg.content.text = 'n/a';
-      }
-      return $(path.svgPath.node).qtip(cfg);
-    };
-    if ($.isFunction(content)) {
-      _ref15 = layer.paths;
-      _results = [];
-      for (_i = 0, _len = _ref15.length; _i < _len; _i++) {
-        path = _ref15[_i];
-        tt = content(path.data, layer.path_id != null ? path.data[layer.path_id] : void 0);
-        _results.push(setTooltip(path, tt));
-      }
-      return _results;
-    } else {
-      _ref16 = layer.pathsById;
-      _results1 = [];
-      for (id in _ref16) {
-        paths = _ref16[id];
-        _results1.push((function() {
-          var _j, _len1, _results2;
-          _results2 = [];
-          for (_j = 0, _len1 = paths.length; _j < _len1; _j++) {
-            path = paths[_j];
-            tt = tooltips[id];
-            _results2.push(setTooltip(path, tt));
-          }
-          return _results2;
-        })());
-      }
-      return _results1;
-    }
   };
 
   /*
@@ -4627,20 +4538,20 @@
     __extends(Bubble, _super);
 
     function Bubble(opts) {
-      var me, _ref14, _ref15, _ref16;
+      var me, _ref13, _ref14, _ref15;
       me = this;
       Bubble.__super__.constructor.call(this, opts);
-      me.radius = (_ref14 = opts.radius) != null ? _ref14 : 4;
-      me.style = (_ref15 = opts.style) != null ? _ref15 : '';
+      me.radius = (_ref13 = opts.radius) != null ? _ref13 : 4;
+      me.style = (_ref14 = opts.style) != null ? _ref14 : '';
       me.title = opts.title;
-      me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : 'bubble';
+      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : 'bubble';
     }
 
     Bubble.prototype.overlaps = function(bubble) {
-      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref14, _ref15;
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref13, _ref14;
       me = this;
-      _ref14 = [me.x, me.y, me.radius], x1 = _ref14[0], y1 = _ref14[1], r1 = _ref14[2];
-      _ref15 = [bubble.x, bubble.y, bubble.radius], x2 = _ref15[0], y2 = _ref15[1], r2 = _ref15[2];
+      _ref13 = [me.x, me.y, me.radius], x1 = _ref13[0], y1 = _ref13[1], r1 = _ref13[2];
+      _ref14 = [bubble.x, bubble.y, bubble.radius], x2 = _ref14[0], y2 = _ref14[1], r2 = _ref14[2];
       if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
         return false;
       }
@@ -4725,14 +4636,14 @@
     __extends(Icon, _super);
 
     function Icon(opts) {
-      var me, _ref14, _ref15, _ref16, _ref17, _ref18;
+      var me, _ref13, _ref14, _ref15, _ref16, _ref17;
       me = this;
       Icon.__super__.constructor.call(this, opts);
-      me.icon = (_ref14 = opts.icon) != null ? _ref14 : '';
-      me.offset = (_ref15 = opts.offset) != null ? _ref15 : [0, 0];
-      me.iconsize = (_ref16 = opts.iconsize) != null ? _ref16 : [10, 10];
-      me["class"] = (_ref17 = opts["class"]) != null ? _ref17 : '';
-      me.title = (_ref18 = opts.title) != null ? _ref18 : '';
+      me.icon = (_ref13 = opts.icon) != null ? _ref13 : '';
+      me.offset = (_ref14 = opts.offset) != null ? _ref14 : [0, 0];
+      me.iconsize = (_ref15 = opts.iconsize) != null ? _ref15 : [10, 10];
+      me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : '';
+      me.title = (_ref17 = opts.title) != null ? _ref17 : '';
     }
 
     Icon.prototype.render = function(layers) {
@@ -4814,13 +4725,13 @@
     __extends(SvgLabel, _super);
 
     function SvgLabel(opts) {
-      var me, _ref14, _ref15, _ref16, _ref17;
+      var me, _ref13, _ref14, _ref15, _ref16;
       me = this;
       SvgLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref14 = opts.text) != null ? _ref14 : '';
-      me.style = (_ref15 = opts.style) != null ? _ref15 : '';
-      me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : '';
-      me.offset = (_ref17 = opts.offset) != null ? _ref17 : [0, 0];
+      me.text = (_ref13 = opts.text) != null ? _ref13 : '';
+      me.style = (_ref14 = opts.style) != null ? _ref14 : '';
+      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : '';
+      me.offset = (_ref16 = opts.offset) != null ? _ref16 : [0, 0];
     }
 
     SvgLabel.prototype.render = function(layers) {
@@ -4870,12 +4781,12 @@
     __extends(HtmlLabel, _super);
 
     function HtmlLabel(opts) {
-      var me, _ref14, _ref15, _ref16;
+      var me, _ref13, _ref14, _ref15;
       me = this;
       HtmlLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref14 = opts.text) != null ? _ref14 : '';
-      me.style = (_ref15 = opts.style) != null ? _ref15 : '';
-      me["class"] = (_ref16 = opts["class"]) != null ? _ref16 : '';
+      me.text = (_ref13 = opts.text) != null ? _ref13 : '';
+      me.style = (_ref14 = opts.style) != null ? _ref14 : '';
+      me["class"] = (_ref15 = opts["class"]) != null ? _ref15 : '';
     }
 
     HtmlLabel.prototype.render = function(layers) {
@@ -4976,26 +4887,26 @@
     me = null;
 
     function PieChart(opts) {
-      var _base2, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref20, _ref21, _ref22;
+      var _base2, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref20, _ref21;
       me = this;
       PieChart.__super__.constructor.call(this, opts);
-      me.radius = (_ref14 = opts.radius) != null ? _ref14 : 4;
-      me.styles = (_ref15 = opts.styles) != null ? _ref15 : '';
-      me.colors = (_ref16 = opts.colors) != null ? _ref16 : ['#3cc', '#c3c', '#33c', '#cc3'];
-      me.titles = (_ref17 = opts.titles) != null ? _ref17 : ['', '', '', '', ''];
-      me.values = (_ref18 = opts.values) != null ? _ref18 : [];
-      me.border = (_ref19 = opts.border) != null ? _ref19 : false;
-      me.borderWidth = (_ref20 = opts.borderWidth) != null ? _ref20 : 2;
-      me["class"] = (_ref21 = opts["class"]) != null ? _ref21 : 'piechart';
-      if ((_ref22 = (_base2 = Raphael.fn).pieChart) == null) {
+      me.radius = (_ref13 = opts.radius) != null ? _ref13 : 4;
+      me.styles = (_ref14 = opts.styles) != null ? _ref14 : '';
+      me.colors = (_ref15 = opts.colors) != null ? _ref15 : ['#3cc', '#c3c', '#33c', '#cc3'];
+      me.titles = (_ref16 = opts.titles) != null ? _ref16 : ['', '', '', '', ''];
+      me.values = (_ref17 = opts.values) != null ? _ref17 : [];
+      me.border = (_ref18 = opts.border) != null ? _ref18 : false;
+      me.borderWidth = (_ref19 = opts.borderWidth) != null ? _ref19 : 2;
+      me["class"] = (_ref20 = opts["class"]) != null ? _ref20 : 'piechart';
+      if ((_ref21 = (_base2 = Raphael.fn).pieChart) == null) {
         _base2.pieChart = drawPieChart;
       }
     }
 
     PieChart.prototype.overlaps = function(bubble) {
-      var dx, dy, r1, r2, x1, x2, y1, y2, _ref14, _ref15;
-      _ref14 = [me.x, me.y, me.radius], x1 = _ref14[0], y1 = _ref14[1], r1 = _ref14[2];
-      _ref15 = [bubble.x, bubble.y, bubble.radius], x2 = _ref15[0], y2 = _ref15[1], r2 = _ref15[2];
+      var dx, dy, r1, r2, x1, x2, y1, y2, _ref13, _ref14;
+      _ref13 = [me.x, me.y, me.radius], x1 = _ref13[0], y1 = _ref13[1], r1 = _ref13[2];
+      _ref14 = [bubble.x, bubble.y, bubble.radius], x2 = _ref14[0], y2 = _ref14[1], r2 = _ref14[2];
       if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
         return false;
       }
@@ -5039,11 +4950,11 @@
     };
 
     PieChart.prototype.clear = function() {
-      var p, _i, _len, _ref14;
+      var p, _i, _len, _ref13;
       me = this;
-      _ref14 = me.chart;
-      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
-        p = _ref14[_i];
+      _ref13 = me.chart;
+      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
+        p = _ref13[_i];
         p.remove();
       }
       return me;
@@ -5101,7 +5012,7 @@
       });
       p.mouseover(function() {
         p.stop().animate({
-          transform: "s1.1 1.1 " + cx + " " + cy
+          transform: "s2.1 2.1 " + cx + " " + cy
         }, ms, "elastic");
       });
       p.mouseout(function() {
@@ -5250,26 +5161,26 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
 
 
     function StackedBarChart(opts) {
-      var me, _base2, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref20, _ref21;
+      var me, _base2, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref20;
       me = this;
       StackedBarChart.__super__.constructor.call(this, opts);
-      me.styles = (_ref14 = opts.styles) != null ? _ref14 : '';
-      me.colors = (_ref15 = opts.colors) != null ? _ref15 : [];
-      me.titles = (_ref16 = opts.titles) != null ? _ref16 : ['', '', '', '', ''];
-      me.values = (_ref17 = opts.values) != null ? _ref17 : [];
-      me.width = (_ref18 = opts.width) != null ? _ref18 : 17;
-      me.height = (_ref19 = opts.height) != null ? _ref19 : 30;
-      me["class"] = (_ref20 = opts["class"]) != null ? _ref20 : 'barchart';
-      if ((_ref21 = (_base2 = Raphael.fn).drawStackedBarChart) == null) {
+      me.styles = (_ref13 = opts.styles) != null ? _ref13 : '';
+      me.colors = (_ref14 = opts.colors) != null ? _ref14 : [];
+      me.titles = (_ref15 = opts.titles) != null ? _ref15 : ['', '', '', '', ''];
+      me.values = (_ref16 = opts.values) != null ? _ref16 : [];
+      me.width = (_ref17 = opts.width) != null ? _ref17 : 17;
+      me.height = (_ref18 = opts.height) != null ? _ref18 : 30;
+      me["class"] = (_ref19 = opts["class"]) != null ? _ref19 : 'barchart';
+      if ((_ref20 = (_base2 = Raphael.fn).drawStackedBarChart) == null) {
         _base2.drawStackedBarChart = drawStackedBars;
       }
     }
 
     StackedBarChart.prototype.overlaps = function(bubble) {
-      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref14, _ref15;
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref13, _ref14;
       me = this;
-      _ref14 = [me.x, me.y, me.radius], x1 = _ref14[0], y1 = _ref14[1], r1 = _ref14[2];
-      _ref15 = [bubble.x, bubble.y, bubble.radius], x2 = _ref15[0], y2 = _ref15[1], r2 = _ref15[2];
+      _ref13 = [me.x, me.y, me.radius], x1 = _ref13[0], y1 = _ref13[1], r1 = _ref13[2];
+      _ref14 = [bubble.x, bubble.y, bubble.radius], x2 = _ref14[0], y2 = _ref14[1], r2 = _ref14[2];
       if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
         return false;
       }
@@ -5316,11 +5227,11 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
     };
 
     StackedBarChart.prototype.clear = function() {
-      var me, p, _i, _len, _ref14;
+      var me, p, _i, _len, _ref13;
       me = this;
-      _ref14 = me.chart;
-      for (_i = 0, _len = _ref14.length; _i < _len; _i++) {
-        p = _ref14[_i];
+      _ref13 = me.chart;
+      for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
+        p = _ref13[_i];
         p.remove();
       }
       me.chart = [];
