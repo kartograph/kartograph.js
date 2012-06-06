@@ -122,7 +122,7 @@ drawPieChart = (cx, cy, r, values, labels, colors, stroke) ->
             stroke: stroke
             'stroke-width': 1
         p.mouseover () ->
-            p.stop().animate { transform: "s1.1 1.1 " + cx + " " + cy }, ms, "elastic"
+            p.stop().animate { transform: "s2.1 2.1 " + cx + " " + cy }, ms, "elastic"
             return
         p.mouseout () ->
             p.stop().animate {transform: ""}, ms, "elastic"
