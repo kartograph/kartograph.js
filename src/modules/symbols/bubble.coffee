@@ -47,11 +47,11 @@ class Bubble extends Symbol
 
     update: () ->
         me = @
-        me.path.attr
-            x: me.x
-            y: me.y
-            r: me.radius
         path = me.path
+        path.attr
+            cx: me.x
+            cy: me.y
+            r: me.radius
         path.node.setAttribute 'style', me.style
         path.node.setAttribute 'class', me.class
         if me.title?
@@ -70,7 +70,7 @@ class Bubble extends Symbol
 
 
 Bubble.props = ['radius','style','class','title']
-Bubble.layers = [] #{ id:'a', type: 'svg' }
+Bubble.layers = [] # { id:'a', type: 'svg' }
 
 kartograph.Bubble = Bubble
 
