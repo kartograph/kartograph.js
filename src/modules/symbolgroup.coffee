@@ -239,6 +239,7 @@ class SymbolGroup
         me.layoutSymbols()
         for s in me.symbols
             s.update()
+        return
 
 
 SymbolGroup._layerid = 0

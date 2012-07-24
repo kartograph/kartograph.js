@@ -4488,16 +4488,14 @@
     };
 
     SymbolGroup.prototype.onResize = function() {
-      var s, _i, _len, _ref13, _results;
+      var s, _i, _len, _ref13;
       me = this;
       me.layoutSymbols();
       _ref13 = me.symbols;
-      _results = [];
       for (_i = 0, _len = _ref13.length; _i < _len; _i++) {
         s = _ref13[_i];
-        _results.push(s.update());
+        s.update();
       }
-      return _results;
     };
 
     return SymbolGroup;
@@ -4664,12 +4662,12 @@
     Bubble.prototype.update = function() {
       var me, path;
       me = this;
-      me.path.attr({
-        x: me.x,
-        y: me.y,
+      path = me.path;
+      path.attr({
+        cx: me.x,
+        cy: me.y,
         r: me.radius
       });
-      path = me.path;
       path.node.setAttribute('style', me.style);
       path.node.setAttribute('class', me["class"]);
       if (me.title != null) {
