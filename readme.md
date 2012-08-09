@@ -53,7 +53,7 @@ Kartograph was created by [Gregor Aisch](http://github.com/gka/). It is supporte
 
 ### License
 
-Kartograph.js is licensed under [GPL](http://www.gnu.org/licenses/gpl-3.0.txt)
+Kartograph.js is licensed under [LGPL](http://www.gnu.org/licenses/lgpl-3.0.txt)
 
 
 
