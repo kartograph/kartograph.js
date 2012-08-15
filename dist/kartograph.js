@@ -49,7 +49,7 @@
 
   kartograph = root.$K = window.kartograph = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.2.1";
+  kartograph.version = "0.2.2";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -378,10 +378,12 @@
         height = cnt.height();
       }
       if (height === 0) {
-        height = width * .5;
+        height = 'auto';
       }
-      me.viewport = new BBox(0, 0, width, height);
-      me.paper = me.createSVGLayer();
+      me.size = {
+        h: height,
+        w: width
+      };
       me.markers = [];
       me.pathById = {};
       me.container.addClass('kartograph');
@@ -464,7 +466,7 @@
     };
 
     Kartograph.prototype._mapLoaded = function(xml) {
-      var $view, AB, halign, me, padding, valign, vp, _ref4, _ref5, _ref6, _ref7;
+      var $view, AB, halign, me, padding, ratio, valign, vp, _ref4, _ref5, _ref6, _ref7;
       me = this;
       if (me.cacheMaps) {
         if ((_ref4 = kartograph.__mapCache) == null) {
@@ -479,9 +481,17 @@
         return;
       }
       me.svgSrc = xml;
+      $view = $('view', xml);
+      if (!(me.paper != null)) {
+        if (me.size.h === 'auto') {
+          ratio = $view.attr('w') / $view.attr('h');
+          me.size.h = me.size.w / ratio;
+        }
+        me.viewport = new BBox(0, 0, me.size.w, me.size.h);
+        me.paper = me.createSVGLayer();
+      }
       vp = me.viewport;
-      $view = $('view', xml)[0];
-      me.viewAB = AB = kartograph.View.fromXML($view);
+      me.viewAB = AB = kartograph.View.fromXML($view[0]);
       padding = (_ref5 = me.opts.padding) != null ? _ref5 : 0;
       halign = (_ref6 = me.opts.halign) != null ? _ref6 : 'center';
       valign = (_ref7 = me.opts.valign) != null ? _ref7 : 'center';

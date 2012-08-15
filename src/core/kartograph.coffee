@@ -26,9 +26,10 @@ class Kartograph
         width ?= cnt.width()
         height ?= cnt.height()
         if height == 0
-            height = width * .5
-        me.viewport = new BBox 0,0,width,height
-        me.paper = me.createSVGLayer()
+            height = 'auto'
+        me.size =
+            h: height
+            w: width
         me.markers = []
         me.pathById = {}
         me.container.addClass 'kartograph'
@@ -114,10 +115,19 @@ class Kartograph
         catch err
             warn 'something went horribly wrong while parsing svg'
             return
+
         me.svgSrc = xml
+        $view = $('view', xml) # use first view
+
+        if not me.paper?
+            if me.size.h == 'auto'
+                ratio = $view.attr('w') / $view.attr('h')
+                me.size.h = me.size.w / ratio
+            me.viewport = new BBox 0, 0, me.size.w, me.size.h
+            me.paper = me.createSVGLayer()
+
         vp = me.viewport
-        $view = $('view', xml)[0] # use first view
-        me.viewAB = AB = kartograph.View.fromXML $view
+        me.viewAB = AB = kartograph.View.fromXML $view[0]
         padding = me.opts.padding ? 0
         halign = me.opts.halign ? 'center'
         valign = me.opts.valign ? 'center'

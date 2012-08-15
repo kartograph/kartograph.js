@@ -19,7 +19,7 @@
 
 root = (exports ? this)
 kartograph = root.$K = window.kartograph = root.kartograph ?= {}
-kartograph.version = "0.2.1"
+kartograph.version = "0.2.2"
 
 __verbose__ = false and console?
 
