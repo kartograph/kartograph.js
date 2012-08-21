@@ -115,6 +115,12 @@ class MapLayer
         for path in me.paths
             $(path.svgPath.node).bind event, ctx.handle
 
+
+resolve = (prop, data) ->
+    if type(prop) == 'function'
+        return prop data
+    return prop
+
 map_layer_path_uid = 0
 
 
