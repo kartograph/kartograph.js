@@ -82,6 +82,39 @@ class MapLayer
         for path in me.paths
             path.remove()
 
+    style: (prop, value, duration, delay) ->
+        me = @
+        duration ?= 0
+        delay ?= 0
+        for path in me.paths
+            val = resolve(value, path.data)
+            dur = resolve(duration, path.data)
+            dly = resolve(delay, path.data)
+
+            if dur > 0
+                at = {}
+                at[prop] = val
+                anim = Raphael.animation(at, dur * 1000)
+                path.svgPath.animate(anim.delay(dly * 1000))
+            else
+                path.svgPath.attr(prop, val)
+        me
+
+    on: (event, callback) ->
+        me = @
+
+        class EventContext
+            constructor: (@type, @cb, @layer) ->
+            handle: (e) =>
+                me = @
+                path = me.layer.getPath(e.target.getAttribute('id'))
+                me.cb path.data, path.svgPath, e
+
+        ctx = new EventContext(event, callback, me)
+
+        for path in me.paths
+            $(path.svgPath.node).bind event, ctx.handle
+
 map_layer_path_uid = 0
 
 

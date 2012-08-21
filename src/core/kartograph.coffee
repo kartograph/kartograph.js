@@ -120,10 +120,12 @@ class Kartograph
         $view = $('view', xml) # use first view
 
         if not me.paper?
-            if me.size.h == 'auto'
+            w = me.size.w
+            h = me.size.h
+            if h == 'auto'
                 ratio = $view.attr('w') / $view.attr('h')
-                me.size.h = me.size.w / ratio
-            me.viewport = new BBox 0, 0, me.size.w, me.size.h
+                h = w / ratio
+            me.viewport = new BBox 0, 0, w, h
             me.paper = me.createSVGLayer()
 
         vp = me.viewport
@@ -131,12 +133,14 @@ class Kartograph
         padding = me.opts.padding ? 0
         halign = me.opts.halign ? 'center'
         valign = me.opts.valign ? 'center'
-        me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
+        # me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
+        zoom = me.opts.zoom ? 1
+        me.viewBC = new kartograph.View me.viewAB.asBBox(), vp.width*zoom, vp.height*zoom, padding,halign,valign
         me.proj = kartograph.Proj.fromXML $('proj', $view)[0]
-        me.mapLoadCallback(me)
+        me.mapLoadCallback me
 
 
-    addLayer: (src_id, layer_id, path_id) ->
+    addLayer: (id, opts) ->
         ###
         add new layer
         ###
@@ -144,10 +148,9 @@ class Kartograph
         me.layerIds ?= []
         me.layers ?= {}
 
-        if __type(src_id) == 'object'
-            opts = src_id
-            src_id = opts.id
-            layer_id = opts.className
+        src_id = id
+        if __type(opts) == 'object'
+            layer_id = opts.name
             path_id = opts.key
             titles = opts.title
         else
@@ -172,13 +175,17 @@ class Kartograph
             me.layerIds.push layer_id
 
         # add event handlers
-        checkEvents = ['click']
+        checkEvents = ['click', 'mouseenter', 'mouseleave', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mouseout']
         for evt in checkEvents
             if __type(opts[evt]) == 'function'
                 me.onLayerEvent evt, opts[evt], layer_id
         if opts.tooltip?
             me.tooltips opts.tooltip
+        if opts.styles?
+            for prop, val of opts.styles
+                map.style layer_id, prop, val
         me
+
 
     getLayer: (layer_id) ->
         ### returns a map layer ###
@@ -194,24 +201,7 @@ class Kartograph
         null
 
     onLayerEvent: (event, callback, layerId) ->
-        me = @
-        me
-        layerId ?= me.layerIds[me.layerIds.length-1]
 
-        class EventContext
-            constructor: (@type, @cb, @map) ->
-
-            handle: (e) =>
-                me = @
-                path = me.map.pathById[e.target.getAttribute('id')]
-                me.cb path.data
-
-        ctx = new EventContext(event, callback, me)
-
-        if me.layers[layerId]?
-            paths = me.layers[layerId].paths
-            for path in paths
-                $(path.svgPath.node).bind event, ctx.handle
 
 
     addMarker: (marker) ->
@@ -313,8 +303,12 @@ class Kartograph
                 sg.remove()
             me.symbolGroups = []
 
+        if me.paper?
+            $(me.paper.canvas).remove()
+            me.paper = undefined
 
-    loadStyles: (url, callback) ->
+
+    loadCSS: (url, callback) ->
         ###
         loads a stylesheet
         ###
@@ -334,7 +328,7 @@ class Kartograph
             callback()
 
 
-    applyStyles: (el, className) ->
+    applyCSS: (el, className) ->
         ###
         applies pre-loaded css styles to
         raphael elements
@@ -366,6 +360,12 @@ class Kartograph
                     if props[k]?
                         el.attr k,props[k]
         el
+
+    style: (layer, prop, value, duration, delay) ->
+        me = @
+        layer = me.getLayer(layer)
+        if layer?
+            layer.style prop, value, duration, delay
 
 
 kartograph.Kartograph = Kartograph

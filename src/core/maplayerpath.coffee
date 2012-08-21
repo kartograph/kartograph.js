@@ -29,7 +29,7 @@ class MapLayerPath
         if not map.styles?
             me.svgPath.node.setAttribute('class', layer_id)
         else
-            map.applyStyles me.svgPath,layer_id
+            map.applyCSS me.svgPath,layer_id
 
         uid = 'path_'+map_layer_path_uid++
         me.svgPath.node.setAttribute('id', uid)
