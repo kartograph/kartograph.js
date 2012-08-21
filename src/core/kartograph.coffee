@@ -178,12 +178,12 @@ class Kartograph
         checkEvents = ['click', 'mouseenter', 'mouseleave', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mouseout']
         for evt in checkEvents
             if __type(opts[evt]) == 'function'
-                layer.on evt, opts[evt], layer_id
+                layer.on evt, opts[evt]
         if opts.tooltip?
             me.tooltips opts.tooltip
         if opts.styles?
             for prop, val of opts.styles
-                map.style layer_id, prop, val
+                layer.style prop, val
         me
 
 

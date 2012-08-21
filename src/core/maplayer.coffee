@@ -107,11 +107,10 @@ class MapLayer
             constructor: (@type, @cb, @layer) ->
             handle: (e) =>
                 me = @
-                path = me.layer.getPath(e.target.getAttribute('id'))
+                path = me.layer.map.pathById[e.target.getAttribute('id')]
                 me.cb path.data, path.svgPath, e
 
         ctx = new EventContext(event, callback, me)
-
         for path in me.paths
             $(path.svgPath.node).bind event, ctx.handle
 
