@@ -16,10 +16,6 @@
     License along with this library. If not, see <http://www.gnu.org/licenses/>.
 ###
 
-root = (exports ? this)	
-
-kartograph = root.kartograph ?= {}
-
 ###
     This is a reduced version of Danial Wachsstocks jQuery based CSS parser
     Everything is removed but the core css-to-object parsing
@@ -70,7 +66,7 @@ kartograph.parsecss = (str, callback) ->
 		return
 	else
 		return ret
-		
+
 munged = {} # cache
 
 parsedeclarations = (index) ->

@@ -100,8 +100,6 @@ View.fromXML = (xml) ->
 	bbox_xml = xml.getElementsByTagName('bbox')[0]
 	bbox = BBox.fromXML(bbox_xml)
 	new kartograph.View bbox,w,h,pad
-		
-root = (exports ? this)	
-root.kartograph ?= {}
-root.kartograph.View = View
+
+kartograph.View = View
 

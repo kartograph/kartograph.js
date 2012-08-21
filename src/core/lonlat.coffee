@@ -16,9 +16,6 @@
     License along with this library. If not, see <http://www.gnu.org/licenses/>.
 ###
 
-root = (exports ? this)	
-kartograph = root.kartograph ?= {}
-
 class LonLat
 	###
 	represents a Point
@@ -27,7 +24,7 @@ class LonLat
 		@lon = Number(lon)
 		@lat = Number(lat)
 		@alt = Number(alt)
-		
+
 	distance: (ll) ->
 		me = @
 		R = 6371 # km
@@ -40,12 +37,12 @@ class LonLat
 				Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
 		c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
 		R * c
-	
+
 class LatLon extends LonLat
 	constructor: (lat, lon, alt = 0) ->
 		super lon, lat, alt
-		
-		
+
+
 kartograph.LonLat = LonLat
 kartograph.LatLon = LatLon
 
