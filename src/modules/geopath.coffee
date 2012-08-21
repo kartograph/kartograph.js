@@ -16,8 +16,6 @@
     License along with this library. If not, see <http://www.gnu.org/licenses/>.
 ###
 
-root = (exports ? this)
-kartograph = root.$K = root.kartograph ?= {}
 
 kartograph.Kartograph::addGeoPath = (points, cmds=[], className = '') ->
     ### converts a set of ###

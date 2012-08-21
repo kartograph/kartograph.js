@@ -18,8 +18,8 @@
 
 
 root = (exports ? this)
-kartograph = root.$K = window.kartograph = root.kartograph ?= {}
-kartograph.version = "0.2.2"
+kartograph = root.$K = window.Kartograph = root.Kartograph ?= {}
+kartograph.version = "0.3.1"
 
 __verbose__ = false and console?
 

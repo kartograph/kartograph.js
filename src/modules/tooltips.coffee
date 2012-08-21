@@ -17,7 +17,7 @@
 ###
 
 root = (exports ? this)
-kartograph = root.$K = root.kartograph ?= {}
+kartograph = root.$K = root.Kartograph ?= {}
 
 kartograph.Kartograph::tooltips = (opts) ->
     me = @
