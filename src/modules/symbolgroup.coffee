@@ -16,47 +16,6 @@
     License along with this library. If not, see <http://www.gnu.org/licenses/>.
 ###
 
-###
-New API
-
-sg = new SymbolGroup({
-    data: crimeRatesPerCity,
-    location: function(d) {
-        return [d.lon, d.lat]];
-    },
-    filter: function(d) {
-        return !isNaN(d.pop);
-    },
-    layout: 'group',
-    group: function(list) {
-        var s=0,p=0,i,d,g = {},lat=0,lon=0;
-        for (i in list) {
-            d = list[i];
-            s += d.murder;
-            p += d.pop;
-        }
-        for (i in list) {
-            d = list[i];
-            lon += d.ll[0] * d.pop/p;
-            lat += d.ll[1] * d.pop/p;
-        }
-        g.murder = s;
-        g.pop = p;
-        g.ll = [lon,lat];
-        return g;
-    },
-    // type specific options
-    type: kartograph.Bubble,
-    radius: function(d) {
-        return Math.sqrt(d.murder/d.pop)*5;
-    },
-    color: '#c00'
-})
-
-Instead of passing lonlat coords as location you may
-pass a string LAYERID.PATHID in order to attach the symbol
-to the center of a certain path.
-###
 
 class SymbolGroup
     ### symbol groups
