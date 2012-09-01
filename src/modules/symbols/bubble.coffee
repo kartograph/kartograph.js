@@ -42,7 +42,7 @@ class Bubble extends Symbol
         me = @
         me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
         me.update()
-        me.map.applyStyles(me.path)
+        me.map.applyCSS(me.path)
         me
 
     update: () ->

@@ -45,3 +45,12 @@ kartograph.Kartograph::getGeoPathStr = (points, cmds=[]) ->
 
     return path_str
 
+
+kartograph.Kartograph::addGeoPolygon = (points, className) ->
+    ### converts a set of ###
+    me = @
+    cmds = ['M']
+    for i of points
+        cmds.push 'L'
+    cmds.push 'Z'
+    me.addGeoPath points, cmds, className
