@@ -116,7 +116,7 @@ class MapLayer
 
 
 resolve = (prop, data) ->
-    if type(prop) == 'function'
+    if __type(prop) == 'function'
         return prop data
     return prop
 
