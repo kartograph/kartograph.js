@@ -7,10 +7,13 @@ Initializing a new map
 ````javascript
 map = $K.map('#map', 600, 400);
 map.loadMap('world.svg', function() {
-	map.addLayer({
-		id: 'countries',
-		key: 'iso3',
-		title: function(d) { return d.countryName; }
+	map.addLayer('countries', {
+		styles: {
+			fill: '#ee9900'
+		},
+		title: function(d) {
+			return d.countryName;
+		}
 	});
 });
 ```
@@ -22,14 +25,11 @@ pop_density = { 'USA': 123455, 'CAN': 232323, ... };
 
 colorscale = new chroma.ColorScale({
 	colors: chroma.brewer.YlOrRd,
-	limits: chroma.limits(pop_density, 'k-means', 9)
+	limits: chroma.limits(chroma.analyze(pop_density), 'k-means', 9)
 });
 
-map.choropleth({
-	data: pop_density,
-	color: function(value) {
-		return colorscale.getColor(value);
-	}
+map.getLayer('countries').style('fill', function(data) {
+	return colorscale.get(pop_density[data.iso]);
 });
 ```
 
@@ -38,24 +38,23 @@ Adding symbols is easy, too:
 ```javascript
 cities = [{ lat: 43, lon: -75, label: 'New York', population: 19465197 }];
 
-new $K.SymbolGroup({
-	map: map,
+map.addSymbols({
 	data: cities,
-	location: function(d) { return [d.lon, d.lat]; },
-	type: 'Bubble',
-	radius: function(d) { return Math.sqrt(d.population) * 0.001; }
+	location: function(d) {
+		return [d.lon, d.lat];
+	},
+	type: Kartograph.Bubble,
+	radius: function(d) {
+		return Math.sqrt(d.population) * 0.001;
+	}
 })
 ```
 
 ### Author
 
-Kartograph was created by [Gregor Aisch](http://github.com/gka/). It is supported by [Piwik Web Analytics](http://piwik.org) and the [Open Knowledge Foundation](http://okfn.org). 
+Kartograph was created by [Gregor Aisch](http://github.com/gka/). It is supported by [Piwik Web Analytics](http://piwik.org) and the [Open Knowledge Foundation](http://okfn.org).
 
 ### License
 
 Kartograph.js is licensed under [LGPL](http://www.gnu.org/licenses/lgpl-3.0.txt)
-
-
-
-
 
