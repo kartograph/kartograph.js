@@ -26,7 +26,7 @@ class Bubble extends Symbol
         me.title = opts.title
         me.class = opts.class ? 'bubble'
 
-    overlaps: (bubble) ->
+    overlaps: (bubble) =>
         me = @
         # check bbox
         [x1,y1,r1] = [me.x, me.y, me.radius]
@@ -38,14 +38,14 @@ class Bubble extends Symbol
             return false
         true
 
-    render: (layers) ->
+    render: (layers) =>
         me = @
         me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
         me.update()
         me.map.applyCSS(me.path)
         me
 
-    update: () ->
+    update: () =>
         me = @
         path = me.path
         path.attr
@@ -58,12 +58,12 @@ class Bubble extends Symbol
             path.attr 'title',me.title
         me
 
-    clear: () ->
+    clear: () =>
         me = @
         me.path.remove()
         me
 
-    nodes: () ->
+    nodes: () =>
         me = @
         [me.path.node]
 

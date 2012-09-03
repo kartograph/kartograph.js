@@ -29,7 +29,7 @@ class SymbolGroup
     constructor: (opts) ->
         me = @
         required = ['data','location','type','map']
-        optional = ['filter', 'tooltip', 'layout', 'group','click']
+        optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay']
 
         for p in required
             if opts[p]?
@@ -78,11 +78,24 @@ class SymbolGroup
         me.layoutSymbols()
 
         # render symbols
+        maxdly = 0
         for s in me.symbols
-            s.render()
+            dly = 0
+            if __type(me.delay) == "function"
+                dly = me.delay s.data
+            else if me.delay?
+                dly = me.delay
+            if dly > 0
+                maxdly = dly if dly > maxdly
+                setTimeout s.render, dly*1000
+            else
+                s.render()
 
         if __type(me.tooltip) == "function"
-            me.initTooltips()
+            if maxdly > 0
+                setTimeout me.initTooltips, maxdly*1000 + 60
+            else
+                me.initTooltips()
 
         if __type(me.click) == "function"
             for s in me.symbols
@@ -142,7 +155,7 @@ class SymbolGroup
         if me.layout == 'group'
             me.groupLayout()
 
-    groupLayout: () ->
+    groupLayout: () =>
         ###
         layouts symbols in this group, eventually adds new 'grouped' symbols
         map.addSymbols({
@@ -157,7 +170,7 @@ class SymbolGroup
         me.gsymbols ?= []
         overlap = true
 
-    initTooltips: () ->
+    initTooltips: () =>
         me = @
         tooltips = me.tooltip
         for s in me.symbols

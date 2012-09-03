@@ -4170,11 +4170,15 @@
     me = null;
 
     function SymbolGroup(opts) {
-      var SymbolType, d, i, id, l, layer, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref6, _ref7, _ref8, _ref9,
+      this.initTooltips = __bind(this.initTooltips, this);
+
+      this.groupLayout = __bind(this.groupLayout, this);
+
+      var SymbolType, d, dly, i, id, l, layer, maxdly, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref6, _ref7, _ref8, _ref9,
         _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'layout', 'group', 'click'];
+      optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -4228,13 +4232,31 @@
         }
       }
       me.layoutSymbols();
+      maxdly = 0;
       _ref8 = me.symbols;
       for (_m = 0, _len4 = _ref8.length; _m < _len4; _m++) {
         s = _ref8[_m];
-        s.render();
+        dly = 0;
+        if (__type(me.delay) === "function") {
+          dly = me.delay(s.data);
+        } else if (me.delay != null) {
+          dly = me.delay;
+        }
+        if (dly > 0) {
+          if (dly > maxdly) {
+            maxdly = dly;
+          }
+          setTimeout(s.render, dly * 1000);
+        } else {
+          s.render();
+        }
       }
       if (__type(me.tooltip) === "function") {
-        me.initTooltips();
+        if (maxdly > 0) {
+          setTimeout(me.initTooltips, maxdly * 1000 + 60);
+        } else {
+          me.initTooltips();
+        }
       }
       if (__type(me.click) === "function") {
         _ref9 = me.symbols;
@@ -4540,6 +4562,16 @@
     __extends(Bubble, _super);
 
     function Bubble(opts) {
+      this.nodes = __bind(this.nodes, this);
+
+      this.clear = __bind(this.clear, this);
+
+      this.update = __bind(this.update, this);
+
+      this.render = __bind(this.render, this);
+
+      this.overlaps = __bind(this.overlaps, this);
+
       var me, _ref7, _ref8, _ref9;
       me = this;
       Bubble.__super__.constructor.call(this, opts);
