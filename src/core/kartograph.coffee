@@ -179,11 +179,11 @@ class Kartograph
         for evt in checkEvents
             if __type(opts[evt]) == 'function'
                 layer.on evt, opts[evt]
-        if opts.tooltip?
-            me.tooltips opts.tooltip
         if opts.styles?
             for prop, val of opts.styles
                 layer.style prop, val
+        if opts.tooltips?
+            layer.tooltips opts.tooltips
         me
 
 

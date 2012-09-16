@@ -84,6 +84,10 @@ class MapLayer
 
     style: (prop, value, duration, delay) ->
         me = @
+        if __type(prop) == "object"
+            for key, val of prop
+                me.style key, val
+            return me
         duration ?= 0
         delay ?= 0
         for path in me.paths
@@ -102,7 +106,6 @@ class MapLayer
 
     on: (event, callback) ->
         me = @
-
         class EventContext
             constructor: (@type, @cb, @layer) ->
             handle: (e) =>
@@ -114,6 +117,33 @@ class MapLayer
         for path in me.paths
             $(path.svgPath.node).bind event, ctx.handle
 
+    tooltips: (content, delay) ->
+        me = @
+        setTooltip = (path, tt) ->
+            cfg = {
+                position: {
+                    target: 'mouse',
+                    viewport: $(window),
+                    adjust: { x:7, y:7}
+                },
+                show: {
+                    delay: delay ? 20
+                },
+                content: {}
+            };
+            if tt?
+                if typeof(tt) == "string"
+                    cfg.content.text = tt
+                else if $.isArray tt
+                    cfg.content.title = tt[0]
+                    cfg.content.text = tt[1]
+            else
+                cfg.content.text = 'n/a'
+            $(path.svgPath.node).qtip(cfg);
+
+        for path in me.paths
+            tt = resolve content, path.data
+            setTooltip path, tt
 
 resolve = (prop, data) ->
     if __type(prop) == 'function'

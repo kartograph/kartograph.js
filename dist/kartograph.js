@@ -40,7 +40,7 @@
 
 
 (function() {
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -548,15 +548,15 @@
           layer.on(evt, opts[evt]);
         }
       }
-      if (opts.tooltip != null) {
-        me.tooltips(opts.tooltip);
-      }
       if (opts.styles != null) {
         _ref6 = opts.styles;
         for (prop in _ref6) {
           val = _ref6[prop];
           layer.style(prop, val);
         }
+      }
+      if (opts.tooltips != null) {
+        layer.tooltips(opts.tooltips);
       }
       return me;
     };
@@ -1028,8 +1028,15 @@
     };
 
     MapLayer.prototype.style = function(prop, value, duration, delay) {
-      var anim, at, dly, dur, me, path, val, _i, _len, _ref4;
+      var anim, at, dly, dur, key, me, path, val, _i, _len, _ref4;
       me = this;
+      if (__type(prop) === "object") {
+        for (key in prop) {
+          val = prop[key];
+          me.style(key, val);
+        }
+        return me;
+      }
       if (duration == null) {
         duration = 0;
       }
@@ -1083,6 +1090,47 @@
       for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
         path = _ref4[_i];
         _results.push($(path.svgPath.node).bind(event, ctx.handle));
+      }
+      return _results;
+    };
+
+    MapLayer.prototype.tooltips = function(content, delay) {
+      var me, path, setTooltip, tt, _i, _len, _ref4, _results;
+      me = this;
+      setTooltip = function(path, tt) {
+        var cfg;
+        cfg = {
+          position: {
+            target: 'mouse',
+            viewport: $(window),
+            adjust: {
+              x: 7,
+              y: 7
+            }
+          },
+          show: {
+            delay: delay != null ? delay : 20
+          },
+          content: {}
+        };
+        if (tt != null) {
+          if (typeof tt === "string") {
+            cfg.content.text = tt;
+          } else if ($.isArray(tt)) {
+            cfg.content.title = tt[0];
+            cfg.content.text = tt[1];
+          }
+        } else {
+          cfg.content.text = 'n/a';
+        }
+        return $(path.svgPath.node).qtip(cfg);
+      };
+      _ref4 = me.paths;
+      _results = [];
+      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+        path = _ref4[_i];
+        tt = resolve(content, path.data);
+        _results.push(setTooltip(path, tt));
       }
       return _results;
     };
@@ -4106,6 +4154,7 @@
       me.data = opts.data;
       me.map = opts.map;
       me.layers = opts.layers;
+      me.key = opts.key;
       me.x = opts.x;
       me.y = opts.y;
     }
@@ -4224,11 +4273,11 @@
       for (i in me.data) {
         d = me.data[i];
         if (__type(me.filter) === "function") {
-          if (me.filter(d)) {
-            me.addSymbol(d);
+          if (me.filter(d, i)) {
+            me.addSymbol(d, i);
           }
         } else {
-          me.addSymbol(d);
+          me.addSymbol(d, i);
         }
       }
       me.layoutSymbols();
@@ -4276,14 +4325,14 @@
       me.map.addSymbolGroup(me);
     }
 
-    SymbolGroup.prototype.addSymbol = function(data) {
+    SymbolGroup.prototype.addSymbol = function(data, key) {
       /* adds a new symbol to this group
       */
 
       var SymbolType, ll, p, sprops, symbol, _i, _len, _ref6;
       me = this;
       SymbolType = me.type;
-      ll = me._evaluate(me.location, data);
+      ll = me._evaluate(me.location, data, key);
       if (__type(ll) === 'array') {
         ll = new kartograph.LonLat(ll[0], ll[1]);
       }
@@ -4291,13 +4340,14 @@
         layers: me.layers,
         location: ll,
         data: data,
+        key: key,
         map: me.map
       };
       _ref6 = SymbolType.props;
       for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
         p = _ref6[_i];
         if (me[p] != null) {
-          sprops[p] = me._evaluate(me[p], data);
+          sprops[p] = me._evaluate(me[p], data, key);
         }
       }
       symbol = new SymbolType(sprops);
@@ -4305,13 +4355,13 @@
       return symbol;
     };
 
-    SymbolGroup.prototype._evaluate = function(prop, data) {
+    SymbolGroup.prototype._evaluate = function(prop, data, key) {
       /* evaluates a property function or returns a static value
       */
 
       var val;
       if (__type(prop) === 'function') {
-        return val = prop(data);
+        return val = prop(data, key);
       } else {
         return val = prop;
       }
@@ -4384,7 +4434,7 @@
           },
           content: {}
         };
-        tt = tooltips(s.data);
+        tt = tooltips(s.data, s.key);
         if (__type(tt) === "string") {
           cfg.content.text = tt;
         } else if (__type(tt) === "array") {
@@ -4450,96 +4500,6 @@
 
   /*
       kartograph - a svg mapping library
-      Copyright (C) 2011  Gregor Aisch
-  
-      This library is free software; you can redistribute it and/or
-      modify it under the terms of the GNU Lesser General Public
-      License as published by the Free Software Foundation; either
-      version 2.1 of the License, or (at your option) any later version.
-  
-      This library is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-      Lesser General Public License for more details.
-  
-      You should have received a copy of the GNU Lesser General Public
-      License along with this library. If not, see <http://www.gnu.org/licenses/>.
-  */
-
-
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  kartograph = root.$K = (_ref6 = root.Kartograph) != null ? _ref6 : root.Kartograph = {};
-
-  kartograph.Kartograph.prototype.tooltips = function(opts) {
-    var content, id, layer, layer_id, me, path, paths, setTooltip, tt, _i, _len, _ref7, _ref8, _ref9, _results, _results1;
-    me = this;
-    content = opts.content;
-    layer_id = (_ref7 = opts.layer) != null ? _ref7 : me.layerIds[me.layerIds.length - 1];
-    if (!me.layers.hasOwnProperty(layer_id)) {
-      warn('tooltips error: layer "' + layer_id + '" not found');
-      return;
-    }
-    layer = me.layers[layer_id];
-    setTooltip = function(path, tt) {
-      var cfg, _ref8;
-      cfg = {
-        position: {
-          target: 'mouse',
-          viewport: $(window),
-          adjust: {
-            x: 7,
-            y: 7
-          }
-        },
-        show: {
-          delay: (_ref8 = opts.delay) != null ? _ref8 : 20
-        },
-        content: {}
-      };
-      if (tt != null) {
-        if (typeof tt === "string") {
-          cfg.content.text = tt;
-        } else if ($.isArray(tt)) {
-          cfg.content.title = tt[0];
-          cfg.content.text = tt[1];
-        }
-      } else {
-        cfg.content.text = 'n/a';
-      }
-      return $(path.svgPath.node).qtip(cfg);
-    };
-    if ($.isFunction(content)) {
-      _ref8 = layer.paths;
-      _results = [];
-      for (_i = 0, _len = _ref8.length; _i < _len; _i++) {
-        path = _ref8[_i];
-        tt = content(path.data, layer.path_id != null ? path.data[layer.path_id] : void 0);
-        _results.push(setTooltip(path, tt));
-      }
-      return _results;
-    } else {
-      _ref9 = layer.pathsById;
-      _results1 = [];
-      for (id in _ref9) {
-        paths = _ref9[id];
-        _results1.push((function() {
-          var _j, _len1, _results2;
-          _results2 = [];
-          for (_j = 0, _len1 = paths.length; _j < _len1; _j++) {
-            path = paths[_j];
-            tt = tooltips[id];
-            _results2.push(setTooltip(path, tt));
-          }
-          return _results2;
-        })());
-      }
-      return _results1;
-    }
-  };
-
-  /*
-      kartograph - a svg mapping library
       Copyright (C) 2011,2012  Gregor Aisch
   
       This library is free software; you can redistribute it and/or
@@ -4572,20 +4532,20 @@
 
       this.overlaps = __bind(this.overlaps, this);
 
-      var me, _ref7, _ref8, _ref9;
+      var me, _ref6, _ref7, _ref8;
       me = this;
       Bubble.__super__.constructor.call(this, opts);
-      me.radius = (_ref7 = opts.radius) != null ? _ref7 : 4;
-      me.style = (_ref8 = opts.style) != null ? _ref8 : '';
+      me.radius = (_ref6 = opts.radius) != null ? _ref6 : 4;
+      me.style = (_ref7 = opts.style) != null ? _ref7 : '';
       me.title = opts.title;
-      me["class"] = (_ref9 = opts["class"]) != null ? _ref9 : 'bubble';
+      me["class"] = (_ref8 = opts["class"]) != null ? _ref8 : 'bubble';
     }
 
     Bubble.prototype.overlaps = function(bubble) {
-      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref7, _ref8;
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref6, _ref7;
       me = this;
-      _ref7 = [me.x, me.y, me.radius], x1 = _ref7[0], y1 = _ref7[1], r1 = _ref7[2];
-      _ref8 = [bubble.x, bubble.y, bubble.radius], x2 = _ref8[0], y2 = _ref8[1], r2 = _ref8[2];
+      _ref6 = [me.x, me.y, me.radius], x1 = _ref6[0], y1 = _ref6[1], r1 = _ref6[2];
+      _ref7 = [bubble.x, bubble.y, bubble.radius], x2 = _ref7[0], y2 = _ref7[1], r2 = _ref7[2];
       if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
         return false;
       }
@@ -4670,14 +4630,14 @@
     __extends(Icon, _super);
 
     function Icon(opts) {
-      var me, _ref10, _ref11, _ref7, _ref8, _ref9;
+      var me, _ref10, _ref6, _ref7, _ref8, _ref9;
       me = this;
       Icon.__super__.constructor.call(this, opts);
-      me.icon = (_ref7 = opts.icon) != null ? _ref7 : '';
-      me.offset = (_ref8 = opts.offset) != null ? _ref8 : [0, 0];
-      me.iconsize = (_ref9 = opts.iconsize) != null ? _ref9 : [10, 10];
-      me["class"] = (_ref10 = opts["class"]) != null ? _ref10 : '';
-      me.title = (_ref11 = opts.title) != null ? _ref11 : '';
+      me.icon = (_ref6 = opts.icon) != null ? _ref6 : '';
+      me.offset = (_ref7 = opts.offset) != null ? _ref7 : [0, 0];
+      me.iconsize = (_ref8 = opts.iconsize) != null ? _ref8 : [10, 10];
+      me["class"] = (_ref9 = opts["class"]) != null ? _ref9 : '';
+      me.title = (_ref10 = opts.title) != null ? _ref10 : '';
     }
 
     Icon.prototype.render = function(layers) {
@@ -4759,13 +4719,13 @@
     __extends(SvgLabel, _super);
 
     function SvgLabel(opts) {
-      var me, _ref10, _ref7, _ref8, _ref9;
+      var me, _ref6, _ref7, _ref8, _ref9;
       me = this;
       SvgLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref7 = opts.text) != null ? _ref7 : '';
-      me.style = (_ref8 = opts.style) != null ? _ref8 : '';
-      me["class"] = (_ref9 = opts["class"]) != null ? _ref9 : '';
-      me.offset = (_ref10 = opts.offset) != null ? _ref10 : [0, 0];
+      me.text = (_ref6 = opts.text) != null ? _ref6 : '';
+      me.style = (_ref7 = opts.style) != null ? _ref7 : '';
+      me["class"] = (_ref8 = opts["class"]) != null ? _ref8 : '';
+      me.offset = (_ref9 = opts.offset) != null ? _ref9 : [0, 0];
     }
 
     SvgLabel.prototype.render = function(layers) {
@@ -4815,12 +4775,12 @@
     __extends(HtmlLabel, _super);
 
     function HtmlLabel(opts) {
-      var me, _ref7, _ref8, _ref9;
+      var me, _ref6, _ref7, _ref8;
       me = this;
       HtmlLabel.__super__.constructor.call(this, opts);
-      me.text = (_ref7 = opts.text) != null ? _ref7 : '';
-      me.style = (_ref8 = opts.style) != null ? _ref8 : '';
-      me["class"] = (_ref9 = opts["class"]) != null ? _ref9 : '';
+      me.text = (_ref6 = opts.text) != null ? _ref6 : '';
+      me.style = (_ref7 = opts.style) != null ? _ref7 : '';
+      me["class"] = (_ref8 = opts["class"]) != null ? _ref8 : '';
     }
 
     HtmlLabel.prototype.render = function(layers) {
@@ -4921,26 +4881,26 @@
     me = null;
 
     function PieChart(opts) {
-      var _base2, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref7, _ref8, _ref9;
+      var _base2, _ref10, _ref11, _ref12, _ref13, _ref14, _ref6, _ref7, _ref8, _ref9;
       me = this;
       PieChart.__super__.constructor.call(this, opts);
-      me.radius = (_ref7 = opts.radius) != null ? _ref7 : 4;
-      me.styles = (_ref8 = opts.styles) != null ? _ref8 : '';
-      me.colors = (_ref9 = opts.colors) != null ? _ref9 : ['#3cc', '#c3c', '#33c', '#cc3'];
-      me.titles = (_ref10 = opts.titles) != null ? _ref10 : ['', '', '', '', ''];
-      me.values = (_ref11 = opts.values) != null ? _ref11 : [];
-      me.border = (_ref12 = opts.border) != null ? _ref12 : false;
-      me.borderWidth = (_ref13 = opts.borderWidth) != null ? _ref13 : 2;
-      me["class"] = (_ref14 = opts["class"]) != null ? _ref14 : 'piechart';
-      if ((_ref15 = (_base2 = Raphael.fn).pieChart) == null) {
+      me.radius = (_ref6 = opts.radius) != null ? _ref6 : 4;
+      me.styles = (_ref7 = opts.styles) != null ? _ref7 : '';
+      me.colors = (_ref8 = opts.colors) != null ? _ref8 : ['#3cc', '#c3c', '#33c', '#cc3'];
+      me.titles = (_ref9 = opts.titles) != null ? _ref9 : ['', '', '', '', ''];
+      me.values = (_ref10 = opts.values) != null ? _ref10 : [];
+      me.border = (_ref11 = opts.border) != null ? _ref11 : false;
+      me.borderWidth = (_ref12 = opts.borderWidth) != null ? _ref12 : 2;
+      me["class"] = (_ref13 = opts["class"]) != null ? _ref13 : 'piechart';
+      if ((_ref14 = (_base2 = Raphael.fn).pieChart) == null) {
         _base2.pieChart = drawPieChart;
       }
     }
 
     PieChart.prototype.overlaps = function(bubble) {
-      var dx, dy, r1, r2, x1, x2, y1, y2, _ref7, _ref8;
-      _ref7 = [me.x, me.y, me.radius], x1 = _ref7[0], y1 = _ref7[1], r1 = _ref7[2];
-      _ref8 = [bubble.x, bubble.y, bubble.radius], x2 = _ref8[0], y2 = _ref8[1], r2 = _ref8[2];
+      var dx, dy, r1, r2, x1, x2, y1, y2, _ref6, _ref7;
+      _ref6 = [me.x, me.y, me.radius], x1 = _ref6[0], y1 = _ref6[1], r1 = _ref6[2];
+      _ref7 = [bubble.x, bubble.y, bubble.radius], x2 = _ref7[0], y2 = _ref7[1], r2 = _ref7[2];
       if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
         return false;
       }
@@ -4984,11 +4944,11 @@
     };
 
     PieChart.prototype.clear = function() {
-      var p, _i, _len, _ref7;
+      var p, _i, _len, _ref6;
       me = this;
-      _ref7 = me.chart;
-      for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
-        p = _ref7[_i];
+      _ref6 = me.chart;
+      for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+        p = _ref6[_i];
         p.remove();
       }
       return me;
@@ -5195,26 +5155,26 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
 
 
     function StackedBarChart(opts) {
-      var me, _base2, _ref10, _ref11, _ref12, _ref13, _ref14, _ref7, _ref8, _ref9;
+      var me, _base2, _ref10, _ref11, _ref12, _ref13, _ref6, _ref7, _ref8, _ref9;
       me = this;
       StackedBarChart.__super__.constructor.call(this, opts);
-      me.styles = (_ref7 = opts.styles) != null ? _ref7 : '';
-      me.colors = (_ref8 = opts.colors) != null ? _ref8 : [];
-      me.titles = (_ref9 = opts.titles) != null ? _ref9 : ['', '', '', '', ''];
-      me.values = (_ref10 = opts.values) != null ? _ref10 : [];
-      me.width = (_ref11 = opts.width) != null ? _ref11 : 17;
-      me.height = (_ref12 = opts.height) != null ? _ref12 : 30;
-      me["class"] = (_ref13 = opts["class"]) != null ? _ref13 : 'barchart';
-      if ((_ref14 = (_base2 = Raphael.fn).drawStackedBarChart) == null) {
+      me.styles = (_ref6 = opts.styles) != null ? _ref6 : '';
+      me.colors = (_ref7 = opts.colors) != null ? _ref7 : [];
+      me.titles = (_ref8 = opts.titles) != null ? _ref8 : ['', '', '', '', ''];
+      me.values = (_ref9 = opts.values) != null ? _ref9 : [];
+      me.width = (_ref10 = opts.width) != null ? _ref10 : 17;
+      me.height = (_ref11 = opts.height) != null ? _ref11 : 30;
+      me["class"] = (_ref12 = opts["class"]) != null ? _ref12 : 'barchart';
+      if ((_ref13 = (_base2 = Raphael.fn).drawStackedBarChart) == null) {
         _base2.drawStackedBarChart = drawStackedBars;
       }
     }
 
     StackedBarChart.prototype.overlaps = function(bubble) {
-      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref7, _ref8;
+      var dx, dy, me, r1, r2, x1, x2, y1, y2, _ref6, _ref7;
       me = this;
-      _ref7 = [me.x, me.y, me.radius], x1 = _ref7[0], y1 = _ref7[1], r1 = _ref7[2];
-      _ref8 = [bubble.x, bubble.y, bubble.radius], x2 = _ref8[0], y2 = _ref8[1], r2 = _ref8[2];
+      _ref6 = [me.x, me.y, me.radius], x1 = _ref6[0], y1 = _ref6[1], r1 = _ref6[2];
+      _ref7 = [bubble.x, bubble.y, bubble.radius], x2 = _ref7[0], y2 = _ref7[1], r2 = _ref7[2];
       if (x1 - r1 > x2 + r2 || x1 + r1 < x2 - r2 || y1 - r1 > y2 + r2 || y1 + r1 < y2 - r2) {
         return false;
       }
@@ -5261,11 +5221,11 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
     };
 
     StackedBarChart.prototype.clear = function() {
-      var me, p, _i, _len, _ref7;
+      var me, p, _i, _len, _ref6;
       me = this;
-      _ref7 = me.chart;
-      for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
-        p = _ref7[_i];
+      _ref6 = me.chart;
+      for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+        p = _ref6[_i];
         p.remove();
       }
       me.chart = [];

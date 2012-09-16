@@ -80,12 +80,11 @@ class View
 			new_path = new kartograph.geom.Path path.type,contours, path.closed
 			new_path._bbox = bbox
 			new_path
-			
 		else if path.type == "circle"
 			[x,y] = me.project path.x,path.y
 			r = path.r * me.scale
 			new kartograph.geom.Circle x,y,r
-		
+
 	asBBox: ->
 		me = @
 		new kartograph.BBox 0,0,me.width,me.height
@@ -98,7 +97,7 @@ View.fromXML = (xml) ->
 	h = Number(xml.getAttribute('h'))
 	pad = Number(xml.getAttribute('padding'))
 	bbox_xml = xml.getElementsByTagName('bbox')[0]
-	bbox = BBox.fromXML(bbox_xml)
+	bbox = BBox.fromXML bbox_xml
 	new kartograph.View bbox,w,h,pad
 
 kartograph.View = View
