@@ -70,9 +70,9 @@ class SymbolGroup
         for i of me.data
             d = me.data[i]
             if __type(me.filter) == "function"
-                me.addSymbol d if me.filter d
+                me.addSymbol d, i if me.filter d, i
             else
-                me.addSymbol d
+                me.addSymbol d, i
 
         # layout symbols
         me.layoutSymbols()
@@ -108,11 +108,11 @@ class SymbolGroup
         me.map.addSymbolGroup(me)
 
 
-    addSymbol: (data) ->
+    addSymbol: (data, key) ->
         ### adds a new symbol to this group ###
         me = @
         SymbolType = me.type
-        ll = me._evaluate me.location,data
+        ll = me._evaluate me.location,data,key
         if __type(ll) == 'array'
             ll = new kartograph.LonLat ll[0],ll[1]
 
@@ -120,20 +120,21 @@ class SymbolGroup
             layers: me.layers
             location: ll
             data: data
+            key: key
             map: me.map
 
         for p in SymbolType.props
             if me[p]?
-                sprops[p] = me._evaluate me[p],data
+                sprops[p] = me._evaluate me[p],data,key
 
         symbol = new SymbolType sprops
         me.symbols.push(symbol)
         symbol
 
-    _evaluate: (prop, data) ->
+    _evaluate: (prop, data, key) ->
         ### evaluates a property function or returns a static value ###
         if __type(prop) == 'function'
-            val = prop(data)
+            val = prop data, key
         else
             val = prop
 
@@ -184,7 +185,7 @@ class SymbolGroup
                 show:
                     delay: 20
                 content: {}
-            tt = tooltips(s.data)
+            tt = tooltips s.data, s.key
             if __type(tt) == "string"
                 cfg.content.text = tt
             else if __type(tt) == "array"

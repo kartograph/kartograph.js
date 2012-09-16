@@ -27,6 +27,7 @@ class Symbol
         me.data = opts.data
         me.map = opts.map
         me.layers = opts.layers
+        me.key = opts.key
         me.x = opts.x
         me.y = opts.y
 
