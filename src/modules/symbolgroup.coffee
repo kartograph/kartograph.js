@@ -29,7 +29,7 @@ class SymbolGroup
     constructor: (opts) ->
         me = @
         required = ['data','location','type','map']
-        optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay']
+        optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay', 'sortBy']
 
         for p in required
             if opts[p]?
@@ -76,6 +76,18 @@ class SymbolGroup
 
         # layout symbols
         me.layoutSymbols()
+
+        if me.sortBy
+            if __type(me.sortBy) == "string"
+                sortBy = me.sortBy
+                sortDir = 'asc'
+            else
+                sortBy = me.sortBy[0]
+                sortDir = me.sortBy[1] ? 'asc'
+            me.symbols = me.symbols.sort (a,b) ->
+                return 0 if a[sortBy] == b[sortBy]
+                m = if sortDir == 'asc' then 1 else -1
+                return if a[sortBy] > b[sortBy] then 1*m else -1*m
 
         # render symbols
         maxdly = 0
@@ -221,5 +233,4 @@ kartograph.SymbolGroup = SymbolGroup
 kartograph.Kartograph::addSymbols = (opts) ->
     opts.map = @
     new SymbolGroup(opts)
-
 
