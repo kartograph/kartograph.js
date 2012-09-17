@@ -126,7 +126,6 @@ class Kartograph
                 ratio = $view.attr('w') / $view.attr('h')
                 h = w / ratio
             me.viewport = new BBox 0, 0, w, h
-            me.paper = me.createSVGLayer()
 
         vp = me.viewport
         me.viewAB = AB = kartograph.View.fromXML $view[0]
@@ -147,6 +146,9 @@ class Kartograph
         me = @
         me.layerIds ?= []
         me.layers ?= {}
+
+        if not me.paper?
+            me.paper = me.createSVGLayer()
 
         src_id = id
         if __type(opts) == 'object'
@@ -289,6 +291,13 @@ class Kartograph
         me.symbolGroups ?= []
         me.symbolGroups.push(symbolgroup)
 
+    removeSymbols: (index) ->
+        me = @
+        if index?
+            me.symbolGroups[index].remove()
+        else
+            for sg in me.symbolGroups
+                sg.remove()
 
     clear: () ->
         me = @
