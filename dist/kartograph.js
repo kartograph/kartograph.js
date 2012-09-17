@@ -40,7 +40,7 @@
 
 
 (function() {
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -490,7 +490,6 @@
           h = w / ratio;
         }
         me.viewport = new BBox(0, 0, w, h);
-        me.paper = me.createSVGLayer();
       }
       vp = me.viewport;
       me.viewAB = AB = kartograph.View.fromXML($view[0]);
@@ -515,6 +514,9 @@
       }
       if ((_ref5 = me.layers) == null) {
         me.layers = {};
+      }
+      if (!(me.paper != null)) {
+        me.paper = me.createSVGLayer();
       }
       src_id = id;
       if (__type(opts) === 'object') {
@@ -714,6 +716,22 @@
         me.symbolGroups = [];
       }
       return me.symbolGroups.push(symbolgroup);
+    };
+
+    Kartograph.prototype.removeSymbols = function(index) {
+      var me, sg, _i, _len, _ref4, _results;
+      me = this;
+      if (index != null) {
+        return me.symbolGroups[index].remove();
+      } else {
+        _ref4 = me.symbolGroups;
+        _results = [];
+        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+          sg = _ref4[_i];
+          _results.push(sg.remove());
+        }
+        return _results;
+      }
     };
 
     Kartograph.prototype.clear = function() {
@@ -4223,11 +4241,11 @@
 
       this.groupLayout = __bind(this.groupLayout, this);
 
-      var SymbolType, d, dly, i, id, l, layer, maxdly, nid, node, optional, p, required, s, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref6, _ref7, _ref8, _ref9,
+      var SymbolType, d, dly, i, id, l, layer, maxdly, nid, node, optional, p, required, s, sortBy, sortDir, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9,
         _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay'];
+      optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay', 'sortBy'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -4281,10 +4299,31 @@
         }
       }
       me.layoutSymbols();
+      if (me.sortBy) {
+        if (__type(me.sortBy) === "string") {
+          sortBy = me.sortBy;
+          sortDir = 'asc';
+        } else {
+          sortBy = me.sortBy[0];
+          sortDir = (_ref8 = me.sortBy[1]) != null ? _ref8 : 'asc';
+        }
+        me.symbols = me.symbols.sort(function(a, b) {
+          var m;
+          if (a[sortBy] === b[sortBy]) {
+            return 0;
+          }
+          m = sortDir === 'asc' ? 1 : -1;
+          if (a[sortBy] > b[sortBy]) {
+            return 1 * m;
+          } else {
+            return -1 * m;
+          }
+        });
+      }
       maxdly = 0;
-      _ref8 = me.symbols;
-      for (_m = 0, _len4 = _ref8.length; _m < _len4; _m++) {
-        s = _ref8[_m];
+      _ref9 = me.symbols;
+      for (_m = 0, _len4 = _ref9.length; _m < _len4; _m++) {
+        s = _ref9[_m];
         dly = 0;
         if (__type(me.delay) === "function") {
           dly = me.delay(s.data);
@@ -4308,12 +4347,12 @@
         }
       }
       if (__type(me.click) === "function") {
-        _ref9 = me.symbols;
-        for (_n = 0, _len5 = _ref9.length; _n < _len5; _n++) {
-          s = _ref9[_n];
-          _ref10 = s.nodes();
-          for (_o = 0, _len6 = _ref10.length; _o < _len6; _o++) {
-            node = _ref10[_o];
+        _ref10 = me.symbols;
+        for (_n = 0, _len5 = _ref10.length; _n < _len5; _n++) {
+          s = _ref10[_n];
+          _ref11 = s.nodes();
+          for (_o = 0, _len6 = _ref11.length; _o < _len6; _o++) {
+            node = _ref11[_o];
             node.symbol = s;
             $(node).click(function(e) {
               e.stopPropagation();
@@ -4841,6 +4880,105 @@
   ];
 
   kartograph.HtmlLabel = HtmlLabel;
+
+  /*
+      kartograph - a svg mapping library
+      Copyright (C) 2011,2012  Gregor Aisch
+  
+      This library is free software; you can redistribute it and/or
+      modify it under the terms of the GNU Lesser General Public
+      License as published by the Free Software Foundation; either
+      version 2.1 of the License, or (at your option) any later version.
+  
+      This library is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+      Lesser General Public License for more details.
+  
+      You should have received a copy of the GNU Lesser General Public
+      License along with this library. If not, see <http://www.gnu.org/licenses/>.
+  */
+
+
+  LabeledBubble = (function(_super) {
+
+    __extends(LabeledBubble, _super);
+
+    function LabeledBubble(opts) {
+      this.nodes = __bind(this.nodes, this);
+
+      this.clear = __bind(this.clear, this);
+
+      this.update = __bind(this.update, this);
+
+      this.render = __bind(this.render, this);
+
+      var me;
+      me = this;
+      LabeledBubble.__super__.constructor.call(this, opts);
+      me.labelattrs = opts.labelattrs;
+      me.buffer = opts.buffer;
+    }
+
+    LabeledBubble.prototype.render = function(layers) {
+      var attrs, me, vp;
+      me = this;
+      LabeledBubble.__super__.render.call(this, layers);
+      vp = me.map.viewport;
+      attrs = me.labelattrs;
+      if (attrs == null) {
+        attrs = {};
+      }
+      if (me.x > vp.width * 0.5) {
+        attrs['text-anchor'] = 'end';
+        me.x -= me.radius + 5;
+      } else if (me.x < vp.width * 0.5) {
+        attrs['text-anchor'] = 'start';
+        me.x += me.radius + 5;
+      }
+      if (me.buffer) {
+        me.bufferlabel = me.layers.mapcanvas.text(me.x, me.y, me.title);
+        me.bufferlabel.attr(attrs);
+        me.bufferlabel.attr({
+          stroke: '#fff',
+          fill: '#fff',
+          'stroke-linejoin': 'round',
+          'stroke-linecap': 'round',
+          'stroke-width': 6
+        });
+      }
+      me.label = me.layers.mapcanvas.text(me.x, me.y, me.title);
+      return me.label.attr(attrs);
+    };
+
+    LabeledBubble.prototype.update = function() {
+      var me;
+      me = this;
+      return LabeledBubble.__super__.update.apply(this, arguments);
+    };
+
+    LabeledBubble.prototype.clear = function() {
+      var me;
+      me = this;
+      return LabeledBubble.__super__.clear.apply(this, arguments);
+    };
+
+    LabeledBubble.prototype.nodes = function() {
+      var me, nodes;
+      me = this;
+      nodes = LabeledBubble.__super__.nodes.apply(this, arguments);
+      return nodes;
+    };
+
+    return LabeledBubble;
+
+  })(Bubble);
+
+  LabeledBubble.props = ['radius', 'style', 'class', 'title', 'labelattrs', 'buffer'];
+
+  LabeledBubble.layers = [];
+
+  kartograph.LabeledBubble = LabeledBubble;
 
   /*
       kartograph - a svg mapping library
