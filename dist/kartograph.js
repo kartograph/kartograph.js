@@ -571,15 +571,21 @@
       me = this;
       if (!(me.layers[layer_id] != null)) {
         warn('could not find layer ' + layer_id);
+        return null;
       }
       return me.layers[layer_id];
     };
 
     Kartograph.prototype.getLayerPath = function(layer_id, path_id) {
-      var me;
+      var layer, me;
       me = this;
-      if ((me.layers[layer_id] != null) && me.layers[layer_id].hasPath(path_id)) {
-        return me.layers[layer_id].getPath(path_id);
+      layer = me.getLayer(layer_id);
+      if (layer != null) {
+        if (__type(path_id) === 'object') {
+          return layer.getPaths(path_id)[0];
+        } else {
+          return layer.getPath(path_id);
+        }
       }
       return null;
     };
@@ -1011,6 +1017,26 @@
         return me.pathsById[id][0];
       }
       throw 'path ' + id + ' not found';
+    };
+
+    MapLayer.prototype.getPaths = function(query) {
+      var key, match, matches, me, path, _i, _len, _ref4;
+      me = this;
+      matches = [];
+      if (__type(query) === 'object') {
+        _ref4 = me.paths;
+        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+          path = _ref4[_i];
+          match = true;
+          for (key in query) {
+            match = match && path.data[key] === query[key];
+          }
+          if (match) {
+            matches.push(path);
+          }
+        }
+      }
+      return matches;
     };
 
     MapLayer.prototype.setView = function(view) {
@@ -4921,23 +4947,37 @@
     }
 
     LabeledBubble.prototype.render = function(layers) {
-      var attrs, me, vp;
+      var me;
       me = this;
+      if (me.buffer) {
+        me.bufferlabel = me.layers.mapcanvas.text(me.x, me.y, me.title);
+      }
+      me.label = me.layers.mapcanvas.text(me.x, me.y, me.title);
       LabeledBubble.__super__.render.call(this, layers);
+      return me;
+    };
+
+    LabeledBubble.prototype.update = function() {
+      var attrs, me, vp, x, y;
+      me = this;
+      LabeledBubble.__super__.update.apply(this, arguments);
       vp = me.map.viewport;
       attrs = me.labelattrs;
       if (attrs == null) {
         attrs = {};
       }
-      if (me.x > vp.width * 0.5) {
+      x = me.x;
+      y = me.y;
+      if (x > vp.width * 0.5) {
         attrs['text-anchor'] = 'end';
-        me.x -= me.radius + 5;
-      } else if (me.x < vp.width * 0.5) {
+        x -= me.radius + 5;
+      } else if (x < vp.width * 0.5) {
         attrs['text-anchor'] = 'start';
-        me.x += me.radius + 5;
+        x += me.radius + 5;
       }
+      attrs['x'] = x;
+      attrs['y'] = y;
       if (me.buffer) {
-        me.bufferlabel = me.layers.mapcanvas.text(me.x, me.y, me.title);
         me.bufferlabel.attr(attrs);
         me.bufferlabel.attr({
           stroke: '#fff',
@@ -4947,14 +4987,8 @@
           'stroke-width': 6
         });
       }
-      me.label = me.layers.mapcanvas.text(me.x, me.y, me.title);
-      return me.label.attr(attrs);
-    };
-
-    LabeledBubble.prototype.update = function() {
-      var me;
-      me = this;
-      return LabeledBubble.__super__.update.apply(this, arguments);
+      me.label.attr(attrs);
+      return me;
     };
 
     LabeledBubble.prototype.clear = function() {

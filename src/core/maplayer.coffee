@@ -66,6 +66,18 @@ class MapLayer
         throw 'path '+id+' not found'
 
 
+    getPaths: (query) ->
+        me = @
+        matches = []
+        if __type(query) == 'object'
+            for path in me.paths
+                match = true
+                for key of query
+                    match = match && path.data[key] == query[key]
+                matches.push path if match
+        matches
+
+
     setView: (view) ->
         ###
         # after resizing of the map, each layer gets a new view

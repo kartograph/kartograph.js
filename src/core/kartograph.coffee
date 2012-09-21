@@ -194,12 +194,17 @@ class Kartograph
         me = @
         if not me.layers[layer_id]?
             warn 'could not find layer ' + layer_id
+            return null
         me.layers[layer_id]
 
     getLayerPath: (layer_id, path_id) ->
         me = @
-        if me.layers[layer_id]? and me.layers[layer_id].hasPath(path_id)
-            return me.layers[layer_id].getPath(path_id)
+        layer = me.getLayer layer_id
+        if layer?
+            if __type(path_id) == 'object'
+                return layer.getPaths(path_id)[0]
+            else
+                return layer.getPath path_id
         null
 
     onLayerEvent: (event, callback, layerId) ->

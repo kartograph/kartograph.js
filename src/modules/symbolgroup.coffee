@@ -153,7 +153,7 @@ class SymbolGroup
     layoutSymbols: () ->
         for s in me.symbols
             ll = s.location
-            if __type(ll) == 'string'
+            if __type(ll) == 'string'  # use layer path centroid as coordinates
                 [layer_id, path_id] = ll.split('.')
                 path = me.map.getLayerPath(layer_id, path_id)
                 if path?

@@ -26,18 +26,29 @@ class LabeledBubble extends Bubble
 
     render: (layers) =>
         me = @
+        if me.buffer
+            me.bufferlabel = me.layers.mapcanvas.text me.x,me.y,me.title
+        me.label = me.layers.mapcanvas.text me.x,me.y,me.title
         super layers
+        me
+
+    update: () =>
+        me = @
+        super
         vp = me.map.viewport
         attrs = me.labelattrs
         attrs ?= {}
-        if me.x > vp.width * 0.5
+        x = me.x
+        y = me.y
+        if x > vp.width * 0.5
             attrs['text-anchor'] = 'end'
-            me.x -= me.radius+5
-        else if me.x < vp.width * 0.5
+            x -= me.radius+5
+        else if x < vp.width * 0.5
             attrs['text-anchor'] = 'start'
-            me.x += me.radius+5
+            x += me.radius+5
+        attrs['x'] = x
+        attrs['y'] = y
         if me.buffer
-            me.bufferlabel = me.layers.mapcanvas.text me.x,me.y,me.title
             me.bufferlabel.attr attrs
             me.bufferlabel.attr
                 stroke: '#fff'
@@ -45,12 +56,9 @@ class LabeledBubble extends Bubble
                 'stroke-linejoin': 'round'
                 'stroke-linecap': 'round'
                 'stroke-width': 6
-        me.label = me.layers.mapcanvas.text me.x,me.y,me.title
-        me.label.attr(attrs)
+        me.label.attr attrs
+        me
 
-    update: () =>
-        me = @
-        super
 
     clear: () =>
         me = @
