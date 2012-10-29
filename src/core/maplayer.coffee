@@ -63,7 +63,8 @@ class MapLayer
         me = @
         if me.hasPath id
             return me.pathsById[id][0]
-        throw 'path '+id+' not found'
+        return null
+        #console.warn 'path '+id+' not found'
 
 
     getPaths: (query) ->
