@@ -49,7 +49,7 @@
 
   kartograph = root.$K = window.Kartograph = (_ref = root.Kartograph) != null ? _ref : root.Kartograph = {};
 
-  kartograph.version = "0.3.1";
+  kartograph.version = "0.3.2";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -503,11 +503,14 @@
     };
 
     Kartograph.prototype.addLayer = function(id, opts) {
+      var $paths, checkEvents, evt, layer, layer_id, me, path_id, prop, src_id, svgLayer, svg_path, titles, val, _i, _j, _len, _len1, _ref4, _ref5, _ref6;
+      if (opts == null) {
+        opts = {};
+      }
       /*
               add new layer
       */
 
-      var $paths, checkEvents, evt, layer, layer_id, me, path_id, prop, src_id, svgLayer, svg_path, titles, val, _i, _j, _len, _len1, _ref4, _ref5, _ref6;
       me = this;
       if ((_ref4 = me.layerIds) == null) {
         me.layerIds = [];

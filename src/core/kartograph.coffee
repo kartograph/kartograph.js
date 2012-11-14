@@ -139,7 +139,7 @@ class Kartograph
         me.mapLoadCallback me
 
 
-    addLayer: (id, opts) ->
+    addLayer: (id, opts={}) ->
         ###
         add new layer
         ###
