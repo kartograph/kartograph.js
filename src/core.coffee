@@ -1,5 +1,5 @@
 ###
-    kartograph - a svg mapping library
+    Kartograph - a svg mapping library
     Copyright (C) 2011,2012  Gregor Aisch
 
     This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
 
 root = (exports ? this)
 kartograph = root.$K = window.Kartograph = root.Kartograph ?= {}
-kartograph.version = "0.3.2"
+kartograph.version = "0.4.0"
 
 __verbose__ = false and console?
 

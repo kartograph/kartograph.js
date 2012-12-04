@@ -21,7 +21,7 @@
 
 
 /*
-    kartograph - a svg mapping library
+    Kartograph - a svg mapping library
     Copyright (C) 2011,2012  Gregor Aisch
 
     This library is free software; you can redistribute it and/or
@@ -40,7 +40,7 @@
 
 
 (function() {
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, foo, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -49,7 +49,7 @@
 
   kartograph = root.$K = window.Kartograph = (_ref = root.Kartograph) != null ? _ref : root.Kartograph = {};
 
-  kartograph.version = "0.3.2";
+  kartograph.version = "0.4.0";
 
   __verbose__ = false && (typeof console !== "undefined" && console !== null);
 
@@ -677,7 +677,9 @@
         h = cnt.height();
       }
       me.viewport = vp = new kartograph.BBox(0, 0, w, h);
-      me.paper.setSize(vp.width, vp.height);
+      if (me.paper != null) {
+        me.paper.setSize(vp.width, vp.height);
+      }
       vp = me.viewport;
       padding = (_ref4 = me.opts.padding) != null ? _ref4 : 0;
       halign = (_ref5 = me.opts.halign) != null ? _ref5 : 'center';
@@ -1525,7 +1527,7 @@
     };
 
     Path.prototype.centroid = function() {
-      var a, area, cnt, cx, cy, dx, dy, i, j, k, l, len, me, p0, p1, total_len, w, x, y, _i, _j, _k, _lengths, _ref5, _ref6, _ref7;
+      var S, a, area, cnt, cnt_orig, cx, cy, diff, dx, dy, i, j, k, l, len, me, p0, p1, s, sp, total_len, w, x, x_, y, y_, _i, _j, _k, _l, _lengths, _m, _ref5, _ref6, _ref7, _ref8, _ref9;
       me = this;
       if (me._centroid != null) {
         return me._centroid;
@@ -1533,13 +1535,34 @@
       area = me.area();
       cx = cy = 0;
       for (i = _i = 0, _ref5 = me.contours.length - 1; 0 <= _ref5 ? _i <= _ref5 : _i >= _ref5; i = 0 <= _ref5 ? ++_i : --_i) {
-        cnt = me.contours[i];
+        cnt_orig = me.contours[i];
+        cnt = [];
+        l = cnt_orig.length;
+        for (j = _j = 0, _ref6 = l - 1; 0 <= _ref6 ? _j <= _ref6 : _j >= _ref6; j = 0 <= _ref6 ? ++_j : --_j) {
+          p0 = cnt_orig[j];
+          p1 = cnt_orig[(j + 1) % l];
+          diff = 0;
+          cnt.push(p0);
+          if (p0[0] === p1[0]) {
+            diff = Math.abs(p0[1] - p1[1]);
+          }
+          if (p0[1] === p1[1]) {
+            diff = Math.abs(p0[0] - p1[0]);
+          }
+          if (diff > 10) {
+            S = Math.floor(diff * 2);
+            for (s = _k = 1, _ref7 = S - 1; 1 <= _ref7 ? _k <= _ref7 : _k >= _ref7; s = 1 <= _ref7 ? ++_k : --_k) {
+              sp = [p0[0] + s / S * (p1[0] - p0[0]), p0[1] + s / S * (p1[1] - p0[1])];
+              cnt.push(sp);
+            }
+          }
+        }
         a = me.areas[i];
-        x = y = 0;
+        x = y = x_ = y_ = 0;
         l = cnt.length;
         _lengths = [];
         total_len = 0;
-        for (j = _j = 0, _ref6 = l - 1; 0 <= _ref6 ? _j <= _ref6 : _j >= _ref6; j = 0 <= _ref6 ? ++_j : --_j) {
+        for (j = _l = 0, _ref8 = l - 1; 0 <= _ref8 ? _l <= _ref8 : _l >= _ref8; j = 0 <= _ref8 ? ++_l : --_l) {
           p0 = cnt[j];
           p1 = cnt[(j + 1) % l];
           dx = p1[0] - p0[0];
@@ -1548,9 +1571,8 @@
           _lengths.push(len);
           total_len += len;
         }
-        for (j = _k = 0, _ref7 = l - 1; 0 <= _ref7 ? _k <= _ref7 : _k >= _ref7; j = 0 <= _ref7 ? ++_k : --_k) {
+        for (j = _m = 0, _ref9 = l - 1; 0 <= _ref9 ? _m <= _ref9 : _m >= _ref9; j = 0 <= _ref9 ? ++_m : --_m) {
           p0 = cnt[j];
-          p1 = cnt[(j + 1) % l];
           w = _lengths[j] / total_len;
           x += w * p0[0];
           y += w * p0[1];
@@ -4020,7 +4042,8 @@
     */
 
     function Scale(domain, prop, filter) {
-      var i, me, val, values;
+      var i, me, val, values,
+        _this = this;
       if (domain == null) {
         domain = [0, 1];
       }
@@ -4030,6 +4053,8 @@
       if (filter == null) {
         filter = null;
       }
+      this.rangedScale = __bind(this.rangedScale, this);
+
       this.scale = __bind(this.scale, this);
 
       me = this;
@@ -4057,10 +4082,23 @@
         return a - b;
       });
       me.values = values;
+      me._range = [0, 1];
+      me.rangedScale.range = function(_r) {
+        me._range = _r;
+        return me.rangedScale;
+      };
     }
 
     Scale.prototype.scale = function(x) {
       return x;
+    };
+
+    Scale.prototype.rangedScale = function(x) {
+      var me, r;
+      me = this;
+      x = me.scale(x);
+      r = me._range;
+      return x * (r[1] - r[0]) + r[0];
     };
 
     return Scale;
@@ -4116,6 +4154,30 @@
 
   })(Scale);
 
+  SqrtScale = (function(_super) {
+
+    __extends(SqrtScale, _super);
+
+    function SqrtScale() {
+      this.scale = __bind(this.scale, this);
+      return SqrtScale.__super__.constructor.apply(this, arguments);
+    }
+
+    /* square root scale
+    */
+
+
+    SqrtScale.prototype.scale = function(x) {
+      var me, vals;
+      me = this;
+      vals = me.values;
+      return Math.sqrt((x - vals[0]) / (vals[vals.length - 1] - vals[0]));
+    };
+
+    return SqrtScale;
+
+  })(Scale);
+
   QuantileScale = (function(_super) {
 
     __extends(QuantileScale, _super);
@@ -4153,19 +4215,23 @@
   kartograph.scale = {};
 
   kartograph.scale.identity = function(s) {
-    return new Scale(domain, prop, filter).scale;
+    return new Scale(domain, prop, filter).rangedScale;
   };
 
   kartograph.scale.linear = function(domain, prop, filter) {
-    return new LinearScale(domain, prop, filter).scale;
+    return new LinearScale(domain, prop, filter).rangedScale;
   };
 
   kartograph.scale.log = function(domain, prop, filter) {
-    return new LogScale(domain, prop, filter).scale;
+    return new LogScale(domain, prop, filter).rangedScale;
+  };
+
+  kartograph.scale.sqrt = function(domain, prop, filter) {
+    return new SqrtScale(domain, prop, filter).rangedScale;
   };
 
   kartograph.scale.quantile = function(domain, prop, filter) {
-    return new QuantileScale(domain, prop, filter).scale;
+    return new QuantileScale(domain, prop, filter).rangedScale;
   };
 
   /*
@@ -4268,13 +4334,13 @@
     function SymbolGroup(opts) {
       this.initTooltips = __bind(this.initTooltips, this);
 
-      this.groupLayout = __bind(this.groupLayout, this);
+      this.kMeansLayout = __bind(this.kMeansLayout, this);
 
       var SymbolType, d, dly, i, id, l, layer, maxdly, nid, node, optional, p, required, s, sortBy, sortDir, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9,
         _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay', 'sortBy'];
+      optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay', 'sortBy', 'aggregate'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -4330,12 +4396,10 @@
       me.layoutSymbols();
       if (me.sortBy) {
         if (__type(me.sortBy) === "string") {
-          sortBy = me.sortBy;
-          sortDir = 'asc';
-        } else {
-          sortBy = me.sortBy[0];
-          sortDir = (_ref8 = me.sortBy[1]) != null ? _ref8 : 'asc';
+          me.sortBy = me.sortBy.split(' ');
         }
+        sortBy = me.sortBy[0];
+        sortDir = (_ref8 = me.sortBy[1]) != null ? _ref8 : 'asc';
         me.symbols = me.symbols.sort(function(a, b) {
           var m;
           if (a[sortBy] === b[sortBy]) {
@@ -4456,29 +4520,73 @@
         s.x = xy[0];
         s.y = xy[1];
       }
-      if (me.layout === 'group') {
-        return me.groupLayout();
+      if (me.layout === 'k-means') {
+        return me.kMeansLayout();
+      } else if (me.layout === 'noverlap') {
+        return me.noverlapLayout();
       }
     };
 
-    SymbolGroup.prototype.groupLayout = function() {
+    SymbolGroup.prototype.kMeansLayout = function() {
       /*
               layouts symbols in this group, eventually adds new 'grouped' symbols
               map.addSymbols({
-                  layout: "group",
-                  group: function(data) {
+                  layout: "k-means",
+                  aggregate: function(data) {
                       // compresses a list of data objects into a single one
                       // typically you want to calculate the mean position, sum value or something here
                   }
               })
       */
 
-      var overlap, _ref6;
+      var SymbolType, cluster, d, i, mean, means, out, p, s, sprops, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref6, _ref7, _ref8, _ref9;
       me = this;
-      if ((_ref6 = me.gsymbols) == null) {
-        me.gsymbols = [];
+      if ((_ref6 = me.osymbols) == null) {
+        me.osymbols = me.symbols;
       }
-      return overlap = true;
+      SymbolType = me.type;
+      cluster = kmeans().iterations(16).size(60);
+      _ref7 = me.osymbols;
+      for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
+        s = _ref7[_i];
+        cluster.add({
+          x: s.x,
+          y: s.y
+        });
+      }
+      means = cluster.means();
+      out = [];
+      for (_j = 0, _len1 = means.length; _j < _len1; _j++) {
+        mean = means[_j];
+        if (mean.size === 0) {
+          continue;
+        }
+        d = [];
+        _ref8 = mean.indices;
+        for (_k = 0, _len2 = _ref8.length; _k < _len2; _k++) {
+          i = _ref8[_k];
+          d.push(me.osymbols[i].data);
+        }
+        d = me.aggregate(d);
+        sprops = {
+          layers: me.layers,
+          location: false,
+          data: d,
+          map: me.map
+        };
+        _ref9 = SymbolType.props;
+        for (_l = 0, _len3 = _ref9.length; _l < _len3; _l++) {
+          p = _ref9[_l];
+          if (me[p] != null) {
+            sprops[p] = me._evaluate(me[p], d);
+          }
+        }
+        s = new SymbolType(sprops);
+        s.x = mean.x;
+        s.y = mean.y;
+        out.push(s);
+      }
+      return me.symbols = out;
     };
 
     SymbolGroup.prototype.initTooltips = function() {
@@ -4565,6 +4673,159 @@
     opts.map = this;
     return new SymbolGroup(opts);
   };
+
+  
+// k-means clustering
+function kmeans() {
+  var kmeans = {},
+      points = [],
+      iterations = 1,
+      size = 1;
+
+  kmeans.size = function(x) {
+    if (!arguments.length) return size;
+    size = x;
+    return kmeans;
+  };
+
+  kmeans.iterations = function(x) {
+    if (!arguments.length) return iterations;
+    iterations = x;
+    return kmeans;
+  };
+
+  kmeans.add = function(x) {
+    points.push(x);
+    return kmeans;
+  };
+
+  kmeans.means = function() {
+    var means = [],
+        seen = {},
+        n = Math.min(size, points.length);
+
+    // Initialize k random (unique!) means.
+    for (var i = 0, m = 2 * n; i < m; i++) {
+      var p = points[~~(Math.random() * points.length)], id = p.x + "/" + p.y;
+      if (!(id in seen)) {
+        seen[id] = 1;
+        if (means.push({x: p.x, y: p.y}) >= n) break;
+      }
+    }
+    n = means.length;
+
+    // For each iteration, create a kd-tree of the current means.
+    for (var j = 0; j < iterations; j++) {
+      var kd = kdtree().points(means);
+
+      // Clear the state.
+      for (var i = 0; i < n; i++) {
+        var mean = means[i];
+        mean.sumX = 0;
+        mean.sumY = 0;
+        mean.size = 0;
+        mean.points = [];
+        mean.indices = [];
+      }
+
+      // Find the mean closest to each point.
+      for (var i = 0; i < points.length; i++) {
+        var point = points[i], mean = kd.find(point);
+        mean.sumX += point.x;
+        mean.sumY += point.y;
+        mean.size++;
+        mean.points.push(point);
+        mean.indices.push(i);
+      }
+
+      // Compute the new means.
+      for (var i = 0; i < n; i++) {
+        var mean = means[i];
+        if (!mean.size) continue; // overlapping mean
+        mean.x = mean.sumX / mean.size;
+        mean.y = mean.sumY / mean.size;
+      }
+    }
+
+    return means;
+  };
+
+  return kmeans;
+}
+
+// kd-tree
+function kdtree() {
+  var kdtree = {},
+      axes = ["x", "y"],
+      root,
+      points = [];
+
+  kdtree.axes = function(x) {
+    if (!arguments.length) return axes;
+    axes = x;
+    return kdtree;
+  };
+
+  kdtree.points = function(x) {
+    if (!arguments.length) return points;
+    points = x;
+    root = null;
+    return kdtree;
+  };
+
+  kdtree.find = function(x) {
+    return find(kdtree.root(), x, root).point;
+  };
+
+  kdtree.root = function(x) {
+    return root || (root = node(points, 0));
+  };
+
+  function node(points, depth) {
+    if (!points.length) return;
+    var axis = axes[depth % axes.length], median = points.length >> 1;
+    points.sort(order(axis)); // could use random sample to speed up here
+    return {
+      axis: axis,
+      point: points[median],
+      left: node(points.slice(0, median), depth + 1),
+      right: node(points.slice(median + 1), depth + 1)
+    };
+  }
+
+  function distance(a, b) {
+    var sum = 0;
+    for (var i = 0; i < axes.length; i++) {
+      var axis = axes[i], d = a[axis] - b[axis];
+      sum += d * d;
+    }
+    return sum;
+  }
+
+  function order(axis) {
+    return function(a, b) {
+      a = a[axis];
+      b = b[axis];
+      return a < b ? -1 : a > b ? 1 : 0;
+    };
+  }
+
+  function find(node, point, best) {
+    if (distance(node.point, point) < distance(best.point, point)) best = node;
+    if (node.left) best = find(node.left, point, best);
+    if (node.right) {
+      var d = node.point[node.axis] - point[node.axis];
+      if (d * d < distance(best.point, point)) best = find(node.right, point, best);
+    }
+    return best;
+  }
+
+  return kdtree;
+}
+;
+
+
+  foo = "bar";
 
   /*
       kartograph - a svg mapping library
