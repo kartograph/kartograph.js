@@ -262,7 +262,8 @@ class Kartograph
         w ?= cnt.width()
         h ?= cnt.height()
         me.viewport = vp = new kartograph.BBox 0,0,w,h
-        me.paper.setSize vp.width, vp.height
+        if me.paper?
+            me.paper.setSize vp.width, vp.height
         vp = me.viewport
         padding = me.opts.padding ? 0
         halign = me.opts.halign ? 'center'
@@ -368,7 +369,7 @@ class Kartograph
                 p = p[0]
                 if me._pathTypes.indexOf(p) >= 0 and p != el.type
                     continue
-                # if we made it until here, the styles can be applied
+                # if we made it until here, the styles can be applied 
                 props = me.styles[sel]
                 for k in me._regardStyles
                     if props[k]?
