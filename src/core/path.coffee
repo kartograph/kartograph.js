@@ -78,9 +78,28 @@ class Path
 
 		cx = cy = 0
 		for i in [0..me.contours.length-1]
-			cnt = me.contours[i]
+			cnt_orig = me.contours[i]
+			cnt = []
+			l = cnt_orig.length
+
+			for j in [0..l-1]
+				p0 = cnt_orig[j]
+				p1 = cnt_orig[(j+1)%l]
+				diff = 0
+				cnt.push p0
+				if p0[0] == p1[0]
+					diff = Math.abs p0[1] - p1[1]
+				if p0[1] == p1[1]
+					diff = Math.abs p0[0] - p1[0]
+				if diff > 10
+					S = Math.floor diff*2
+					for s in [1..S-1]
+						sp = [p0[0] + s/S * (p1[0] - p0[0]), p0[1] + s/S * (p1[1] - p0[1])]
+						cnt.push sp
+					# insert new points in between
+
 			a = me.areas[i]
-			x = y = 0
+			x = y = x_ = y_ = 0
 			l = cnt.length
 			# at first compute total edge length
 			_lengths = []
@@ -90,24 +109,16 @@ class Path
 				p1 = cnt[(j+1)%l]
 				dx = p1[0]-p0[0]
 				dy = p1[1]-p0[1]
-				len = Math.sqrt(dx*dx + dy*dy)
+				len = Math.sqrt dx*dx + dy*dy
 				_lengths.push(len)
 				total_len += len
 
 			for j in [0..l-1]
 				p0 = cnt[j]
-				p1 = cnt[(j+1)%l]
 				w = _lengths[j]/total_len
-				x += w*p0[0]
-				y += w*p0[1]
-				# centroid
-				# k = (p0[0]*p1[1] - p1[0]*p0[1])
-				# x += (p0[0]+p1[0]) * k
-				# y += (p0[1]+p1[1]) * k
+				x += w * p0[0]
+				y += w * p0[1]
 
-			# k = 1/(6*a)
-			# x *= k
-			# y *= k
 			k = a/area
 			cx += x * k
 			cy += y * k
