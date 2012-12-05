@@ -21,6 +21,8 @@ root = (exports ? this)
 kartograph = root.$K = window.Kartograph = root.Kartograph ?= {}
 kartograph.version = "0.4.0"
 
+$ = root.jQuery
+
 __verbose__ = false and console?
 
 warn = (s) ->
