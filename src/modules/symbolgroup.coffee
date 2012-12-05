@@ -29,7 +29,7 @@ class SymbolGroup
     constructor: (opts) ->
         me = @
         required = ['data','location','type','map']
-        optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay', 'sortBy', 'aggregate']
+        optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate']
 
         for p in required
             if opts[p]?

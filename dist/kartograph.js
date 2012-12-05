@@ -4343,7 +4343,7 @@
         _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'layout', 'group', 'click', 'delay', 'sortBy', 'aggregate'];
+      optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
