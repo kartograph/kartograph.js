@@ -4632,11 +4632,13 @@
             r1 = s1.x + rad1;
             t1 = s1.y - rad1;
             b1 = s1.y + rad1;
-            if (!(r0 < l1 || r1 < l0) && !(b0 < t1 || b1 < t0)) {
-              dx = s1.x - s0.x;
-              dy = s1.y - s0.y;
-              if (dx * dx + dy * dy < (rad0 + rad1) * (rad0 + rad1)) {
-                intersects.push(q);
+            if (rad1 / s0.radius < 0.8) {
+              if (!(r0 < l1 || r1 < l0) && !(b0 < t1 || b1 < t0)) {
+                dx = s1.x - s0.x;
+                dy = s1.y - s0.y;
+                if (dx * dx + dy * dy < (rad0 + rad1) * (rad0 + rad1)) {
+                  intersects.push(q);
+                }
               }
             }
           }

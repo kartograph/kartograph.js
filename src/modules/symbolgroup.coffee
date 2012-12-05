@@ -258,11 +258,12 @@ class SymbolGroup
                     r1 = s1.x + rad1
                     t1 = s1.y - rad1
                     b1 = s1.y + rad1
-                    if not (r0 < l1 or r1 < l0) and not (b0 < t1 or b1 < t0)
-                        dx = (s1.x - s0.x)
-                        dy = (s1.y - s0.y)
-                        if dx * dx + dy * dy < (rad0 + rad1) * (rad0 + rad1)
-                            intersects.push q
+                    if rad1 / s0.radius < 0.8
+                        if not (r0 < l1 or r1 < l0) and not (b0 < t1 or b1 < t0)
+                            dx = (s1.x - s0.x)
+                            dy = (s1.y - s0.y)
+                            if dx * dx + dy * dy < (rad0 + rad1) * (rad0 + rad1)
+                                intersects.push q
 
                 if intersects.length > 0
                     d = [s0.data]
