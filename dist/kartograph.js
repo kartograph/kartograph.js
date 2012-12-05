@@ -4593,7 +4593,7 @@
     };
 
     SymbolGroup.prototype.noverlap = function() {
-      var SymbolType, b0, b1, d, i, intersects, iterations, l, l0, l1, out, p, q, r, r0, r1, s, s0, s1, sprops, symbols, t0, t1, w, x, y, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
+      var SymbolType, b0, b1, d, dx, dy, i, intersects, iterations, l, l0, l1, out, p, q, r, r0, r1, rad0, rad1, s, s0, s1, sprops, symbols, t0, t1, w, x, y, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
       me = this;
       if ((_ref6 = me.osymbols) == null) {
         me.osymbols = me.symbols;
@@ -4616,31 +4616,37 @@
           if (!s0) {
             continue;
           }
-          l0 = s0.x - s0.radius * 0.7;
-          r0 = s0.x + s0.radius * 0.7;
-          t0 = s0.y - s0.radius * 0.7;
-          b0 = s0.y + s0.radius * 0.7;
+          rad0 = s0.radius * 0.95;
+          l0 = s0.x - rad0;
+          r0 = s0.x + rad0;
+          t0 = s0.y - rad0;
+          b0 = s0.y + rad0;
           intersects = [];
           for (q = _k = _ref9 = p + 1, _ref10 = l - 2; _ref9 <= _ref10 ? _k <= _ref10 : _k >= _ref10; q = _ref9 <= _ref10 ? ++_k : --_k) {
             s1 = symbols[q];
             if (!s1) {
               continue;
             }
-            l1 = s1.x - s1.radius;
-            r1 = s1.x + s1.radius;
-            t1 = s1.y - s1.radius;
-            b1 = s1.y + s1.radius;
+            rad1 = s1.radius;
+            l1 = s1.x - rad1;
+            r1 = s1.x + rad1;
+            t1 = s1.y - rad1;
+            b1 = s1.y + rad1;
             if (!(r0 < l1 || r1 < l0) && !(b0 < t1 || b1 < t0)) {
-              intersects.push(q);
+              dx = s1.x - s0.x;
+              dy = s1.y - s0.y;
+              if (dx * dx + dy * dy < (rad0 + rad1) * (rad0 + rad1)) {
+                intersects.push(q);
+              }
             }
           }
           if (intersects.length > 0) {
             d = [s0.data];
-            r = s0.radius;
+            r = s0.radius * s0.radius;
             for (_l = 0, _len = intersects.length; _l < _len; _l++) {
               i = intersects[_l];
               d.push(symbols[i].data);
-              r += symbols[i].radius;
+              r += symbols[i].radius * symbols[i].radius;
             }
             d = me.aggregate(d);
             sprops = {
@@ -4657,13 +4663,13 @@
               }
             }
             s = new SymbolType(sprops);
-            w = s0.radius / r;
+            w = s0.radius * s0.radius / r;
             x = s0.x * w;
             y = s0.y * w;
             for (_n = 0, _len2 = intersects.length; _n < _len2; _n++) {
               i = intersects[_n];
               s1 = symbols[i];
-              w = s1.radius / r;
+              w = s1.radius * s1.radius / r;
               x += s1.x * w;
               y += s1.y * w;
               symbols[i] = void 0;

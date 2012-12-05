@@ -242,29 +242,34 @@ class SymbolGroup
                 s0 = symbols[p]
                 if not s0
                     continue
-                l0 = s0.x - s0.radius * 0.7
-                r0 = s0.x + s0.radius * 0.7
-                t0 = s0.y - s0.radius * 0.7
-                b0 = s0.y + s0.radius * 0.7
+                rad0 = s0.radius * 0.95
+                l0 = s0.x - rad0
+                r0 = s0.x + rad0
+                t0 = s0.y - rad0
+                b0 = s0.y + rad0
                 intersects = []
                 for q in [p+1..l-2]
                     #console.info p,q
                     s1 = symbols[q]
                     if not s1
                         continue
-                    l1 = s1.x - s1.radius
-                    r1 = s1.x + s1.radius
-                    t1 = s1.y - s1.radius
-                    b1 = s1.y + s1.radius
+                    rad1 = s1.radius
+                    l1 = s1.x - rad1
+                    r1 = s1.x + rad1
+                    t1 = s1.y - rad1
+                    b1 = s1.y + rad1
                     if not (r0 < l1 or r1 < l0) and not (b0 < t1 or b1 < t0)
-                        intersects.push q
+                        dx = (s1.x - s0.x)
+                        dy = (s1.y - s0.y)
+                        if dx * dx + dy * dy < (rad0 + rad1) * (rad0 + rad1)
+                            intersects.push q
 
                 if intersects.length > 0
                     d = [s0.data]
-                    r = s0.radius
+                    r = s0.radius * s0.radius
                     for i in intersects
                         d.push symbols[i].data
-                        r += symbols[i].radius
+                        r += symbols[i].radius * symbols[i].radius
                     d = me.aggregate d
 
                     sprops =
@@ -278,12 +283,12 @@ class SymbolGroup
                             sprops[p] = me._evaluate me[p],d
 
                     s = new SymbolType sprops
-                    w = s0.radius / r
+                    w = s0.radius * s0.radius / r
                     x = s0.x * w
                     y = s0.y * w
                     for i in intersects
                         s1 = symbols[i]
-                        w = s1.radius / r
+                        w = s1.radius * s1.radius / r
                         x += s1.x * w
                         y += s1.y * w
                         symbols[i] = undefined
