@@ -4343,7 +4343,7 @@
         _this = this;
       me = this;
       required = ['data', 'location', 'type', 'map'];
-      optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate'];
+      optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate', 'clusteringOpts'];
       for (_i = 0, _len = required.length; _i < _len; _i++) {
         p = required[_i];
         if (opts[p] != null) {
@@ -4542,13 +4542,19 @@
               })
       */
 
-      var SymbolType, cluster, d, i, mean, means, out, p, s, sprops, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref6, _ref7, _ref8, _ref9;
+      var SymbolType, cluster, d, i, mean, means, out, p, s, size, sprops, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref6, _ref7, _ref8, _ref9;
       me = this;
       if ((_ref6 = me.osymbols) == null) {
         me.osymbols = me.symbols;
       }
       SymbolType = me.type;
-      cluster = kmeans().iterations(16).size(60);
+      if (me.clusteringOpts != null) {
+        size = me.clusteringOpts.size;
+      }
+      if (size == null) {
+        size = 64;
+      }
+      cluster = kmeans().iterations(16).size(size);
       _ref7 = me.osymbols;
       for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
         s = _ref7[_i];
@@ -4593,7 +4599,7 @@
     };
 
     SymbolGroup.prototype.noverlap = function() {
-      var SymbolType, b0, b1, d, dx, dy, i, intersects, iterations, l, l0, l1, out, p, q, r, r0, r1, rad0, rad1, s, s0, s1, sprops, symbols, t0, t1, w, x, y, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
+      var SymbolType, b0, b1, d, dx, dy, i, intersects, iterations, l, l0, l1, maxRatio, out, p, q, r, r0, r1, rad0, rad1, s, s0, s1, sprops, symbols, t0, t1, tolerance, w, x, y, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
       me = this;
       if ((_ref6 = me.osymbols) == null) {
         me.osymbols = me.symbols;
@@ -4605,6 +4611,16 @@
         return;
       }
       symbols = me.osymbols.slice();
+      if (me.clusteringOpts != null) {
+        tolerance = me.clusteringOpts.tolerance;
+        maxRatio = me.clusteringOpts.maxRatio;
+      }
+      if (tolerance == null) {
+        tolerance = 0.05;
+      }
+      if (maxRatio == null) {
+        maxRatio = 0.8;
+      }
       for (i = _i = 0, _ref7 = iterations - 1; 0 <= _ref7 ? _i <= _ref7 : _i >= _ref7; i = 0 <= _ref7 ? ++_i : --_i) {
         symbols.sort(function(a, b) {
           return b.radius - a.radius;
@@ -4616,7 +4632,7 @@
           if (!s0) {
             continue;
           }
-          rad0 = s0.radius * 0.95;
+          rad0 = s0.radius * (1 - tolerance);
           l0 = s0.x - rad0;
           r0 = s0.x + rad0;
           t0 = s0.y - rad0;
@@ -4632,7 +4648,7 @@
             r1 = s1.x + rad1;
             t1 = s1.y - rad1;
             b1 = s1.y + rad1;
-            if (rad1 / s0.radius < 0.8) {
+            if (rad1 / s0.radius < maxRatio) {
               if (!(r0 < l1 || r1 < l0) && !(b0 < t1 || b1 < t0)) {
                 dx = s1.x - s0.x;
                 dy = s1.y - s0.y;

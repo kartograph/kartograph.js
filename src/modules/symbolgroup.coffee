@@ -29,7 +29,7 @@ class SymbolGroup
     constructor: (opts) ->
         me = @
         required = ['data','location','type','map']
-        optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate']
+        optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate', 'clusteringOpts']
 
         for p in required
             if opts[p]?
@@ -184,8 +184,11 @@ class SymbolGroup
         me = @
         me.osymbols ?= me.symbols
         SymbolType = me.type
+        if me.clusteringOpts?
+            size = me.clusteringOpts.size
+        size ?= 64
 
-        cluster = kmeans().iterations(16).size(60)
+        cluster = kmeans().iterations(16).size(size)
 
         for s in me.osymbols
             cluster.add
@@ -232,6 +235,12 @@ class SymbolGroup
 
         symbols = me.osymbols.slice()
 
+        if me.clusteringOpts?
+            tolerance = me.clusteringOpts.tolerance
+            maxRatio = me.clusteringOpts.maxRatio
+        tolerance ?= 0.05
+        maxRatio ?= 0.8
+
         for i in [0..iterations-1]
             # sort by radius
             symbols.sort (a,b) ->
@@ -242,7 +251,7 @@ class SymbolGroup
                 s0 = symbols[p]
                 if not s0
                     continue
-                rad0 = s0.radius * 0.95
+                rad0 = s0.radius * (1-tolerance)
                 l0 = s0.x - rad0
                 r0 = s0.x + rad0
                 t0 = s0.y - rad0
@@ -258,7 +267,7 @@ class SymbolGroup
                     r1 = s1.x + rad1
                     t1 = s1.y - rad1
                     b1 = s1.y + rad1
-                    if rad1 / s0.radius < 0.8
+                    if rad1 / s0.radius < maxRatio
                         if not (r0 < l1 or r1 < l0) and not (b0 < t1 or b1 < t0)
                             dx = (s1.x - s0.x)
                             dy = (s1.y - s0.y)
