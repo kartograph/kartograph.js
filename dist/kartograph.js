@@ -40,10 +40,11 @@
 
 
 (function() {
-  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, foo, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
+  var Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, PanAndZoomControl, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, __verbose__, _base, _base1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -4334,7 +4335,9 @@
     function SymbolGroup(opts) {
       this.initTooltips = __bind(this.initTooltips, this);
 
-      this.kMeansLayout = __bind(this.kMeansLayout, this);
+      this.noverlap = __bind(this.noverlap, this);
+
+      this.kMeans = __bind(this.kMeans, this);
 
       var SymbolType, d, dly, i, id, l, layer, maxdly, nid, node, optional, p, required, s, sortBy, sortDir, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9,
         _this = this;
@@ -4520,14 +4523,14 @@
         s.x = xy[0];
         s.y = xy[1];
       }
-      if (me.layout === 'k-means') {
-        return me.kMeansLayout();
-      } else if (me.layout === 'noverlap') {
-        return me.noverlapLayout();
+      if (me.clustering === 'k-means') {
+        return me.kMeans();
+      } else if (me.clustering === 'noverlap') {
+        return me.noverlap();
       }
     };
 
-    SymbolGroup.prototype.kMeansLayout = function() {
+    SymbolGroup.prototype.kMeans = function() {
       /*
               layouts symbols in this group, eventually adds new 'grouped' symbols
               map.addSymbols({
@@ -4587,6 +4590,95 @@
         out.push(s);
       }
       return me.symbols = out;
+    };
+
+    SymbolGroup.prototype.noverlap = function() {
+      var SymbolType, b0, b1, d, i, intersects, iterations, l, l0, l1, out, p, q, r, r0, r1, s, s0, s1, sprops, symbols, t0, t1, w, x, y, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
+      me = this;
+      if ((_ref6 = me.osymbols) == null) {
+        me.osymbols = me.symbols;
+      }
+      iterations = 3;
+      SymbolType = me.type;
+      if (__indexOf.call(SymbolType.props, 'radius') < 0) {
+        warn('noverlap layout only available for symbols with property "radius"');
+        return;
+      }
+      symbols = me.osymbols.slice();
+      for (i = _i = 0, _ref7 = iterations - 1; 0 <= _ref7 ? _i <= _ref7 : _i >= _ref7; i = 0 <= _ref7 ? ++_i : --_i) {
+        symbols.sort(function(a, b) {
+          return b.radius - a.radius;
+        });
+        l = symbols.length;
+        out = [];
+        for (p = _j = 0, _ref8 = l - 3; 0 <= _ref8 ? _j <= _ref8 : _j >= _ref8; p = 0 <= _ref8 ? ++_j : --_j) {
+          s0 = symbols[p];
+          if (!s0) {
+            continue;
+          }
+          l0 = s0.x - s0.radius * 0.7;
+          r0 = s0.x + s0.radius * 0.7;
+          t0 = s0.y - s0.radius * 0.7;
+          b0 = s0.y + s0.radius * 0.7;
+          intersects = [];
+          for (q = _k = _ref9 = p + 1, _ref10 = l - 2; _ref9 <= _ref10 ? _k <= _ref10 : _k >= _ref10; q = _ref9 <= _ref10 ? ++_k : --_k) {
+            s1 = symbols[q];
+            if (!s1) {
+              continue;
+            }
+            l1 = s1.x - s1.radius;
+            r1 = s1.x + s1.radius;
+            t1 = s1.y - s1.radius;
+            b1 = s1.y + s1.radius;
+            if (!(r0 < l1 || r1 < l0) && !(b0 < t1 || b1 < t0)) {
+              intersects.push(q);
+            }
+          }
+          if (intersects.length > 0) {
+            d = [s0.data];
+            r = s0.radius;
+            for (_l = 0, _len = intersects.length; _l < _len; _l++) {
+              i = intersects[_l];
+              d.push(symbols[i].data);
+              r += symbols[i].radius;
+            }
+            d = me.aggregate(d);
+            sprops = {
+              layers: me.layers,
+              location: false,
+              data: d,
+              map: me.map
+            };
+            _ref11 = SymbolType.props;
+            for (_m = 0, _len1 = _ref11.length; _m < _len1; _m++) {
+              p = _ref11[_m];
+              if (me[p] != null) {
+                sprops[p] = me._evaluate(me[p], d);
+              }
+            }
+            s = new SymbolType(sprops);
+            w = s0.radius / r;
+            x = s0.x * w;
+            y = s0.y * w;
+            for (_n = 0, _len2 = intersects.length; _n < _len2; _n++) {
+              i = intersects[_n];
+              s1 = symbols[i];
+              w = s1.radius / r;
+              x += s1.x * w;
+              y += s1.y * w;
+              symbols[i] = void 0;
+            }
+            s.x = x;
+            s.y = y;
+            symbols[p] = void 0;
+            out.push(s);
+          } else {
+            out.push(s0);
+          }
+        }
+        symbols = out;
+      }
+      return me.symbols = symbols;
     };
 
     SymbolGroup.prototype.initTooltips = function() {
@@ -4675,6 +4767,33 @@
   };
 
   
+/*
+    Copyright (c) 2010, SimpleGeo and Stamen Design
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above copyright
+          notice, this list of conditions and the following disclaimer in the
+          documentation and/or other materials provided with the distribution.
+        * Neither the name of SimpleGeo nor the
+          names of its contributors may be used to endorse or promote products
+          derived from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL SIMPLEGEO BE LIABLE FOR ANY
+    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 // k-means clustering
 function kmeans() {
   var kmeans = {},
@@ -4824,8 +4943,6 @@ function kdtree() {
 }
 ;
 
-
-  foo = "bar";
 
   /*
       kartograph - a svg mapping library

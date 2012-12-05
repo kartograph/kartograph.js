@@ -164,13 +164,13 @@ class SymbolGroup
                 xy = me.map.lonlat2xy ll
             s.x = xy[0]
             s.y = xy[1]
-        if me.layout == 'k-means'
-            me.kMeansLayout()
-        else if me.layout == 'noverlap'
-            me.noverlapLayout()
+        if me.clustering == 'k-means'
+            me.kMeans()
+        else if me.clustering == 'noverlap'
+            me.noverlap()
 
 
-    kMeansLayout: () =>
+    kMeans: () =>
         ###
         layouts symbols in this group, eventually adds new 'grouped' symbols
         map.addSymbols({
@@ -219,6 +219,83 @@ class SymbolGroup
 
         me.symbols = out
 
+    noverlap: () =>
+        me = @
+        me.osymbols ?= me.symbols
+
+        iterations = 3
+
+        SymbolType = me.type
+        if 'radius' not in SymbolType.props
+            warn 'noverlap layout only available for symbols with property "radius"'
+            return
+
+        symbols = me.osymbols.slice()
+
+        for i in [0..iterations-1]
+            # sort by radius
+            symbols.sort (a,b) ->
+                return b.radius - a.radius
+            l = symbols.length
+            out = []
+            for p in [0..l-3]
+                s0 = symbols[p]
+                if not s0
+                    continue
+                l0 = s0.x - s0.radius * 0.7
+                r0 = s0.x + s0.radius * 0.7
+                t0 = s0.y - s0.radius * 0.7
+                b0 = s0.y + s0.radius * 0.7
+                intersects = []
+                for q in [p+1..l-2]
+                    #console.info p,q
+                    s1 = symbols[q]
+                    if not s1
+                        continue
+                    l1 = s1.x - s1.radius
+                    r1 = s1.x + s1.radius
+                    t1 = s1.y - s1.radius
+                    b1 = s1.y + s1.radius
+                    if not (r0 < l1 or r1 < l0) and not (b0 < t1 or b1 < t0)
+                        intersects.push q
+
+                if intersects.length > 0
+                    d = [s0.data]
+                    r = s0.radius
+                    for i in intersects
+                        d.push symbols[i].data
+                        r += symbols[i].radius
+                    d = me.aggregate d
+
+                    sprops =
+                        layers: me.layers
+                        location: false
+                        data: d
+                        map: me.map
+
+                    for p in SymbolType.props
+                        if me[p]?
+                            sprops[p] = me._evaluate me[p],d
+
+                    s = new SymbolType sprops
+                    w = s0.radius / r
+                    x = s0.x * w
+                    y = s0.y * w
+                    for i in intersects
+                        s1 = symbols[i]
+                        w = s1.radius / r
+                        x += s1.x * w
+                        y += s1.y * w
+                        symbols[i] = undefined
+                    s.x = x
+                    s.y = y
+                    symbols[p] = undefined
+                    out.push s
+                else
+                    # no intersection with s0
+                    out.push s0
+            symbols = out
+        me.symbols = symbols
 
     initTooltips: () =>
         me = @
@@ -272,7 +349,38 @@ kartograph.Kartograph::addSymbols = (opts) ->
     new SymbolGroup(opts)
 
 
+#
+# Code for k-means clustering is taken from
+# http://polymaps.org/ex/kmeans.js
+#
 `
+/*
+    Copyright (c) 2010, SimpleGeo and Stamen Design
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above copyright
+          notice, this list of conditions and the following disclaimer in the
+          documentation and/or other materials provided with the distribution.
+        * Neither the name of SimpleGeo nor the
+          names of its contributors may be used to endorse or promote products
+          derived from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL SIMPLEGEO BE LIABLE FOR ANY
+    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 // k-means clustering
 function kmeans() {
   var kmeans = {},
@@ -422,4 +530,4 @@ function kdtree() {
 }
 `
 
-foo = "bar"
+
