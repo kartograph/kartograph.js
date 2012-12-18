@@ -81,10 +81,12 @@ class Kartograph
         # load svg map
         me = @
         # line 95
+        def = $.Deferred()
         me.clear()
         me.opts = opts ? {}
         me.opts.zoom ?= 1
         me.mapLoadCallback = callback
+        me._loadMapDeferred = def
         me._lastMapUrl = mapurl # store last map url for map cache
 
         if me.cacheMaps and kartograph.__mapCache[mapurl]?
@@ -99,6 +101,15 @@ class Kartograph
                 context: me
                 error: (a,b,c) ->
                     warn a,b,c
+        return def.promise()
+
+
+    setMap: (svg, opts) ->
+        me = @
+        me.opts = opts ? {}
+        me.opts.zoom ?= 1
+        me._lastMapUrl = 'string'
+        me._mapLoaded svg
         return
 
 
@@ -114,6 +125,7 @@ class Kartograph
             xml = $(xml) # if $.browser.msie
         catch err
             warn 'something went horribly wrong while parsing svg'
+            me._loadMapDeferred.reject('could not parse svg')
             return
 
         me.svgSrc = xml
@@ -136,7 +148,11 @@ class Kartograph
         zoom = me.opts.zoom ? 1
         me.viewBC = new kartograph.View me.viewAB.asBBox(), vp.width*zoom, vp.height*zoom, padding,halign,valign
         me.proj = kartograph.Proj.fromXML $('proj', $view)[0]
-        me.mapLoadCallback me
+        if me.mapLoadCallback?
+            me.mapLoadCallback me
+        if me._loadMapDeferred?
+            me._loadMapDeferred.resolve me
+        return
 
 
     addLayer: (id, opts={}) ->
