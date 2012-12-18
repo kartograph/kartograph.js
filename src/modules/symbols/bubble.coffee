@@ -22,7 +22,8 @@ class Bubble extends Symbol
         me = @
         super opts
         me.radius = opts.radius ? 4
-        me.style = opts.style ? ''
+        me.style = opts.style
+        me.attrs = opts.attrs
         me.title = opts.title
         me.class = opts.class ? 'bubble'
 
@@ -52,8 +53,9 @@ class Bubble extends Symbol
             cx: me.x
             cy: me.y
             r: me.radius
-        path.node.setAttribute 'style', me.style
-        path.node.setAttribute 'class', me.class
+        path.attr me.attrs if me.attrs?
+        path.node.setAttribute 'style', me.style if me.style?
+        path.node.setAttribute 'class', me.class if me.class?
         if me.title?
             path.attr 'title',me.title
         me
@@ -69,7 +71,7 @@ class Bubble extends Symbol
 
 
 
-Bubble.props = ['radius','style','class','title']
+Bubble.props = ['radius','style','class','title','attrs']
 Bubble.layers = [] # { id:'a', type: 'svg' }
 
 kartograph.Bubble = Bubble
