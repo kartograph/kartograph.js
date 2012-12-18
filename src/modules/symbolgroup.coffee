@@ -28,8 +28,8 @@ class SymbolGroup
 
     constructor: (opts) ->
         me = @
-        required = ['data','location','type','map']
-        optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate', 'clusteringOpts']
+        required = ['data', 'location', 'type', 'map']
+        optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate', 'clusteringOpts', 'mouseenter', 'mouseleave']
 
         for p in required
             if opts[p]?
@@ -108,13 +108,20 @@ class SymbolGroup
             else
                 me.initTooltips()
 
-        if __type(me.click) == "function"
-            for s in me.symbols
-                for node in s.nodes()
-                    node.symbol = s
-                    $(node).click (e) =>
-                        e.stopPropagation()
-                        me.click e.target.symbol.data
+        for s in me.symbols
+            for node in s.nodes()
+                node.symbol = s
+
+        $.each ['click', 'mouseenter', 'mouseleave'], (i, evt) ->
+            if __type(me[evt]) == "function"
+                for s in me.symbols
+                    for node in s.nodes()
+                        $(node)[evt] (e) =>
+                            tgt = e.target
+                            while not tgt.symbol
+                                tgt = $(tgt).parent().get(0)
+                            e.stopPropagation()
+                            me[evt] tgt.symbol.data, tgt.symbol
 
         me.map.addSymbolGroup(me)
 
