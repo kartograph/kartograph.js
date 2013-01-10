@@ -158,6 +158,15 @@ class MapLayer
             tt = resolve content, path.data
             setTooltip path, tt
 
+    sort: (sortBy) ->
+        me = @
+        me.paths.sort (a,b) ->
+            return sortBy(a.data) - sortBy(b.data)
+        for path in me.paths
+            if path == me.paths[0]
+                continue
+            path.svgPath.insertAfter me.paths[0].svgPath
+
 resolve = (prop, data) ->
     if __type(prop) == 'function'
         return prop data
