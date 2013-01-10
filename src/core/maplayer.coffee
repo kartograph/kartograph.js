@@ -165,10 +165,11 @@ class MapLayer
         me = @
         me.paths.sort (a,b) ->
             return sortBy(a.data) - sortBy(b.data)
+        lp = false
         for path in me.paths
-            if path == me.paths[0]
-                continue
-            path.svgPath.insertAfter me.paths[0].svgPath
+            if lp
+                path.svgPath.insertAfter lp.svgPath
+            lp = path
         me
 
 resolve = (prop, data) ->
