@@ -164,7 +164,11 @@ class MapLayer
     sort: (sortBy) ->
         me = @
         me.paths.sort (a,b) ->
-            return sortBy(a.data) - sortBy(b.data)
+            av = sortBy(a.data)
+            bv = sortBy(b.data)
+            if av == bv
+                return 0
+            return av > bv ? 1 : -1
         lp = false
         for path in me.paths
             if lp

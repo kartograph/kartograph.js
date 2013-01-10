@@ -50,7 +50,7 @@
 
   kartograph = root.$K = window.Kartograph = (_ref = root.Kartograph) != null ? _ref : root.Kartograph = {};
 
-  kartograph.version = "0.4.1";
+  kartograph.version = "0.4.2";
 
   $ = root.jQuery;
 
@@ -1208,7 +1208,15 @@
       var lp, me, path, _i, _len, _ref4;
       me = this;
       me.paths.sort(function(a, b) {
-        return sortBy(a.data) - sortBy(b.data);
+        var av, bv, _ref4;
+        av = sortBy(a.data);
+        bv = sortBy(b.data);
+        if (av === bv) {
+          return 0;
+        }
+        return (_ref4 = av > bv) != null ? _ref4 : {
+          1: -1
+        };
       });
       lp = false;
       _ref4 = me.paths;
