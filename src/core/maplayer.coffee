@@ -86,6 +86,7 @@ class MapLayer
         me = @
         for path in me.paths
             path.setView(view)
+        me
 
     remove: ->
         ###
@@ -129,6 +130,7 @@ class MapLayer
         ctx = new EventContext(event, callback, me)
         for path in me.paths
             $(path.svgPath.node).bind event, ctx.handle
+        me
 
     tooltips: (content, delay) ->
         me = @
@@ -157,6 +159,7 @@ class MapLayer
         for path in me.paths
             tt = resolve content, path.data
             setTooltip path, tt
+        me
 
     sort: (sortBy) ->
         me = @
@@ -166,6 +169,7 @@ class MapLayer
             if path == me.paths[0]
                 continue
             path.svgPath.insertAfter me.paths[0].svgPath
+        me
 
 resolve = (prop, data) ->
     if __type(prop) == 'function'
