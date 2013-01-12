@@ -4845,6 +4845,25 @@
       }
     };
 
+    SymbolGroup.prototype.evaluate = function(opts) {
+      var p, s, _i, _j, _len, _len1, _ref6, _ref7, _results;
+      me = this;
+      _ref6 = me.symbols;
+      _results = [];
+      for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+        s = _ref6[_i];
+        _ref7 = me.type.props;
+        for (_j = 0, _len1 = _ref7.length; _j < _len1; _j++) {
+          p = _ref7[_j];
+          if (opts[p] != null) {
+            s[p] = me._evaluate(opts[p], s.data);
+          }
+        }
+        _results.push(s.update());
+      }
+      return _results;
+    };
+
     return SymbolGroup;
 
   })();

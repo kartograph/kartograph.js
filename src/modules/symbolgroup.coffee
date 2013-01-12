@@ -362,6 +362,14 @@ class SymbolGroup
             s.update()
         return
 
+    evaluate: (opts) ->
+        me = @
+        for s in me.symbols
+            for p in me.type.props
+                if opts[p]?
+                    s[p] = me._evaluate opts[p],s.data
+            s.update()
+
 
 SymbolGroup._layerid = 0
 kartograph.SymbolGroup = SymbolGroup
