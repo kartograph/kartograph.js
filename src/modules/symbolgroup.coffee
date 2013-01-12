@@ -121,7 +121,7 @@ class SymbolGroup
                             while not tgt.symbol
                                 tgt = $(tgt).parent().get(0)
                             e.stopPropagation()
-                            me[evt] tgt.symbol.data, tgt.symbol
+                            me[evt] tgt.symbol.data, tgt.symbol, e
 
         me.map.addSymbolGroup(me)
 

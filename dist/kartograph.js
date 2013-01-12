@@ -4516,7 +4516,7 @@
                     tgt = $(tgt).parent().get(0);
                   }
                   e.stopPropagation();
-                  return me[evt](tgt.symbol.data, tgt.symbol);
+                  return me[evt](tgt.symbol.data, tgt.symbol, e);
                 }));
               }
               return _results1;
