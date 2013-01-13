@@ -70,9 +70,9 @@ class SymbolGroup
         for i of me.data
             d = me.data[i]
             if __type(me.filter) == "function"
-                me.addSymbol d, i if me.filter d, i
+                me.add d, i if me.filter d, i
             else
-                me.addSymbol d, i
+                me.add d, i
 
         # layout symbols
         me.layoutSymbols()
@@ -133,7 +133,7 @@ class SymbolGroup
         me.map.addSymbolGroup(me)
 
 
-    addSymbol: (data, key) ->
+    add: (data, key) ->
         ### adds a new symbol to this group ###
         me = @
         SymbolType = me.type
@@ -145,7 +145,7 @@ class SymbolGroup
             layers: me.layers
             location: ll
             data: data
-            key: key
+            key: key ? me.symbols.length
             map: me.map
 
         for p in SymbolType.props
