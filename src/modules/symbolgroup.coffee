@@ -78,15 +78,22 @@ class SymbolGroup
         me.layoutSymbols()
 
         if me.sortBy
+            sortDir = 'asc'
             if __type(me.sortBy) == "string"
-                me.sortBy = me.sortBy.split ' '
+                me.sortBy = me.sortBy.split ' ',2
+                sortBy = me.sortBy[0]
+                sortDir = me.sortBy[1] ? 'asc'
 
-            sortBy = me.sortBy[0]
-            sortDir = me.sortBy[1] ? 'asc'
             me.symbols = me.symbols.sort (a,b) ->
-                return 0 if a[sortBy] == b[sortBy]
+                if __type(me.sortBy) == "function"
+                    va = me.sortBy a.data, a
+                    vb = me.sortBy b.data, b
+                else
+                    va = a[sortBy]
+                    vb = b[sortBy]
+                return 0 if va == vb
                 m = if sortDir == 'asc' then 1 else -1
-                return if a[sortBy] > b[sortBy] then 1*m else -1*m
+                return if va > vb then 1*m else -1*m
 
         # render symbols
         maxdly = 0
@@ -104,9 +111,9 @@ class SymbolGroup
 
         if __type(me.tooltip) == "function"
             if maxdly > 0
-                setTimeout me.initTooltips, maxdly*1000 + 60
+                setTimeout me._initTooltips, maxdly*1000 + 60
             else
-                me.initTooltips()
+                me._initTooltips()
 
         for s in me.symbols
             for node in s.nodes()
@@ -319,7 +326,7 @@ class SymbolGroup
             symbols = out
         me.symbols = symbols
 
-    initTooltips: () =>
+    _initTooltips: () =>
         me = @
         tooltips = me.tooltip
         for s in me.symbols
@@ -344,16 +351,20 @@ class SymbolGroup
                 $(node).qtip(cfg)
         return
 
-    remove: () ->
+    remove: (filter) ->
         me = @
         for s in me.symbols
+            if filter?
+                if filter(s.data)
+                    continue
             try
                 s.clear()
             catch error
                 warn 'error: symbolgroup.remove'
-        for id,layer of me.layers
-            if id != "mapcanvas"
-                layer.remove()
+        if not filter?
+            for id,layer of me.layers
+                if id != "mapcanvas"
+                    layer.remove()
 
     onResize: () ->
         me = @
@@ -362,6 +373,12 @@ class SymbolGroup
             s.update()
         return
 
+    tooltips: (cb) ->
+        me = @
+        me.tooltips = cb
+        me._initTooltips()
+        me
+
     evaluate: (opts) ->
         me = @
         for s in me.symbols
@@ -369,6 +386,7 @@ class SymbolGroup
                 if opts[p]?
                     s[p] = me._evaluate opts[p],s.data
             s.update()
+        me
 
 
 SymbolGroup._layerid = 0

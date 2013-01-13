@@ -50,7 +50,7 @@
 
   kartograph = root.$K = window.Kartograph = (_ref = root.Kartograph) != null ? _ref : root.Kartograph = {};
 
-  kartograph.version = "0.4.2";
+  kartograph.version = "0.4.3";
 
   $ = root.jQuery;
 
@@ -4378,7 +4378,7 @@
     me = null;
 
     function SymbolGroup(opts) {
-      this.initTooltips = __bind(this.initTooltips, this);
+      this._initTooltips = __bind(this._initTooltips, this);
 
       this.noverlap = __bind(this.noverlap, this);
 
@@ -4442,18 +4442,26 @@
       }
       me.layoutSymbols();
       if (me.sortBy) {
+        sortDir = 'asc';
         if (__type(me.sortBy) === "string") {
-          me.sortBy = me.sortBy.split(' ');
+          me.sortBy = me.sortBy.split(' ', 2);
+          sortBy = me.sortBy[0];
+          sortDir = (_ref8 = me.sortBy[1]) != null ? _ref8 : 'asc';
         }
-        sortBy = me.sortBy[0];
-        sortDir = (_ref8 = me.sortBy[1]) != null ? _ref8 : 'asc';
         me.symbols = me.symbols.sort(function(a, b) {
-          var m;
-          if (a[sortBy] === b[sortBy]) {
+          var m, va, vb;
+          if (__type(me.sortBy) === "function") {
+            va = me.sortBy(a.data, a);
+            vb = me.sortBy(b.data, b);
+          } else {
+            va = a[sortBy];
+            vb = b[sortBy];
+          }
+          if (va === vb) {
             return 0;
           }
           m = sortDir === 'asc' ? 1 : -1;
-          if (a[sortBy] > b[sortBy]) {
+          if (va > vb) {
             return 1 * m;
           } else {
             return -1 * m;
@@ -4481,9 +4489,9 @@
       }
       if (__type(me.tooltip) === "function") {
         if (maxdly > 0) {
-          setTimeout(me.initTooltips, maxdly * 1000 + 60);
+          setTimeout(me._initTooltips, maxdly * 1000 + 60);
         } else {
-          me.initTooltips();
+          me._initTooltips();
         }
       }
       _ref10 = me.symbols;
@@ -4773,7 +4781,7 @@
       return me.symbols = symbols;
     };
 
-    SymbolGroup.prototype.initTooltips = function() {
+    SymbolGroup.prototype._initTooltips = function() {
       var cfg, node, s, tooltips, tt, _i, _j, _len, _len1, _ref6, _ref7;
       me = this;
       tooltips = me.tooltip;
@@ -4845,11 +4853,17 @@
       }
     };
 
+    SymbolGroup.prototype.tooltips = function(cb) {
+      me = this;
+      me.tooltips = cb;
+      me._initTooltips();
+      return me;
+    };
+
     SymbolGroup.prototype.evaluate = function(opts) {
-      var p, s, _i, _j, _len, _len1, _ref6, _ref7, _results;
+      var p, s, _i, _j, _len, _len1, _ref6, _ref7;
       me = this;
       _ref6 = me.symbols;
-      _results = [];
       for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
         s = _ref6[_i];
         _ref7 = me.type.props;
@@ -4859,9 +4873,9 @@
             s[p] = me._evaluate(opts[p], s.data);
           }
         }
-        _results.push(s.update());
+        s.update();
       }
-      return _results;
+      return me;
     };
 
     return SymbolGroup;
