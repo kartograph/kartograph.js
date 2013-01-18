@@ -74,62 +74,8 @@ class SymbolGroup
             else
                 me.add d, i
 
-        # layout symbols
-        me.layoutSymbols()
-
-        if me.sortBy
-            sortDir = 'asc'
-            if __type(me.sortBy) == "string"
-                me.sortBy = me.sortBy.split ' ',2
-                sortBy = me.sortBy[0]
-                sortDir = me.sortBy[1] ? 'asc'
-
-            me.symbols = me.symbols.sort (a,b) ->
-                if __type(me.sortBy) == "function"
-                    va = me.sortBy a.data, a
-                    vb = me.sortBy b.data, b
-                else
-                    va = a[sortBy]
-                    vb = b[sortBy]
-                return 0 if va == vb
-                m = if sortDir == 'asc' then 1 else -1
-                return if va > vb then 1*m else -1*m
-
-        # render symbols
-        maxdly = 0
-        for s in me.symbols
-            dly = 0
-            if __type(me.delay) == "function"
-                dly = me.delay s.data
-            else if me.delay?
-                dly = me.delay
-            if dly > 0
-                maxdly = dly if dly > maxdly
-                setTimeout s.render, dly*1000
-            else
-                s.render()
-
-        if __type(me.tooltip) == "function"
-            if maxdly > 0
-                setTimeout me._initTooltips, maxdly*1000 + 60
-            else
-                me._initTooltips()
-
-        for s in me.symbols
-            for node in s.nodes()
-                node.symbol = s
-
-        $.each ['click', 'mouseenter', 'mouseleave'], (i, evt) ->
-            if __type(me[evt]) == "function"
-                for s in me.symbols
-                    for node in s.nodes()
-                        $(node)[evt] (e) =>
-                            tgt = e.target
-                            while not tgt.symbol
-                                tgt = $(tgt).parent().get(0)
-                            e.stopPropagation()
-                            me[evt] tgt.symbol.data, tgt.symbol, e
-
+        me.layout()
+        me.render()
         me.map.addSymbolGroup(me)
 
 
@@ -156,14 +102,8 @@ class SymbolGroup
         me.symbols.push symbol
         symbol
 
-    _evaluate: (prop, data, key) ->
-        ### evaluates a property function or returns a static value ###
-        if __type(prop) == 'function'
-            val = prop data, key
-        else
-            val = prop
 
-    layoutSymbols: () ->
+    layout: () ->
         for s in me.symbols
             ll = s.location
             if __type(ll) == 'string'  # use layer path centroid as coordinates
@@ -179,12 +119,87 @@ class SymbolGroup
             s.x = xy[0]
             s.y = xy[1]
         if me.clustering == 'k-means'
-            me.kMeans()
+            me._kMeans()
         else if me.clustering == 'noverlap'
-            me.noverlap()
+            me._noverlap()
+        me
 
+    render: () ->
+        me = @
+        # sort
+        if me.sortBy
+            sortDir = 'asc'
+            if __type(me.sortBy) == "string"
+                me.sortBy = me.sortBy.split ' ',2
+                sortBy = me.sortBy[0]
+                sortDir = me.sortBy[1] ? 'asc'
 
-    kMeans: () =>
+            me.symbols = me.symbols.sort (a,b) ->
+                if __type(me.sortBy) == "function"
+                    va = me.sortBy a.data, a
+                    vb = me.sortBy b.data, b
+                else
+                    va = a[sortBy]
+                    vb = b[sortBy]
+                return 0 if va == vb
+                m = if sortDir == 'asc' then 1 else -1
+                return if va > vb then 1*m else -1*m
+
+        # render
+        for s in me.symbols
+            s.render()
+            for node in s.nodes()
+                node.symbol = s
+
+        # tooltips
+        if __type(me.tooltip) == "function"
+            me._initTooltips()
+
+        # events
+        $.each ['click', 'mouseenter', 'mouseleave'], (i, evt) ->
+            if __type(me[evt]) == "function"
+                for s in me.symbols
+                    for node in s.nodes()
+                        $(node)[evt] (e) =>
+                            tgt = e.target
+                            while not tgt.symbol
+                                tgt = $(tgt).parent().get(0)
+                            e.stopPropagation()
+                            me[evt] tgt.symbol.data, tgt.symbol, e
+        me
+
+    tooltips: (cb) ->
+        me = @
+        me.tooltips = cb
+        me._initTooltips()
+        me
+
+    remove: (filter) ->
+        me = @
+        kept = []
+        for s in me.symbols
+            if filter? and not filter(s.data)
+                kept.push s
+                continue
+            try
+                s.clear()
+            catch error
+                warn 'error: symbolgroup.remove'
+        if not filter?
+            for id,layer of me.layers
+                if id != "mapcanvas"
+                    layer.remove()
+        else
+            me.symbols = kept
+
+    _evaluate: (prop, data, key) ->
+        ### evaluates a property function or returns a static value ###
+        if __type(prop) == 'function'
+            val = prop data, key
+        else
+            val = prop
+
+    _kMeans: () =>
         ###
         layouts symbols in this group, eventually adds new 'grouped' symbols
         map.addSymbols({
@@ -236,7 +251,7 @@ class SymbolGroup
 
         me.symbols = out
 
-    noverlap: () =>
+    _noverlap: () =>
         me = @
         me.osymbols ?= me.symbols
 
@@ -351,35 +366,16 @@ class SymbolGroup
                 $(node).qtip(cfg)
         return
 
-    remove: (filter) ->
-        me = @
-        for s in me.symbols
-            if filter?
-                if filter(s.data)
-                    continue
-            try
-                s.clear()
-            catch error
-                warn 'error: symbolgroup.remove'
-        if not filter?
-            for id,layer of me.layers
-                if id != "mapcanvas"
-                    layer.remove()
 
     onResize: () ->
         me = @
-        me.layoutSymbols()
+        me.layout()
         for s in me.symbols
             s.update()
         return
 
-    tooltips: (cb) ->
-        me = @
-        me.tooltips = cb
-        me._initTooltips()
-        me
 
-    evaluate: (opts) ->
+    update: (opts) ->
         me = @
         for s in me.symbols
             for p in me.type.props
