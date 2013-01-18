@@ -3674,10 +3674,10 @@
     });
   };
 
-  MapLayer.prototype.applyTexture = function(url, w, h, color) {
+  MapLayer.prototype.applyTexture = function(url, filt) {
     var lp, me, _i, _len, _ref6, _results;
-    if (color == null) {
-      color = '#fff';
+    if (filt == null) {
+      filt = false;
     }
     me = this;
     filter.__patternFills += 1;
@@ -3685,9 +3685,13 @@
     _results = [];
     for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
       lp = _ref6[_i];
-      _results.push(lp.svgPath.attr({
-        fill: 'url(' + url + ')'
-      }));
+      if (!filt || filt(lp.data)) {
+        _results.push(lp.svgPath.attr({
+          fill: 'url(' + url + ')'
+        }));
+      } else {
+        _results.push(void 0);
+      }
     }
     return _results;
   };
@@ -4380,11 +4384,11 @@
     function SymbolGroup(opts) {
       this._initTooltips = __bind(this._initTooltips, this);
 
-      this.noverlap = __bind(this.noverlap, this);
+      this._noverlap = __bind(this._noverlap, this);
 
-      this.kMeans = __bind(this.kMeans, this);
+      this._kMeans = __bind(this._kMeans, this);
 
-      var SymbolType, d, dly, i, id, l, layer, maxdly, nid, node, optional, p, required, s, sortBy, sortDir, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
+      var SymbolType, d, i, id, l, layer, nid, optional, p, required, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref6, _ref7;
       me = this;
       required = ['data', 'location', 'type', 'map'];
       optional = ['filter', 'tooltip', 'click', 'delay', 'sortBy', 'clustering', 'aggregate', 'clusteringOpts', 'mouseenter', 'mouseleave'];
@@ -4434,109 +4438,18 @@
         d = me.data[i];
         if (__type(me.filter) === "function") {
           if (me.filter(d, i)) {
-            me.addSymbol(d, i);
+            me.add(d, i);
           }
         } else {
-          me.addSymbol(d, i);
+          me.add(d, i);
         }
       }
-      me.layoutSymbols();
-      if (me.sortBy) {
-        sortDir = 'asc';
-        if (__type(me.sortBy) === "string") {
-          me.sortBy = me.sortBy.split(' ', 2);
-          sortBy = me.sortBy[0];
-          sortDir = (_ref8 = me.sortBy[1]) != null ? _ref8 : 'asc';
-        }
-        me.symbols = me.symbols.sort(function(a, b) {
-          var m, va, vb;
-          if (__type(me.sortBy) === "function") {
-            va = me.sortBy(a.data, a);
-            vb = me.sortBy(b.data, b);
-          } else {
-            va = a[sortBy];
-            vb = b[sortBy];
-          }
-          if (va === vb) {
-            return 0;
-          }
-          m = sortDir === 'asc' ? 1 : -1;
-          if (va > vb) {
-            return 1 * m;
-          } else {
-            return -1 * m;
-          }
-        });
-      }
-      maxdly = 0;
-      _ref9 = me.symbols;
-      for (_m = 0, _len4 = _ref9.length; _m < _len4; _m++) {
-        s = _ref9[_m];
-        dly = 0;
-        if (__type(me.delay) === "function") {
-          dly = me.delay(s.data);
-        } else if (me.delay != null) {
-          dly = me.delay;
-        }
-        if (dly > 0) {
-          if (dly > maxdly) {
-            maxdly = dly;
-          }
-          setTimeout(s.render, dly * 1000);
-        } else {
-          s.render();
-        }
-      }
-      if (__type(me.tooltip) === "function") {
-        if (maxdly > 0) {
-          setTimeout(me._initTooltips, maxdly * 1000 + 60);
-        } else {
-          me._initTooltips();
-        }
-      }
-      _ref10 = me.symbols;
-      for (_n = 0, _len5 = _ref10.length; _n < _len5; _n++) {
-        s = _ref10[_n];
-        _ref11 = s.nodes();
-        for (_o = 0, _len6 = _ref11.length; _o < _len6; _o++) {
-          node = _ref11[_o];
-          node.symbol = s;
-        }
-      }
-      $.each(['click', 'mouseenter', 'mouseleave'], function(i, evt) {
-        var _len7, _p, _ref12, _results;
-        if (__type(me[evt]) === "function") {
-          _ref12 = me.symbols;
-          _results = [];
-          for (_p = 0, _len7 = _ref12.length; _p < _len7; _p++) {
-            s = _ref12[_p];
-            _results.push((function() {
-              var _len8, _q, _ref13, _results1,
-                _this = this;
-              _ref13 = s.nodes();
-              _results1 = [];
-              for (_q = 0, _len8 = _ref13.length; _q < _len8; _q++) {
-                node = _ref13[_q];
-                _results1.push($(node)[evt](function(e) {
-                  var tgt;
-                  tgt = e.target;
-                  while (!tgt.symbol) {
-                    tgt = $(tgt).parent().get(0);
-                  }
-                  e.stopPropagation();
-                  return me[evt](tgt.symbol.data, tgt.symbol, e);
-                }));
-              }
-              return _results1;
-            }).call(this));
-          }
-          return _results;
-        }
-      });
+      me.layout();
+      me.render();
       me.map.addSymbolGroup(me);
     }
 
-    SymbolGroup.prototype.addSymbol = function(data, key) {
+    SymbolGroup.prototype.add = function(data, key) {
       /* adds a new symbol to this group
       */
 
@@ -4551,7 +4464,7 @@
         layers: me.layers,
         location: ll,
         data: data,
-        key: key,
+        key: key != null ? key : me.symbols.length,
         map: me.map
       };
       _ref6 = SymbolType.props;
@@ -4566,19 +4479,7 @@
       return symbol;
     };
 
-    SymbolGroup.prototype._evaluate = function(prop, data, key) {
-      /* evaluates a property function or returns a static value
-      */
-
-      var val;
-      if (__type(prop) === 'function') {
-        return val = prop(data, key);
-      } else {
-        return val = prop;
-      }
-    };
-
-    SymbolGroup.prototype.layoutSymbols = function() {
+    SymbolGroup.prototype.layout = function() {
       var layer_id, ll, path, path_id, s, xy, _i, _len, _ref6, _ref7;
       _ref6 = me.symbols;
       for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
@@ -4600,13 +4501,143 @@
         s.y = xy[1];
       }
       if (me.clustering === 'k-means') {
-        return me.kMeans();
+        me._kMeans();
       } else if (me.clustering === 'noverlap') {
-        return me.noverlap();
+        me._noverlap();
+      }
+      return me;
+    };
+
+    SymbolGroup.prototype.render = function() {
+      var node, s, sortBy, sortDir, _i, _j, _len, _len1, _ref6, _ref7, _ref8;
+      me = this;
+      if (me.sortBy) {
+        sortDir = 'asc';
+        if (__type(me.sortBy) === "string") {
+          me.sortBy = me.sortBy.split(' ', 2);
+          sortBy = me.sortBy[0];
+          sortDir = (_ref6 = me.sortBy[1]) != null ? _ref6 : 'asc';
+        }
+        me.symbols = me.symbols.sort(function(a, b) {
+          var m, va, vb;
+          if (__type(me.sortBy) === "function") {
+            va = me.sortBy(a.data, a);
+            vb = me.sortBy(b.data, b);
+          } else {
+            va = a[sortBy];
+            vb = b[sortBy];
+          }
+          if (va === vb) {
+            return 0;
+          }
+          m = sortDir === 'asc' ? 1 : -1;
+          if (va > vb) {
+            return 1 * m;
+          } else {
+            return -1 * m;
+          }
+        });
+      }
+      _ref7 = me.symbols;
+      for (_i = 0, _len = _ref7.length; _i < _len; _i++) {
+        s = _ref7[_i];
+        s.render();
+        _ref8 = s.nodes();
+        for (_j = 0, _len1 = _ref8.length; _j < _len1; _j++) {
+          node = _ref8[_j];
+          node.symbol = s;
+        }
+      }
+      if (__type(me.tooltip) === "function") {
+        me._initTooltips();
+      }
+      $.each(['click', 'mouseenter', 'mouseleave'], function(i, evt) {
+        var _k, _len2, _ref9, _results;
+        if (__type(me[evt]) === "function") {
+          _ref9 = me.symbols;
+          _results = [];
+          for (_k = 0, _len2 = _ref9.length; _k < _len2; _k++) {
+            s = _ref9[_k];
+            _results.push((function() {
+              var _l, _len3, _ref10, _results1,
+                _this = this;
+              _ref10 = s.nodes();
+              _results1 = [];
+              for (_l = 0, _len3 = _ref10.length; _l < _len3; _l++) {
+                node = _ref10[_l];
+                _results1.push($(node)[evt](function(e) {
+                  var tgt;
+                  tgt = e.target;
+                  while (!tgt.symbol) {
+                    tgt = $(tgt).parent().get(0);
+                  }
+                  e.stopPropagation();
+                  return me[evt](tgt.symbol.data, tgt.symbol, e);
+                }));
+              }
+              return _results1;
+            }).call(this));
+          }
+          return _results;
+        }
+      });
+      return me;
+    };
+
+    SymbolGroup.prototype.tooltips = function(cb) {
+      me = this;
+      me.tooltips = cb;
+      me._initTooltips();
+      return me;
+    };
+
+    SymbolGroup.prototype.remove = function(filter) {
+      var id, kept, layer, s, _i, _len, _ref6, _ref7, _results;
+      me = this;
+      kept = [];
+      _ref6 = me.symbols;
+      for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+        s = _ref6[_i];
+        if ((filter != null) && !filter(s.data)) {
+          kept.push(s);
+          continue;
+        }
+        try {
+          s.clear();
+        } catch (error) {
+          warn('error: symbolgroup.remove');
+        }
+      }
+      if (!(filter != null)) {
+        _ref7 = me.layers;
+        _results = [];
+        for (id in _ref7) {
+          layer = _ref7[id];
+          if (id !== "mapcanvas") {
+            _results.push(layer.remove());
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      } else {
+        return me.symbols = kept;
       }
     };
 
-    SymbolGroup.prototype.kMeans = function() {
+    SymbolGroup.prototype._evaluate = function(prop, data, key) {
+      /* evaluates a property function or returns a static value
+      */
+
+      var val;
+      if (__type(prop) === 'function') {
+        return val = prop(data, key);
+      } else {
+        return val = prop;
+      }
+    };
+
+    SymbolGroup.prototype._kMeans = function() {
       /*
               layouts symbols in this group, eventually adds new 'grouped' symbols
               map.addSymbols({
@@ -4674,7 +4705,7 @@
       return me.symbols = out;
     };
 
-    SymbolGroup.prototype.noverlap = function() {
+    SymbolGroup.prototype._noverlap = function() {
       var SymbolType, b0, b1, d, dx, dy, i, intersects, iterations, l, l0, l1, maxRatio, out, p, q, r, r0, r1, rad0, rad1, s, s0, s1, sprops, symbols, t0, t1, tolerance, w, x, y, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref10, _ref11, _ref6, _ref7, _ref8, _ref9;
       me = this;
       if ((_ref6 = me.osymbols) == null) {
@@ -4817,35 +4848,10 @@
       }
     };
 
-    SymbolGroup.prototype.remove = function() {
-      var id, layer, s, _i, _len, _ref6, _ref7, _results;
-      me = this;
-      _ref6 = me.symbols;
-      for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
-        s = _ref6[_i];
-        try {
-          s.clear();
-        } catch (error) {
-          warn('error: symbolgroup.remove');
-        }
-      }
-      _ref7 = me.layers;
-      _results = [];
-      for (id in _ref7) {
-        layer = _ref7[id];
-        if (id !== "mapcanvas") {
-          _results.push(layer.remove());
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    };
-
     SymbolGroup.prototype.onResize = function() {
       var s, _i, _len, _ref6;
       me = this;
-      me.layoutSymbols();
+      me.layout();
       _ref6 = me.symbols;
       for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
         s = _ref6[_i];
@@ -4853,14 +4859,7 @@
       }
     };
 
-    SymbolGroup.prototype.tooltips = function(cb) {
-      me = this;
-      me.tooltips = cb;
-      me._initTooltips();
-      return me;
-    };
-
-    SymbolGroup.prototype.evaluate = function(opts) {
+    SymbolGroup.prototype.update = function(opts) {
       var p, s, _i, _j, _len, _len1, _ref6, _ref7;
       me = this;
       _ref6 = me.symbols;
@@ -5069,6 +5068,62 @@ function kdtree() {
 ;
 
 
+  kartograph.dorlingLayout = function(symbolgroup) {
+    var A, B, apply, d, ds, dx, dy, f, i, j, nodes, r, rd, rs, _i;
+    nodes = [];
+    $.each(symbolgroup.symbols, function(i, s) {
+      return nodes.push({
+        i: i,
+        x: s.path.attrs.cx,
+        y: s.path.attrs.cy,
+        r: s.path.attrs.r
+      });
+    });
+    nodes.sort(function(a, b) {
+      return b.r - a.r;
+    });
+    apply = function() {
+      var n, _i, _len;
+      for (_i = 0, _len = nodes.length; _i < _len; _i++) {
+        n = nodes[_i];
+        symbolgroup.symbols[n.i].path.attr({
+          cx: n.x,
+          cy: n.y
+        });
+      }
+    };
+    for (r = _i = 1; _i <= 40; r = ++_i) {
+      for (i in nodes) {
+        for (j in nodes) {
+          if (j > i) {
+            A = nodes[i];
+            B = nodes[j];
+            if (A.x + A.r < B.x - B.r || A.x - A.r > B.x + B.r) {
+              continue;
+            }
+            if (A.y + A.r < B.y - B.r || A.y - A.r > B.y + B.r) {
+              continue;
+            }
+            dx = A.x - B.x;
+            dy = A.y - B.y;
+            ds = dx * dx + dy * dy;
+            rd = A.r + B.r;
+            rs = rd * rd;
+            if (ds < rs) {
+              d = Math.sqrt(ds);
+              f = 10 / d;
+              A.x += dx * f * (1 - (A.r / rd));
+              A.y += dy * f * (1 - (A.r / rd));
+              B.x -= dx * f * (1 - (B.r / rd));
+              B.y -= dy * f * (1 - (B.r / rd));
+            }
+          }
+        }
+      }
+    }
+    return apply();
+  };
+
   /*
       kartograph - a svg mapping library
       Copyright (C) 2011,2012  Gregor Aisch
@@ -5132,7 +5187,9 @@ function kdtree() {
     Bubble.prototype.render = function(layers) {
       var me;
       me = this;
-      me.path = me.layers.mapcanvas.circle(me.x, me.y, me.radius);
+      if (!(me.path != null)) {
+        me.path = me.layers.mapcanvas.circle(me.x, me.y, me.radius);
+      }
       me.update();
       me.map.applyCSS(me.path);
       return me;
