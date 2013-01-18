@@ -41,7 +41,8 @@ class Bubble extends Symbol
 
     render: (layers) =>
         me = @
-        me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
+        if not me.path?
+            me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
         me.update()
         me.map.applyCSS me.path
         me
