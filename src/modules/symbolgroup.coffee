@@ -576,7 +576,7 @@ function kdtree() {
 }
 `
 
-kartograph.dorlingLayout = (symbolgroup) ->
+kartograph.dorlingLayout = (symbolgroup, iterations=40) ->
     nodes = []
     $.each symbolgroup.symbols, (i, s) ->
         nodes.push
@@ -594,7 +594,7 @@ kartograph.dorlingLayout = (symbolgroup) ->
                 cy: n.y
         return
 
-    for r in [1..40]  # run 10 times
+    for r in [1..iterations]  # run 10 times
         for i of nodes
             for j of nodes
                 if j > i

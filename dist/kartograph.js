@@ -50,7 +50,7 @@
 
   kartograph = root.$K = window.Kartograph = (_ref = root.Kartograph) != null ? _ref : root.Kartograph = {};
 
-  kartograph.version = "0.4.3";
+  kartograph.version = "0.5.1";
 
   $ = root.jQuery;
 
@@ -5068,8 +5068,11 @@ function kdtree() {
 ;
 
 
-  kartograph.dorlingLayout = function(symbolgroup) {
+  kartograph.dorlingLayout = function(symbolgroup, iterations) {
     var A, B, apply, d, ds, dx, dy, f, i, j, nodes, r, rd, rs, _i;
+    if (iterations == null) {
+      iterations = 40;
+    }
     nodes = [];
     $.each(symbolgroup.symbols, function(i, s) {
       return nodes.push({
@@ -5092,7 +5095,7 @@ function kdtree() {
         });
       }
     };
-    for (r = _i = 1; _i <= 40; r = ++_i) {
+    for (r = _i = 1; 1 <= iterations ? _i <= iterations : _i >= iterations; r = 1 <= iterations ? ++_i : --_i) {
       for (i in nodes) {
         for (j in nodes) {
           if (j > i) {
