@@ -23,15 +23,26 @@ kartograph.version = "0.5.1"
 
 $ = root.jQuery
 
-__verbose__ = false and console?
+__verbose__ = false
 
 warn = (s) ->
     if __verbose__
-        console.warn 'kartograph ('+kartograph.version+'): ',s
-
+        try
+            console.warn.apply console, arguments
+        catch e
+            try
+                opera.postError.apply opera, arguments
+            catch e
+                alert Array.prototype.join.call( arguments, ' ')
 log = (s) ->
     if __verbose__
-        console.log 'kartograph ('+kartograph.version+'): ',s
+        try
+            console.log.apply console, arguments
+        catch e
+            try
+                opera.postError.apply opera, arguments
+            catch e
+                alert Array.prototype.join.call( arguments, ' ')
 
 String::trim ?= () ->
     this.replace /^\s+|\s+$/g,""
