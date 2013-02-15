@@ -224,7 +224,10 @@ class Kartograph
         null
 
     onLayerEvent: (event, callback, layerId) ->
-
+        # DEPRECATED!
+        me = @
+        me.getLayer(layerId).on event, callback
+        me
 
 
     addMarker: (marker) ->
