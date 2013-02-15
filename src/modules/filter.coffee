@@ -47,13 +47,15 @@ MapLayer::applyFilter = (filter_id) ->
         filter: 'url(#'+filter_id+')'
 
 
-MapLayer::applyTexture = (url, filt=false) ->
+MapLayer::applyTexture = (url, filt=false, defCol='#000') ->
     me = @
     filter.__patternFills += 1
     for lp in me.paths
         if not filt or filt(lp.data)
             lp.svgPath.attr
                 fill: 'url('+url+')'
+        else
+            lp.svgPath.attr 'fill', defCol
 
 class Filter
     ### base class for all svg filter ###
