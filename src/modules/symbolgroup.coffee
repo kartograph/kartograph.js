@@ -375,13 +375,13 @@ class SymbolGroup
         return
 
 
-    update: (opts) ->
+    update: (opts, animate=false) ->
         me = @
         for s in me.symbols
             for p in me.type.props
                 if opts[p]?
                     s[p] = me._evaluate opts[p],s.data
-            s.update()
+            s.update(animate)
         me
 
 

@@ -47,14 +47,19 @@ class Bubble extends Symbol
         me.map.applyCSS me.path
         me
 
-    update: () =>
+    update: (animate=false) =>
         me = @
         path = me.path
-        path.attr
+        attrs =
             cx: me.x
             cy: me.y
             r: me.radius
-        path.attr me.attrs if me.attrs?
+        if me.attrs?
+            attrs = $.extend attrs, me.attrs
+        if not animate
+            path.attr attrs
+        else
+            path.animate attrs, 1000
         path.node.setAttribute 'style', me.style if me.style?
         path.node.setAttribute 'class', me.class if me.class?
         if me.title?
