@@ -4883,11 +4883,8 @@
       }
     };
 
-    SymbolGroup.prototype.update = function(opts, animate) {
+    SymbolGroup.prototype.update = function(opts, duration, easing) {
       var p, s, _i, _j, _len, _len1, _ref6, _ref7;
-      if (animate == null) {
-        animate = false;
-      }
       me = this;
       _ref6 = me.symbols;
       for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
@@ -4899,7 +4896,7 @@
             s[p] = me._evaluate(opts[p], s.data);
           }
         }
-        s.update(animate);
+        s.update(duration, easing);
       }
       return me;
     };
@@ -5225,10 +5222,13 @@ function kdtree() {
       return me;
     };
 
-    Bubble.prototype.update = function(animate) {
+    Bubble.prototype.update = function(duration, easing) {
       var attrs, me, path;
-      if (animate == null) {
-        animate = false;
+      if (duration == null) {
+        duration = false;
+      }
+      if (easing == null) {
+        easing = 'expo-out';
       }
       me = this;
       path = me.path;
@@ -5240,10 +5240,10 @@ function kdtree() {
       if (me.attrs != null) {
         attrs = $.extend(attrs, me.attrs);
       }
-      if (!animate) {
+      if (!duration) {
         path.attr(attrs);
       } else {
-        path.animate(attrs, 1000);
+        path.animate(attrs, duration, easing);
       }
       if (me.style != null) {
         path.node.setAttribute('style', me.style);

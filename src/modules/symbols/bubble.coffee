@@ -47,7 +47,7 @@ class Bubble extends Symbol
         me.map.applyCSS me.path
         me
 
-    update: (animate=false) =>
+    update: (duration=false, easing='expo-out') =>
         me = @
         path = me.path
         attrs =
@@ -56,10 +56,10 @@ class Bubble extends Symbol
             r: me.radius
         if me.attrs?
             attrs = $.extend attrs, me.attrs
-        if not animate
+        if not duration
             path.attr attrs
         else
-            path.animate attrs, 1000
+            path.animate attrs, duration, easing
         path.node.setAttribute 'style', me.style if me.style?
         path.node.setAttribute 'class', me.class if me.class?
         if me.title?
