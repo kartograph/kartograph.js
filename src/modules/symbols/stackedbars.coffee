@@ -58,86 +58,84 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
 
 `
 
-	
 class StackedBarChart extends kartograph.Symbol
-	###
-	usage:
-	new SymbolMap({
-		map: map,
-		radius: 10
-		data: [25,75],
-		colors: ['red', 'blue'],
-		titles: ['red pie', 'blue pie']
-	})
-	###
-	constructor: (opts) ->
-		me = @
-		super opts
-		me.styles = opts.styles ? ''
-		me.colors = opts.colors ? []
-		me.titles = opts.titles ? ['','','','','']
-		me.values = opts.values ? [] 
-		me.width = opts.width ? 17
-		me.height = opts.height ? 30
-		me.class = opts.class ? 'barchart'
-		Raphael.fn.drawStackedBarChart ?= drawStackedBars
-				
-	overlaps: (bubble) ->
-		me = @
-		# check bbox
-		[x1,y1,r1] = [me.x, me.y, me.radius]
-		[x2,y2,r2] = [bubble.x, bubble.y, bubble.radius]
-		return false if x1 - r1 > x2 + r2 or x1 + r1 < x2 - r2 or y1 - r1 > y2 + r2 or y1 + r1 < y2 - r2
-		dx = x1-x2
-		dy = y1-y2
-		if dx*dx+dy*dy > (r1+r2)*(r1+r2)
-			return false
-		true
+    ###
+    usage:
+    new SymbolMap({
+        map: map,
+        radius: 10
+        data: [25,75],
+        colors: ['red', 'blue'],
+        titles: ['red pie', 'blue pie']
+    })
+    ###
+    constructor: (opts) ->
+        me = @
+        super opts
+        me.styles = opts.styles ? ''
+        me.colors = opts.colors ? []
+        me.titles = opts.titles ? ['','','','','']
+        me.values = opts.values ? [] 
+        me.width = opts.width ? 17
+        me.height = opts.height ? 30
+        me.class = opts.class ? 'barchart'
+        Raphael.fn.drawStackedBarChart ?= drawStackedBars
 
-	render: (layers) ->
-		me = @
-		#me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
-		w = me.width
-		h = me.height
-		x = me.x
-		y = me.y
-		bg = me.layers.mapcanvas.rect(x-w*0.5-2,y-h*0.5-2,w+4,h+4).attr
-			stroke: 'none'
-			fill: '#fff'
-			
-		me.chart = me.layers.mapcanvas.drawStackedBarChart me.x, me.y, me.width, me.height, me.values, me.titles, me.colors, "none"
-		
-		me.chart.push bg
-		
-		#me.update()
-		#me.map.applyStyles(me.path)
-		me
-		
-	update: () ->
-		me = @
-		return
-		me.path.attr 
-			x: me.x
-			y: me.y
-			r: me.radius
-		path = me.path
-		path.node.setAttribute 'style', me.styles[0]
-		path.node.setAttribute 'class', me.class
-		if me.title?
-			path.attr 'title',me.titles[0]
-		me
-	
-	clear: () ->
-		me = @
-		for p in me.chart
-			p.remove()
-		me.chart = []
-		me
-		
-	nodes: () ->
-		me = @
-		[me.path.node]
-		
+    overlaps: (bubble) ->
+        me = @
+        # check bbox
+        [x1,y1,r1] = [me.x, me.y, me.radius]
+        [x2,y2,r2] = [bubble.x, bubble.y, bubble.radius]
+        return false if x1 - r1 > x2 + r2 or x1 + r1 < x2 - r2 or y1 - r1 > y2 + r2 or y1 + r1 < y2 - r2
+        dx = x1-x2
+        dy = y1-y2
+        if dx*dx+dy*dy > (r1+r2)*(r1+r2)
+            return false
+        true
+
+    render: (layers) ->
+        me = @
+        #me.path = me.layers.mapcanvas.circle me.x,me.y,me.radius
+        w = me.width
+        h = me.height
+        x = me.x
+        y = me.y
+        bg = me.layers.mapcanvas.rect(x-w*0.5-2,y-h*0.5-2,w+4,h+4).attr
+            stroke: 'none'
+            fill: '#fff'
+
+        me.chart = me.layers.mapcanvas.drawStackedBarChart me.x, me.y, me.width, me.height, me.values, me.titles, me.colors, "none"
+        me.chart.push bg
+
+        #me.update()
+        #me.map.applyStyles(me.path)
+        me
+
+    update: () ->
+        me = @
+        return
+        me.path.attr 
+            x: me.x
+            y: me.y
+            r: me.radius
+        path = me.path
+        path.node.setAttribute 'style', me.styles[0]
+        path.node.setAttribute 'class', me.class
+        if me.title?
+            path.attr 'title',me.titles[0]
+        me
+    clear: () ->
+        me = @
+        for p in me.chart
+            p.remove()
+        me.chart = []
+        me
+
+    nodes: () ->
+        me = @
+        for el in me.chart
+            el.node
+
 
 StackedBarChart.props = ['values','styles','class','titles','colors','width','height']
 StackedBarChart.layers = [] #{ id:'a', type: 'svg' }
