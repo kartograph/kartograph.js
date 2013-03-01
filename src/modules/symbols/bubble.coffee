@@ -60,8 +60,9 @@ class Bubble extends Symbol
             path.attr attrs
         else
             path.animate attrs, duration, easing
-        path.node.setAttribute 'style', me.style if me.style?
-        path.node.setAttribute 'class', me.class if me.class?
+        if path.node?
+            path.node.setAttribute 'style', me.style if me.style?
+            path.node.setAttribute 'class', me.class if me.class?
         if me.title?
             path.attr 'title',me.title
         me
