@@ -135,17 +135,21 @@ class MapLayer
     tooltips: (content, delay) ->
         me = @
         setTooltip = (path, tt) ->
-            cfg = {
-                position: {
+            cfg =
+                position:
                     target: 'mouse',
                     viewport: $(window),
                     adjust: { x:7, y:7}
-                },
-                show: {
+                show:
                     delay: delay ? 20
-                },
+                events:
+                    show: (evt, api) ->
+                        # make sure that two tooltips are never shown
+                        # together at the same time
+                        $('.qtip').filter () ->
+                            this != api.elements.tooltip.get(0)
+                        .hide()
                 content: {}
-            };
             if tt?
                 if typeof(tt) == "string"
                     cfg.content.text = tt
