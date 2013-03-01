@@ -355,6 +355,14 @@ class SymbolGroup
                 show:
                     delay: 20
                 content: {}
+                events:
+                    show: (evt, api) ->
+                        # make sure that two tooltips are never shown
+                        # together at the same time
+                        $('.qtip').filter () ->
+                            this != api.elements.tooltip.get(0)
+                        .hide()
+
             tt = tooltips s.data, s.key
             if __type(tt) == "string"
                 cfg.content.text = tt
@@ -377,10 +385,14 @@ class SymbolGroup
 
     update: (opts, duration, easing) ->
         me = @
+        if not opts?
+            opts = {}
         for s in me.symbols
             for p in me.type.props
                 if opts[p]?
                     s[p] = me._evaluate opts[p],s.data
+                else if me[p]?
+                    s[p] = me._evaluate me[p],s.data
             s.update(duration, easing)
         me
 
