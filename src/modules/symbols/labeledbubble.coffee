@@ -34,9 +34,9 @@ class LabeledBubble extends Bubble
         super layers
         me
 
-    update: () =>
+    update: (duration=false, easing='expo-out') =>
         me = @
-        super
+        super duration, easing
         if me.label?
             vp = me.map.viewport
             attrs = $.extend({}, me.labelattrs)
