@@ -493,7 +493,6 @@
       }
       me.svgSrc = xml;
       $view = $('view', xml);
-      log('got svg src', me.svgSrc);
       if (!(me.paper != null)) {
         w = me.size.w;
         h = me.size.h;
@@ -504,18 +503,13 @@
         me.viewport = new BBox(0, 0, w, h);
       }
       vp = me.viewport;
-      log('got viewport', me.viewport);
       me.viewAB = AB = kartograph.View.fromXML($view[0]);
-      log('got first view', me.viewAB);
       padding = (_ref5 = me.opts.padding) != null ? _ref5 : 0;
       halign = (_ref6 = me.opts.halign) != null ? _ref6 : 'center';
       valign = (_ref7 = me.opts.valign) != null ? _ref7 : 'center';
-      log('got alignment', halign, valign);
       zoom = (_ref8 = me.opts.zoom) != null ? _ref8 : 1;
       me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
-      log('got second view', me.viewBC);
       me.proj = kartograph.Proj.fromXML($('proj', $view)[0]);
-      log('got projection', me.proj);
       if (me.mapLoadCallback != null) {
         me.mapLoadCallback(me);
       }
