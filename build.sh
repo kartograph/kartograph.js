@@ -9,6 +9,5 @@ cat src/core/*.coffee >> tmp
 cat src/modules/*.coffee >> tmp
 cat src/modules/symbols/*.coffee >> tmp
 cat tmp | coffee -sp > kartograph.js
-uglifyjs kartograph.js > kartograph.min.js
-mv kartograph*.js dist
+uglifyjs -cm -o kartograph.min.js kartograph.js
 echo "build complete"

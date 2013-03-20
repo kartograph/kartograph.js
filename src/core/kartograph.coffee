@@ -185,23 +185,37 @@ class Kartograph
 
         $paths = $('*', svgLayer[0])
 
-        for svg_path in $paths
-            layer.addPath(svg_path, titles)
+        rows = $paths.length
+        chunkSize = opts.chunks ? rows
+        iter = 0
 
-        if layer.paths.length > 0
-            me.layers[layer_id] = layer
-            me.layerIds.push layer_id
+        nextPaths = () ->
+            base = (chunkSize) * iter
+            for i in [0...chunkSize]
+                if base + i < rows
+                    layer.addPath $paths.get(base+i), titles
+            if opts.styles?
+                for prop, val of opts.styles
+                    layer.style prop, val
+            iter++
+            if iter * chunkSize < rows
+                setTimeout nextPaths, 0
+            else
+                moveOn()
 
-        # add event handlers
-        checkEvents = ['click', 'mouseenter', 'mouseleave', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mouseout']
-        for evt in checkEvents
-            if __type(opts[evt]) == 'function'
-                layer.on evt, opts[evt]
-        if opts.styles?
-            for prop, val of opts.styles
-                layer.style prop, val
-        if opts.tooltips?
-            layer.tooltips opts.tooltips
+        moveOn = () ->
+            if layer.paths.length > 0
+                me.layers[layer_id] = layer
+                me.layerIds.push layer_id
+            # add event handlers
+            checkEvents = ['click', 'mouseenter', 'mouseleave', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mouseout']
+            for evt in checkEvents
+                if __type(opts[evt]) == 'function'
+                    layer.on evt, opts[evt]
+            if opts.tooltips?
+                layer.tooltips opts.tooltips
+
+        setTimeout nextPaths, 0
         me
 
 
@@ -306,10 +320,6 @@ class Kartograph
         me.viewBC.project(me.viewAB.project(a))
 
 
-    showZoomControls: () ->
-        me = @
-        me.zc = new PanAndZoomControl me
-        me
 
     addSymbolGroup: (symbolgroup) ->
         me = @
