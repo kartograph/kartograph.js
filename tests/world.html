@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../lib/jquery.min.js"></script>
+    <script src="../lib/raphael-min.js"></script>
+    <script src="../kartograph.min.js"></script>
+    <script type="text/javascript">
+
+$(function() {
+
+    var map = Kartograph.map('#map');
+    map.loadMap('svg/world.svg', function() {
+        map.addLayer('countries', {
+            styles: {
+                fill: '#abc',
+                stroke: '#fff'
+            },
+            chunks: 50
+        });
+    });
+
+});
+
+
+    </script>
+</head>
+<body>
+    <div id="map"></div>
+</body>
+</html>
