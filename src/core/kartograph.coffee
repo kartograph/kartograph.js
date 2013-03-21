@@ -214,8 +214,13 @@ class Kartograph
                     layer.on evt, opts[evt]
             if opts.tooltips?
                 layer.tooltips opts.tooltips
+            if opts.done?
+                opts.done()
 
-        setTimeout nextPaths, 0
+        if opts.chunks?
+            setTimeout nextPaths, 0
+        else
+            nextPaths()
         me
 
 

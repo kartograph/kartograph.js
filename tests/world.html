@@ -15,7 +15,10 @@ $(function() {
                 fill: '#abc',
                 stroke: '#fff'
             },
-            chunks: 50
+            chunks: 50,
+            done: function() {
+                map.getLayer('countries').style('fill', '#789');
+            }
         });
     });
 
