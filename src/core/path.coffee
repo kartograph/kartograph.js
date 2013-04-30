@@ -193,7 +193,7 @@ Path.fromSVG = (path) ->
 				if contour.length > 2
 					contours.push contour
 					contour = []
-		if contour.length > 2
+		if contour.length >= 2
 			contours.push contour
 			contour = []
 
