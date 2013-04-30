@@ -4097,7 +4097,7 @@
     */
 
     me = this;
-    if (type(cmds) === 'string') {
+    if (__type(cmds) === 'string') {
       cmds = cmds.split("");
     }
     if (cmds.length === 0) {
