@@ -29,7 +29,7 @@ kartograph.Kartograph::addGeoPath = (points, cmds=[], className = '') ->
 kartograph.Kartograph::getGeoPathStr = (points, cmds=[]) ->
     ### converts a set of ###
     me = @
-    if type(cmds) == 'string'
+    if __type(cmds) == 'string'
         cmds = cmds.split("")
     if cmds.length == 0
         cmds.push 'M'
