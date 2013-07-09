@@ -27,7 +27,8 @@ class MapLayerPath
         me.vpath = view.projectPath(path)
         me.svgPath = me.vpath.toSVG(paper)
         if not map.styles?
-            me.svgPath.node.setAttribute('class', layer_id)
+            if Raphael.svg
+                me.svgPath.node.setAttribute('class', layer_id)
         else
             map.applyCSS me.svgPath,layer_id
 
