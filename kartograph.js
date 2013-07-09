@@ -19,7 +19,7 @@
 
 
 (function() {
-  var $, Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+  var $, Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, hex2rgb, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -27,9 +27,9 @@
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  kartograph = root.$K = (_ref = root.Kartograph) != null ? _ref : root.Kartograph = {};
+  kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.6.1";
+  kartograph.version = "0.6.6";
 
   $ = root.jQuery;
 
@@ -1347,7 +1347,9 @@
       me.vpath = view.projectPath(path);
       me.svgPath = me.vpath.toSVG(paper);
       if (map.styles == null) {
-        me.svgPath.node.setAttribute('class', layer_id);
+        if (Raphael.svg) {
+          me.svgPath.node.setAttribute('class', layer_id);
+        }
       } else {
         map.applyCSS(me.svgPath, layer_id);
       }
@@ -1812,7 +1814,7 @@
           }
         }
       }
-      if (contour.length > 2) {
+      if (contour.length >= 2) {
         contours.push(contour);
         contour = [];
       }
@@ -3220,8 +3222,8 @@
       cos_tilt = cos(this.tilt);
       sin_tilt = sin(this.tilt);
       H = ra * (this.dist - 1);
-      A = ((yo * cos_up + xo * sin_up) * sin(this.tilt / H)) + cos_tilt;
-      xt = (xo * cos_up - yo * sin_up) * cos(this.tilt / A);
+      A = ((yo * cos_up + xo * sin_up) * sin(this.tilt) / H) + cos_tilt;
+      xt = (xo * cos_up - yo * sin_up) * cos(this.tilt) / A;
       yt = (yo * cos_up + xo * sin_up) / A;
       x = r + xt;
       y = r + yt;
@@ -3903,6 +3905,26 @@
 
   filter.blur = BlurFilter;
 
+  hex2rgb = function(hex) {
+    var b, g, r, u;
+
+    if (hex.trim().match(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)) {
+      if (hex.length === 4 || hex.length === 7) {
+        hex = hex.substr(1);
+      }
+      if (hex.length === 3) {
+        hex = hex.split("");
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      u = parseInt(hex, 16);
+      r = u >> 16;
+      g = u >> 8 & 0xFF;
+      b = u & 0xFF;
+      return [r, g, b];
+    }
+    throw 'unknown color format: "' + hex + '"';
+  };
+
   GlowFilter = (function(_super) {
     __extends(GlowFilter, _super);
 
@@ -3916,16 +3938,15 @@
 
 
     GlowFilter.prototype.buildFilter = function(fltr) {
-      var alpha, blur, color, inner, knockout, me, rgb, strength, _ref17, _ref18, _ref19, _ref20, _ref21, _ref22;
+      var alpha, blur, inner, knockout, me, rgb, strength, _ref17, _ref18, _ref19, _ref20, _ref21, _ref22;
 
       me = this;
       blur = (_ref17 = me.params.blur) != null ? _ref17 : 4;
       strength = (_ref18 = me.params.strength) != null ? _ref18 : 1;
-      color = (_ref19 = me.params.color) != null ? _ref19 : '#D1BEB0';
-      if (typeof color === 'string') {
-        color = chroma.hex(color);
+      rgb = (_ref19 = me.params.color) != null ? _ref19 : '#D1BEB0';
+      if (__type(rgb) === 'string') {
+        rgb = hex2rgb(rgb);
       }
-      rgb = color.rgb;
       inner = (_ref20 = me.params.inner) != null ? _ref20 : false;
       knockout = (_ref21 = me.params.knockout) != null ? _ref21 : false;
       alpha = (_ref22 = me.params.alpha) != null ? _ref22 : 1;
