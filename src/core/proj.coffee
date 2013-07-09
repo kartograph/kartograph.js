@@ -896,8 +896,8 @@ class Satellite extends Azimuthal
         sin_tilt = sin(@tilt)
 
         H = ra * (@dist - 1)
-        A = ((yo * cos_up + xo * sin_up) * sin(@tilt/H)) + cos_tilt
-        xt = (xo * cos_up - yo * sin_up) * cos(@tilt/A)
+        A = ((yo * cos_up + xo * sin_up) * sin(@tilt)/H) + cos_tilt
+        xt = (xo * cos_up - yo * sin_up) * cos(@tilt) /A
         yt = (yo * cos_up + xo * sin_up) / A
 
         x = r + xt
