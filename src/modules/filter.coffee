@@ -93,15 +93,29 @@ class BlurFilter extends Filter
 filter.blur = BlurFilter
 
 
+hex2rgb = (hex) ->
+    if hex.trim().match /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+        if hex.length == 4 or hex.length == 7
+            hex = hex.substr(1)
+        if hex.length == 3
+            hex = hex.split("")
+            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]
+        u = parseInt(hex, 16)
+        r = u >> 16
+        g = u >> 8 & 0xFF
+        b = u & 0xFF
+        return [r,g,b]
+    throw 'unknown color format: "'+hex+'"'
+
+
 class GlowFilter extends Filter
     ### combined class for outer and inner glow filter ###
     buildFilter: (fltr) ->
         me = @
         blur = me.params.blur ? 4
         strength = me.params.strength ? 1
-        color = me.params.color ? '#D1BEB0'
-        color = chroma.hex(color) if typeof color == 'string'
-        rgb = color.rgb
+        rgb = me.params.color ? '#D1BEB0'
+        rgb = hex2rgb(rgb) if __type(rgb) == 'string'
         inner = me.params.inner ? false
         knockout = me.params.knockout ? false
         alpha = me.params.alpha ? 1
