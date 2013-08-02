@@ -19,13 +19,15 @@
 
 class MapLayerPath
 
-    constructor: (svg_path, layer_id, map, titles) ->
+    constructor: (svg_path, layer_id, layer, titles) ->
         me = @
-        paper = map.paper
+        paper = layer.paper
+        map = layer.map
         view = map.viewBC
         me.path = path = kartograph.geom.Path.fromSVG(svg_path)
         me.vpath = view.projectPath(path)
         me.svgPath = me.vpath.toSVG(paper)
+        me.svgPath.data 'path', me
         if not map.styles?
             if Raphael.svg
                 me.svgPath.node.setAttribute('class', layer_id)

@@ -18,11 +18,11 @@
 
 class MapLayer
 
-    constructor: (layer_id, path_id, map, filter)->
+    constructor: (layer_id, path_id, map, filter, paper)->
         me = @
         me.id = layer_id
         me.path_id = path_id
-        me.paper = map.paper
+        me.paper = paper ? map.paper
         me.view = map.viewBC
         me.map = map
         me.filter = filter
@@ -31,7 +31,7 @@ class MapLayer
     addPath: (svg_path, titles) ->
         me = @
         me.paths ?= []
-        layerPath = new MapLayerPath(svg_path, me.id, me.map, titles)
+        layerPath = new MapLayerPath(svg_path, me.id, me, titles)
         if __type(me.filter) == 'function'
             if me.filter(layerPath.data) == false
                 layerPath.remove()

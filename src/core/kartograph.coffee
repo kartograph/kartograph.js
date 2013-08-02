@@ -57,7 +57,6 @@ class Kartograph
         svg.addClass id
         about = $('desc', paper.canvas).text()
         $('desc', paper.canvas).text(about.replace('with ', 'with kartograph '+kartograph.version+' and '))
-
         paper
 
     createHTMLLayer: (id) ->
@@ -174,6 +173,10 @@ class Kartograph
         else
             opts = {}
 
+        layer_paper = me.paper
+        if opts.add_svg_layer
+            layer_paper = me.createSVGLayer()
+
         layer_id ?= src_id
         svgLayer = $('#'+src_id, me.svgSrc)
 
@@ -181,7 +184,7 @@ class Kartograph
             # warn 'didn\'t find any paths for layer "'+src_id+'"'
             return
 
-        layer = new MapLayer(layer_id, path_id, me, opts.filter)
+        layer = new MapLayer(layer_id, path_id, me, opts.filter, layer_paper)
 
         $paths = $('*', svgLayer[0])
 
