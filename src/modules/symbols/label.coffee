@@ -62,16 +62,16 @@ class HtmlLabel extends kartograph.Symbol
         me = @
         super opts
         me.text = opts.text ? ''
-        me.style = opts.style ? ''
+        me.css = opts.css ? ''
         me.class = opts.class ? ''
 
     render: (layers) ->
         me = @
         l = $ '<div>'+me.text+'</div>'
         l.css
-            width: '50px'
+            width: '80px'
             position: 'absolute'
-            left: '-25px'
+            left: '-40px'
             'text-align': 'center'
         me.lbl = lbl = $ '<div class="label" />'
         lbl.append l
@@ -90,6 +90,8 @@ class HtmlLabel extends kartograph.Symbol
             position: 'absolute'
             left: me.x+'px'
             top: me.y+'px'
+        me.lbl.css me.css
+
 
     clear: () ->
         me = @
@@ -100,7 +102,7 @@ class HtmlLabel extends kartograph.Symbol
         me = @
         [me.lbl[0]]
 
-HtmlLabel.props = ['text', 'style', 'class']
+HtmlLabel.props = ['text', 'css', 'class']
 HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
 
 kartograph.HtmlLabel = HtmlLabel
