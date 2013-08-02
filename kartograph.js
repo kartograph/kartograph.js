@@ -29,7 +29,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.6.6";
+  kartograph.version = "0.7.1";
 
   $ = root.jQuery;
 
@@ -540,7 +540,7 @@
     };
 
     Kartograph.prototype.addLayer = function(id, opts) {
-      var $paths, chunkSize, iter, layer, layer_id, me, moveOn, nextPaths, path_id, rows, src_id, svgLayer, titles, _ref4, _ref5, _ref6;
+      var $paths, chunkSize, iter, layer, layer_id, layer_paper, me, moveOn, nextPaths, path_id, rows, src_id, svgLayer, titles, _ref4, _ref5, _ref6;
 
       if (opts == null) {
         opts = {};
@@ -567,6 +567,10 @@
       } else {
         opts = {};
       }
+      layer_paper = me.paper;
+      if (opts.add_svg_layer) {
+        layer_paper = me.createSVGLayer();
+      }
       if (layer_id == null) {
         layer_id = src_id;
       }
@@ -574,7 +578,7 @@
       if (svgLayer.length === 0) {
         return;
       }
-      layer = new MapLayer(layer_id, path_id, me, opts.filter);
+      layer = new MapLayer(layer_id, path_id, me, opts.filter, layer_paper);
       $paths = $('*', svgLayer[0]);
       rows = $paths.length;
       chunkSize = (_ref6 = opts.chunks) != null ? _ref6 : rows;
@@ -1035,13 +1039,13 @@
 
 
   MapLayer = (function() {
-    function MapLayer(layer_id, path_id, map, filter) {
+    function MapLayer(layer_id, path_id, map, filter, paper) {
       var me;
 
       me = this;
       me.id = layer_id;
       me.path_id = path_id;
-      me.paper = map.paper;
+      me.paper = paper != null ? paper : map.paper;
       me.view = map.viewBC;
       me.map = map;
       me.filter = filter;
@@ -1054,7 +1058,7 @@
       if ((_ref4 = me.paths) == null) {
         me.paths = [];
       }
-      layerPath = new MapLayerPath(svg_path, me.id, me.map, titles);
+      layerPath = new MapLayerPath(svg_path, me.id, me, titles);
       if (__type(me.filter) === 'function') {
         if (me.filter(layerPath.data) === false) {
           layerPath.remove();
@@ -1337,15 +1341,17 @@
 
 
   MapLayerPath = (function() {
-    function MapLayerPath(svg_path, layer_id, map, titles) {
-      var attr, data, i, me, paper, path, title, uid, v, view, vn, _i, _ref4;
+    function MapLayerPath(svg_path, layer_id, layer, titles) {
+      var attr, data, i, map, me, paper, path, title, uid, v, view, vn, _i, _ref4;
 
       me = this;
-      paper = map.paper;
+      paper = layer.paper;
+      map = layer.map;
       view = map.viewBC;
       me.path = path = kartograph.geom.Path.fromSVG(svg_path);
       me.vpath = view.projectPath(path);
       me.svgPath = me.vpath.toSVG(paper);
+      me.svgPath.data('path', me);
       if (map.styles == null) {
         if (Raphael.svg) {
           me.svgPath.node.setAttribute('class', layer_id);
@@ -5548,7 +5554,7 @@ function kdtree() {
       me = this;
       HtmlLabel.__super__.constructor.call(this, opts);
       me.text = (_ref21 = opts.text) != null ? _ref21 : '';
-      me.style = (_ref22 = opts.style) != null ? _ref22 : '';
+      me.css = (_ref22 = opts.css) != null ? _ref22 : '';
       me["class"] = (_ref23 = opts["class"]) != null ? _ref23 : '';
     }
 
@@ -5558,9 +5564,9 @@ function kdtree() {
       me = this;
       l = $('<div>' + me.text + '</div>');
       l.css({
-        width: '50px',
+        width: '80px',
         position: 'absolute',
-        left: '-25px',
+        left: '-40px',
         'text-align': 'center'
       });
       me.lbl = lbl = $('<div class="label" />');
@@ -5578,11 +5584,12 @@ function kdtree() {
       var me;
 
       me = this;
-      return me.lbl.css({
+      me.lbl.css({
         position: 'absolute',
         left: me.x + 'px',
         top: me.y + 'px'
       });
+      return me.lbl.css(me.css);
     };
 
     HtmlLabel.prototype.clear = function() {
@@ -5604,7 +5611,7 @@ function kdtree() {
 
   })(kartograph.Symbol);
 
-  HtmlLabel.props = ['text', 'style', 'class'];
+  HtmlLabel.props = ['text', 'css', 'class'];
 
   HtmlLabel.layers = [
     {

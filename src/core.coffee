@@ -20,7 +20,7 @@
 
 root = (exports ? this)
 kartograph = root.$K = root.kartograph ?= {}
-kartograph.version = "0.6.6"
+kartograph.version = "0.7.1"
 
 $ = root.jQuery
 
