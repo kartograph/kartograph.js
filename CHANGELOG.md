@@ -3,6 +3,7 @@
 * changed namespace to kartograph (lowercase)
 * fixed glow filter
 * added possibility to render layers in separate svg doc
+* updated to work with jquery 1.10
 
 ### 0.6.7
 
