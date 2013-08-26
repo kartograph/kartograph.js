@@ -76,7 +76,7 @@ class Kartograph
         cnt.append div
         div
 
-    loadMap: (mapurl, callback, opts) ->
+    load: (mapurl, callback, opts) ->
         # load svg map
         me = @
         # line 95
@@ -95,12 +95,15 @@ class Kartograph
             # load map from url
             $.ajax
                 url: mapurl
-                dataType: "text" # if $.browser.msie then "text" else "xml"
+                dataType: "text"
                 success: me._mapLoaded
                 context: me
                 error: (a,b,c) ->
                     warn a,b,c
         return def.promise()
+
+    loadMap: () ->
+        @load.apply @, arguments
 
 
     setMap: (svg, opts) ->
@@ -365,7 +368,7 @@ class Kartograph
         loads a stylesheet
         ###
         me = @
-        if $.browser.msie
+        if not Raphael.svg
             $.ajax
                 url: url
                 dataType: 'text'
@@ -420,12 +423,15 @@ class Kartograph
             layer.style prop, value, duration, delay
 
 
-kartograph.Kartograph = Kartograph
+K = kartograph
+
+root.kartograph = (container, width, height) ->
+    new Kartograph container, width, height
 
 kartograph.map = (container, width, height) ->
-    ### short-hand constructor ###
     new Kartograph container, width, height
 
 
 kartograph.__mapCache = {} # will store svg files
 
+$.extend root.kartograph, K
