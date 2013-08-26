@@ -1,3 +1,9 @@
+### 0.8.1
+
+* simplified API: loadMap() --> load()
+* turned top level namespace into constructor function
+* including versions in dist filesnames
+
 ### 0.7.1
 
 * changed namespace to kartograph (lowercase)
