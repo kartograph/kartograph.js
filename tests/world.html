@@ -3,13 +3,12 @@
 <head>
     <script src="../lib/jquery.min.js"></script>
     <script src="../lib/raphael-min.js"></script>
-    <script src="../kartograph.min.js"></script>
+    <script src="../kartograph.js"></script>
     <script type="text/javascript">
 
 $(function() {
 
-    var map = Kartograph.map('#map');
-    map.loadMap('svg/world.svg', function() {
+    kartograph('#map').load('svg/world.svg').done(function(map) {
         map.addLayer('countries', {
             styles: {
                 fill: '#abc',
