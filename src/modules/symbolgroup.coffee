@@ -400,7 +400,7 @@ class SymbolGroup
 SymbolGroup._layerid = 0
 kartograph.SymbolGroup = SymbolGroup
 
-kartograph.Kartograph::addSymbols = (opts) ->
+Kartograph::addSymbols = (opts) ->
     opts.map = @
     new SymbolGroup(opts)
 

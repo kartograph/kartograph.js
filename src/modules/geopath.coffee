@@ -17,7 +17,7 @@
 ###
 
 
-kartograph.Kartograph::addGeoPath = (points, cmds=[], className = '') ->
+Kartograph::addGeoPath = (points, cmds=[], className = '') ->
     ### converts a set of ###
     me = @
     path_str = me.getGeoPathStr points,cmds
@@ -26,7 +26,7 @@ kartograph.Kartograph::addGeoPath = (points, cmds=[], className = '') ->
     return path
 
 
-kartograph.Kartograph::getGeoPathStr = (points, cmds=[]) ->
+Kartograph::getGeoPathStr = (points, cmds=[]) ->
     ### converts a set of ###
     me = @
     if __type(cmds) == 'string'
@@ -46,7 +46,7 @@ kartograph.Kartograph::getGeoPathStr = (points, cmds=[]) ->
     return path_str
 
 
-kartograph.Kartograph::addGeoPolygon = (points, className) ->
+Kartograph::addGeoPolygon = (points, className) ->
     ### converts a set of ###
     me = @
     cmds = ['M']

@@ -30,7 +30,7 @@ MapLayer::SVG = (el, attr) ->
             el.setAttribute key, val
     el
 
-kartograph.Kartograph::addFilter = (id, type, params = {}) ->
+Kartograph::addFilter = (id, type, params = {}) ->
     me = @
     doc = window.document
     if kartograph.filter[type]?
