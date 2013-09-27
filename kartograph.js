@@ -1,1 +1,1 @@
-kartograph-0.8.1.js
+kartograph-0.8.2.js

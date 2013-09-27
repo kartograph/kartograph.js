@@ -1,3 +1,7 @@
+### 0.8.2
+* fixed centroid calculation for polygons with area = 0
+* fixed order for polygons
+
 ### 0.8.1
 
 * simplified API: loadMap() --> load()

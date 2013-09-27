@@ -1,7 +1,7 @@
 {
     "name"         : "kartograph-js",
     "description"  : "JavaScript library for SVG mapping",
-    "version"      : "0.8.1",
+    "version"      : "0.8.2",
     "author"       : "Gregor Aisch",
     "homepage"     : "http://kartograph.org",
     "keywords"     : ["svg", "map", "raphael"],

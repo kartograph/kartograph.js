@@ -19,7 +19,7 @@
 
 
 (function() {
-  var $, Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, K, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, hex2rgb, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __point_in_polygon, __proj, __type, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+  var $, Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, K, Kartograph, LAEA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, hex2rgb, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __area, __is_clockwise, __point_in_polygon, __proj, __type, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -1597,14 +1597,21 @@
     	represents complex polygons (aka multi-polygons)
     */
     function Path(type, contours, closed) {
-      var self;
+      var cnt, self, _i, _len;
 
       if (closed == null) {
         closed = true;
       }
       self = this;
       self.type = type;
-      self.contours = contours;
+      self.contours = [];
+      for (_i = 0, _len = contours.length; _i < _len; _i++) {
+        cnt = contours[_i];
+        if (!__is_clockwise(cnt)) {
+          cnt.reverse();
+        }
+        self.contours.push(cnt);
+      }
       self.closed = closed;
     }
 
@@ -1649,7 +1656,7 @@
     };
 
     Path.prototype.area = function() {
-      var area, cnt, i, me, _i, _j, _len, _ref5, _ref6;
+      var area, cnt, me, _i, _len, _ref5;
 
       me = this;
       if (me.areas != null) {
@@ -1660,12 +1667,7 @@
       _ref5 = me.contours;
       for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
         cnt = _ref5[_i];
-        area = 0;
-        for (i = _j = 0, _ref6 = cnt.length - 2; 0 <= _ref6 ? _j <= _ref6 : _j >= _ref6; i = 0 <= _ref6 ? ++_j : --_j) {
-          area += cnt[i][0] * cnt[i + 1][1] - cnt[i + 1][0] * cnt[i][1];
-        }
-        area *= .5;
-        area = area;
+        area = __area(cnt);
         me.areas.push(area);
         me._area += area;
       }
@@ -1685,6 +1687,11 @@
         cnt_orig = me.contours[i];
         cnt = [];
         l = cnt_orig.length;
+        a = me.areas[i];
+        k = a / area;
+        if (k === 0) {
+          continue;
+        }
         for (j = _j = 0, _ref6 = l - 1; 0 <= _ref6 ? _j <= _ref6 : _j >= _ref6; j = 0 <= _ref6 ? ++_j : --_j) {
           p0 = cnt_orig[j];
           p1 = cnt_orig[(j + 1) % l];
@@ -1704,7 +1711,6 @@
             }
           }
         }
-        a = me.areas[i];
         x = y = x_ = y_ = 0;
         l = cnt.length;
         _lengths = [];
@@ -1724,7 +1730,6 @@
           x += w * p0[0];
           y += w * p0[1];
         }
-        k = a / area;
         cx += x * k;
         cy += y * k;
       }
@@ -1927,6 +1932,25 @@
       angle += dtheta;
     }
     return Math.abs(angle) >= pi;
+  };
+
+  __is_clockwise = function(contour) {
+    return __area(contour) > 0;
+  };
+
+  __area = function(contour) {
+    var i, n, s, x1, x2, y1, y2, _i;
+
+    s = 0;
+    n = contour.length;
+    for (i = _i = 0; 0 <= n ? _i < n : _i > n; i = 0 <= n ? ++_i : --_i) {
+      x1 = contour[i][0];
+      y1 = contour[i][1];
+      x2 = contour[(i + 1) % n][0];
+      y2 = contour[(i + 1) % n][1];
+      s += x1 * y2 - x2 * y1;
+    }
+    return s *= 0.5;
   };
 
   /*
