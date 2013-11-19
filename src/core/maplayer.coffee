@@ -96,26 +96,35 @@ class MapLayer
         for path in me.paths
             path.remove()
 
-    style: (prop, value, duration, delay) ->
+    style: (props, value, duration, delay) ->
         me = @
-        if __type(prop) == "object"
-            for key, val of prop
-                me.style key, val
-            return me
+        if __type(props) == "string"
+            key = props
+            props = {}
+            props[key] = value
+        else if __type(props) == "object"
+            delay = duration
+            duration = value
+
         duration ?= 0
-        delay ?= 0
-        for path in me.paths
-            val = resolve(value, path.data)
+        $.each me.paths, (i, path) ->
+            attrs = {}
+            for prop, val of props
+                attrs[prop] = resolve(val, path.data)
             dur = resolve(duration, path.data)
             dly = resolve(delay, path.data)
+            dly ?= 0
 
             if dur > 0
-                at = {}
-                at[prop] = val
-                anim = Raphael.animation(at, dur * 1000)
+                anim = Raphael.animation(attrs, dur * 1000)
                 path.svgPath.animate(anim.delay(dly * 1000))
             else
-                path.svgPath.attr(prop, val)
+                if delay == 0
+                    setTimeout () ->
+                        path.svgPath.attr(attrs)
+                    , 0
+                else
+                    path.svgPath.attr(attrs)
         me
 
     on: (event, callback) ->
