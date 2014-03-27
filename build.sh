@@ -1,8 +1,8 @@
 #!/bin/sh
 BUILD=tmp
 VERSION=$(node -e "console.log(require('./package.json').version);")
-OUT=kartograph-$VERSION.js
-OUTMIN=kartograph-$VERSION.min.js
+OUT=dist/kartograph.js
+OUTMIN=dist/kartograph.min.js
 #
 # builds all coffee script sources
 # to one single minified js file
@@ -15,5 +15,4 @@ cat src/modules/symbols/*.coffee >> $BUILD
 cat $BUILD | coffee -sp > $OUT
 uglifyjs -cm -o $OUTMIN $OUT
 rm $BUILD
-ln -s $OUT kartograph.js
 echo "build complete"

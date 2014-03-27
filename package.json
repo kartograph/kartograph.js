@@ -1,7 +1,7 @@
 {
     "name"         : "kartograph-js",
     "description"  : "JavaScript library for SVG mapping",
-    "version"      : "0.8.4",
+    "version"      : "0.8.5",
     "author"       : "Gregor Aisch",
     "homepage"     : "http://kartograph.org",
     "keywords"     : ["svg", "map", "raphael"],
@@ -23,5 +23,12 @@
     "devDependencies": {
         "uglify-js"     : "2.x",
         "coffee-script" : "1.2"
-    }
+    },
+    "npmName": "kartograph-js",
+    "npmFileMap": [{
+        "basePath" : "/dist/",
+        "files": [
+          "*.js"
+        ]
+    }]
 }

@@ -29,7 +29,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.8.4";
+  kartograph.version = "0.8.5";
 
   $ = root.jQuery;
 
