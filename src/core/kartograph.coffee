@@ -308,7 +308,10 @@ class Kartograph
         me.viewport = vp = new kartograph.BBox 0,0,w,h
         if me.paper?
             me.paper.setSize vp.width, vp.height
-        vp = me.viewport
+        # update size for other svg layers as well
+        for id,layer of me.layers
+            if layer.paper? and layer.paper != me.paper
+                layer.paper.setSize vp.width, vp.height
         padding = me.opts.padding ? 0
         halign = me.opts.halign ? 'center'
         valign = me.opts.valign ? 'center'
