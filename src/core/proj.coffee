@@ -808,6 +808,58 @@ class LAEA extends Azimuthal
 __proj['laea'] = LAEA
 
 
+
+class LAEA_Alaska extends LAEA
+    constructor: () ->
+        opts =
+            lon0: -150
+            lat0: 90
+        super opts
+        @scale = Math.sqrt(2)*0.5*0.33
+
+
+class LAEA_Hawaii extends LAEA
+    constructor: (opts) ->
+        opts =
+            lon0: -157
+            lat0: 20
+        super opts
+
+
+class LAEA_USA extends LAEA
+
+    constructor: (opts) ->
+        opts.lon0 = -100
+        opts.lat0 = 45
+        super opts
+        @laea_alaska = new LAEA_Alaska()
+        @laea_hawaii = new LAEA_Hawaii()
+
+    project: (lon, lat) ->
+        alaska = lat > 44 and (lon < -127 or lon > 170)
+        hawaii = lon < -127 and lat < 44
+
+        if alaska
+            if lon > 170
+                lon -= 380
+            [x,y] = @laea_alaska.project lon, lat
+        else if hawaii
+            [x,y] = @laea_hawaii.project lon, lat
+        else
+            [x,y] = super lon, lat
+
+        if alaska
+            x += -180
+            y += 100
+        if hawaii
+            y += 220
+            x += -80
+        [x,y]
+
+
+__proj['laea-usa'] = LAEA_USA
+
+
 class Stereographic extends Azimuthal
     ###
     Stereographic projection
