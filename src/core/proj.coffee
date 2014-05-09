@@ -17,7 +17,7 @@
 ###
 
 
-__proj = kartograph.proj = {}
+__proj = root.kartograph.proj = {}
 
 Function::bind = (scope) ->
     _function = @

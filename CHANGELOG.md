@@ -1,3 +1,6 @@
+### 0.8.6
+* exposing projections and View for projection showcase
+
 ### 0.8.2
 * fixed centroid calculation for polygons with area = 0
 * fixed order for polygons

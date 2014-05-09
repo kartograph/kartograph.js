@@ -29,7 +29,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.8.5";
+  kartograph.version = "0.8.6";
 
   $ = root.jQuery;
 
@@ -1987,7 +1987,7 @@
   */
 
 
-  __proj = kartograph.proj = {};
+  __proj = root.kartograph.proj = {};
 
   Function.prototype.bind = function(scope) {
     var _function;
@@ -3739,7 +3739,7 @@
     return new kartograph.View(bbox, w, h, pad);
   };
 
-  kartograph.View = View;
+  root.kartograph.View = View;
 
   /*
       kartograph - a svg mapping library

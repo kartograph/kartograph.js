@@ -7,7 +7,7 @@ OUTMIN=dist/kartograph.min.js
 # builds all coffee script sources
 # to one single minified js file
 #
-rm kartograph*.js
+rm dist/kartograph*.js
 cat src/core.coffee > $BUILD
 cat src/core/*.coffee >> $BUILD
 cat src/modules/*.coffee >> $BUILD

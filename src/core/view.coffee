@@ -100,5 +100,5 @@ View.fromXML = (xml) ->
 	bbox = BBox.fromXML bbox_xml
 	new kartograph.View bbox,w,h,pad
 
-kartograph.View = View
+root.kartograph.View = View
 
