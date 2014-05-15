@@ -2107,7 +2107,7 @@
     reconstructs a projection from xml description
     */
 
-    var attr, i, id, opts, _i, _ref5;
+    var attr, i, id, opts, prj, _i, _ref5;
 
     id = xml.getAttribute('id');
     opts = {};
@@ -2117,9 +2117,12 @@
         opts[attr.name] = attr.value;
       }
     }
-    proj = new proj[id](opts);
-    proj.name = id;
-    return proj;
+    if (proj[id] == null) {
+      throw 'unknown projection ' + id;
+    }
+    prj = new proj[id](opts);
+    prj.name = id;
+    return prj;
   };
 
   kartograph.Proj = Proj;

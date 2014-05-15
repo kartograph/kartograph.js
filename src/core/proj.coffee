@@ -100,9 +100,11 @@ Proj.fromXML = (xml) ->
         attr = xml.attributes[i]
         if attr.name != "id"
             opts[attr.name] = attr.value
-    proj = new proj[id](opts)
-    proj.name = id
-    proj
+    if not proj[id]?
+        throw 'unknown projection '+id
+    prj = new proj[id](opts)
+    prj.name = id
+    prj
 
 kartograph.Proj = Proj
 
