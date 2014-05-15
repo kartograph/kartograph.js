@@ -81,5 +81,5 @@ class LabeledBubble extends Bubble
 LabeledBubble.props = ['radius','style','class','title','labelattrs','buffer','center','attrs']
 LabeledBubble.layers = [] # { id:'a', type: 'svg' }
 
-kartograph.LabeledBubble = LabeledBubble
+root.kartograph.LabeledBubble = LabeledBubble
 

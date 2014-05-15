@@ -17,7 +17,7 @@
 ###
 
 
-__proj = root.kartograph.proj = {}
+proj = kartograph.proj = root.kartograph.proj = {}
 
 Function::bind = (scope) ->
     _function = @
@@ -80,7 +80,7 @@ class Proj
     world_bbox: ->
         p = @project.bind @
         sea = @sea()
-        bbox = new kartograph.BBox()
+        bbox = new BBox()
         for s in sea
             bbox.update(s[0],s[1])
         bbox
@@ -100,7 +100,7 @@ Proj.fromXML = (xml) ->
         attr = xml.attributes[i]
         if attr.name != "id"
             opts[attr.name] = attr.value
-    proj = new kartograph.proj[id](opts)
+    proj = new proj[id](opts)
     proj.name = id
     proj
 
@@ -153,7 +153,7 @@ class Equirectangular extends Cylindrical
         lon = @clon(lon)
         [(lon) * Math.cos(@phi0) * 1000, lat*-1*1000]
 
-__proj['lonlat'] = Equirectangular
+proj['lonlat'] = Equirectangular
 
 
 class CEA extends Cylindrical
@@ -177,7 +177,7 @@ class CEA extends Cylindrical
         y = Math.sin(phi) / Math.cos(@phi1)
         [x*1000,y*1000]
 
-__proj['cea'] = CEA
+proj['cea'] = CEA
 
 
 class GallPeters extends CEA
@@ -190,7 +190,7 @@ class GallPeters extends CEA
         opts.lat1 = 45
         super opts
 
-__proj['gallpeters'] = GallPeters
+proj['gallpeters'] = GallPeters
 
 
 class HoboDyer extends CEA
@@ -203,7 +203,7 @@ class HoboDyer extends CEA
         opts.lat1 = 37.7
         super opts
 
-__proj['hobodyer'] = HoboDyer
+proj['hobodyer'] = HoboDyer
 
 
 class Behrmann extends CEA
@@ -216,7 +216,7 @@ class Behrmann extends CEA
         opts.lat1 = 30
         super opts
 
-__proj['behrmann'] = Behrmann
+proj['behrmann'] = Behrmann
 
 
 class Balthasart extends CEA
@@ -229,7 +229,7 @@ class Balthasart extends CEA
         opts.lat1 = 50
         super opts
 
-__proj['balthasart'] = Balthasart
+proj['balthasart'] = Balthasart
 
 
 class Mercator extends Cylindrical
@@ -252,7 +252,7 @@ class Mercator extends Cylindrical
         y = math.log((1+math.sin(phi)) / math.cos(phi)) * 1000
         [x,y]
 
-__proj['mercator'] = Mercator
+proj['mercator'] = Mercator
 
 
 
@@ -308,7 +308,7 @@ class NaturalEarth extends PseudoCylindrical
         y = lpphi * (s.B0 + phi2 * (s.B1 + phi4 * (s.B2 + s.B3 * phi2 + s.B4 * phi4))) * 180 + 270
         [x,y]
 
-__proj['naturalearth'] = NaturalEarth
+proj['naturalearth'] = NaturalEarth
 
 
 class Robinson extends PseudoCylindrical
@@ -354,7 +354,7 @@ class Robinson extends PseudoCylindrical
             y = -y
         [x ,y]
 
-__proj['robinson'] = Robinson
+proj['robinson'] = Robinson
 
 
 class EckertIV extends PseudoCylindrical
@@ -402,7 +402,7 @@ class EckertIV extends PseudoCylindrical
             y = me.C_y * Math.sin(lpphi);
         [x,y]
 
-__proj['eckert4'] = EckertIV
+proj['eckert4'] = EckertIV
 
 
 class Sinusoidal extends PseudoCylindrical
@@ -420,7 +420,7 @@ class Sinusoidal extends PseudoCylindrical
         y = 1032 * phi
         [x,y]
 
-__proj['sinusoidal'] = Sinusoidal
+proj['sinusoidal'] = Sinusoidal
 
 
 class Mollweide extends PseudoCylindrical
@@ -475,7 +475,7 @@ class Mollweide extends PseudoCylindrical
         y = 1000 * me.cy * math.sin(phi)
         [x,y*-1]
 
-__proj['mollweide'] = Mollweide
+proj['mollweide'] = Mollweide
 
 
 class WagnerIV extends Mollweide
@@ -488,7 +488,7 @@ class WagnerIV extends Mollweide
         # p=math.pi/3
         super opts, 1.0471975511965976
 
-__proj['wagner4'] = WagnerIV
+proj['wagner4'] = WagnerIV
 
 
 class WagnerV extends Mollweide
@@ -501,7 +501,7 @@ class WagnerV extends Mollweide
         # p=math.pi/3
         super opts,null,0.90977,1.65014,3.00896
 
-__proj['wagner5'] = WagnerV
+proj['wagner5'] = WagnerV
 
 
 class Loximuthal extends PseudoCylindrical
@@ -527,7 +527,7 @@ class Loximuthal extends PseudoCylindrical
         y = 1000 * (phi - me.phi0)
         [x,y*-1]
 
-__proj['loximuthal'] = Loximuthal
+proj['loximuthal'] = Loximuthal
 
 
 class CantersModifiedSinusoidalI extends PseudoCylindrical
@@ -561,7 +561,7 @@ class CantersModifiedSinusoidalI extends PseudoCylindrical
         y = 1000 * lat * (C1 + C3 * y2 + C5 * y4)
         [x,y*-1]
 
-__proj['canters1'] = CantersModifiedSinusoidalI
+proj['canters1'] = CantersModifiedSinusoidalI
 
 
 class Hatano extends PseudoCylindrical
@@ -600,7 +600,7 @@ class Hatano extends PseudoCylindrical
         y = 1000 * Math.sin(phi) * (if phi < 0.0 then FYCS else FYCN)
         return [x, y*-1]
 
-__proj['hatano'] = Hatano
+proj['hatano'] = Hatano
 
 
 class GoodeHomolosine extends PseudoCylindrical
@@ -624,7 +624,7 @@ class GoodeHomolosine extends PseudoCylindrical
         else
             return me.p0.project(lon, lat)
 
-__proj['goodehomolosine'] = GoodeHomolosine
+proj['goodehomolosine'] = GoodeHomolosine
 
 
 class Nicolosi extends PseudoCylindrical
@@ -686,9 +686,9 @@ class Nicolosi extends PseudoCylindrical
 
     world_bbox: ->
         r = @r
-        new kartograph.BBox(-r,-r,r*2, r*2)
+        new BBox(-r,-r,r*2, r*2)
 
-__proj['nicolosi'] = Nicolosi
+proj['nicolosi'] = Nicolosi
 
 # -------------------------------
 # Family of Azimuthal Projecitons
@@ -744,7 +744,7 @@ class Azimuthal extends Proj
 
     world_bbox: ->
         r = @r
-        new kartograph.BBox(0,0,r*2, r*2)
+        new BBox(0,0,r*2, r*2)
 
 
 class Orthographic extends Azimuthal
@@ -766,7 +766,7 @@ class Orthographic extends Azimuthal
         y = me.r + yo
         [x,y]
 
-__proj['ortho'] = Orthographic
+proj['ortho'] = Orthographic
 
 
 
@@ -805,7 +805,7 @@ class LAEA extends Azimuthal
         y = @r + yo
         [x,y]
 
-__proj['laea'] = LAEA
+proj['laea'] = LAEA
 
 
 
@@ -857,7 +857,7 @@ class LAEA_USA extends LAEA
         [x,y]
 
 
-__proj['laea-usa'] = LAEA_USA
+proj['laea-usa'] = LAEA_USA
 
 
 class Stereographic extends Azimuthal
@@ -886,7 +886,7 @@ class Stereographic extends Azimuthal
         y = @r + yo
         [x,y]
 
-__proj['stereo'] = Stereographic
+proj['stereo'] = Stereographic
 
 
 
@@ -973,7 +973,7 @@ class Satellite extends Azimuthal
             out.push([r + math.cos(@rad(phi)) * r, r + math.sin(@rad(phi)) * r])
         out
 
-__proj['satellite'] = Satellite
+proj['satellite'] = Satellite
 
 
 
@@ -1008,7 +1008,7 @@ class EquidistantAzimuthal extends Azimuthal
     _visible: (lon, lat) ->
         true
 
-__proj['equi'] = EquidistantAzimuthal
+proj['equi'] = EquidistantAzimuthal
 
 
 
@@ -1052,7 +1052,7 @@ class Aitoff extends PseudoCylindrical
     _visible: (lon, lat) ->
         true
 
-__proj['aitoff'] = Aitoff
+proj['aitoff'] = Aitoff
 
 
 class Winkel3 extends Aitoff
@@ -1064,7 +1064,7 @@ class Winkel3 extends Aitoff
         @winkel = true
 
 
-__proj['winkel3'] = Winkel3
+proj['winkel3'] = Winkel3
 
 # -------------------------------
 # Family of Conic Projecitons
@@ -1145,7 +1145,7 @@ class LCC extends Conic
         [x,y*-1]
 
 #too buggy
-__proj['lcc'] = LCC
+proj['lcc'] = LCC
 
 
 class PseudoConic extends Conic

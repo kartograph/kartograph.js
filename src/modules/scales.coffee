@@ -97,20 +97,20 @@ class QuantileScale extends Scale
 
 # short-hand functions
 
-kartograph.scale = {}
+scale = root.kartograph.scale = {}
 
-kartograph.scale.identity = (s) ->
+scale.identity = (s) ->
 	new Scale(domain, prop, filter).rangedScale
 
-kartograph.scale.linear = (domain, prop, filter) ->
+scale.linear = (domain, prop, filter) ->
 	new LinearScale(domain, prop, filter).rangedScale
 
-kartograph.scale.log = (domain, prop, filter) ->
+scale.log = (domain, prop, filter) ->
 	new LogScale(domain, prop, filter).rangedScale
 
-kartograph.scale.sqrt = (domain, prop, filter) ->
+scale.sqrt = (domain, prop, filter) ->
 	new SqrtScale(domain, prop, filter).rangedScale
 
-kartograph.scale.quantile = (domain, prop, filter) ->
+scale.quantile = (domain, prop, filter) ->
 	new QuantileScale(domain, prop, filter).rangedScale
 

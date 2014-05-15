@@ -85,7 +85,7 @@ class SymbolGroup
         SymbolType = me.type
         ll = me._evaluate me.location,data,key
         if __type(ll) == 'array'
-            ll = new kartograph.LonLat ll[0],ll[1]
+            ll = new LonLat ll[0],ll[1]
 
         sprops =
             layers: me.layers

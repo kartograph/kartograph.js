@@ -81,5 +81,5 @@ class Bubble extends Symbol
 Bubble.props = ['radius','style','class','title','attrs']
 Bubble.layers = [] # { id:'a', type: 'svg' }
 
-kartograph.Bubble = Bubble
+root.kartograph.Bubble = Bubble
 

@@ -19,7 +19,7 @@
 
 
 (function() {
-  var $, Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, K, Kartograph, LAEA, LAEA_Alaska, LAEA_Hawaii, LAEA_USA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, hex2rgb, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, resolve, restore, root, uid, warn, __area, __is_clockwise, __point_in_polygon, __proj, __type, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+  var $, Aitoff, Azimuthal, BBox, Balthasart, Behrmann, BlurFilter, Bubble, CEA, CantersModifiedSinusoidalI, Circle, CohenSutherland, Conic, Cylindrical, EckertIV, EquidistantAzimuthal, Equirectangular, Filter, GallPeters, GlowFilter, GoodeHomolosine, Hatano, HoboDyer, HtmlLabel, Icon, K, Kartograph, LAEA, LAEA_Alaska, LAEA_Hawaii, LAEA_USA, LCC, LabeledBubble, LatLon, Line, LinearScale, LogScale, LonLat, Loximuthal, MapLayer, MapLayerPath, Mercator, Mollweide, NaturalEarth, Nicolosi, Orthographic, Path, PieChart, Proj, PseudoConic, PseudoCylindrical, QuantileScale, REbraces, REcomment_string, REfull, REmunged, Robinson, Satellite, Scale, Sinusoidal, SqrtScale, StackedBarChart, Stereographic, SvgLabel, Symbol, SymbolGroup, View, WagnerIV, WagnerV, Winkel3, drawPieChart, filter, geom, hex2rgb, kartograph, log, map_layer_path_uid, munge, munged, parsedeclarations, proj, resolve, restore, root, scale, uid, warn, __area, __is_clockwise, __point_in_polygon, __type, _base, _base1, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -29,7 +29,7 @@
 
   kartograph = root.$K = (_ref = root.kartograph) != null ? _ref : root.kartograph = {};
 
-  kartograph.version = "0.8.6";
+  kartograph.version = "0.8.7";
 
   $ = root.jQuery;
 
@@ -240,7 +240,7 @@
     y = Number(xml.getAttribute('y'));
     w = Number(xml.getAttribute('w'));
     h = Number(xml.getAttribute('h'));
-    return new kartograph.BBox(x, y, w, h);
+    return new BBox(x, y, w, h);
   };
 
   kartograph.BBox = BBox;
@@ -528,12 +528,12 @@
         me.viewport = new BBox(0, 0, w, h);
       }
       vp = me.viewport;
-      me.viewAB = AB = kartograph.View.fromXML($view[0]);
+      me.viewAB = AB = View.fromXML($view[0]);
       padding = (_ref5 = me.opts.padding) != null ? _ref5 : 0;
       halign = (_ref6 = me.opts.halign) != null ? _ref6 : 'center';
       valign = (_ref7 = me.opts.valign) != null ? _ref7 : 'center';
       zoom = (_ref8 = me.opts.zoom) != null ? _ref8 : 1;
-      me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
+      me.viewBC = new View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
       me.proj = kartograph.Proj.fromXML($('proj', $view)[0]);
       if (me.mapLoadCallback != null) {
         me.mapLoadCallback(me);
@@ -763,7 +763,7 @@
       if (h == null) {
         h = cnt.height();
       }
-      me.viewport = vp = new kartograph.BBox(0, 0, w, h);
+      me.viewport = vp = new BBox(0, 0, w, h);
       if (me.paper != null) {
         me.paper.setSize(vp.width, vp.height);
       }
@@ -778,7 +778,7 @@
       halign = (_ref6 = me.opts.halign) != null ? _ref6 : 'center';
       valign = (_ref7 = me.opts.valign) != null ? _ref7 : 'center';
       zoom = me.opts.zoom;
-      me.viewBC = new kartograph.View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
+      me.viewBC = new View(me.viewAB.asBBox(), vp.width * zoom, vp.height * zoom, padding, halign, valign);
       _ref8 = me.layers;
       for (id in _ref8) {
         layer = _ref8[id];
@@ -798,10 +798,10 @@
 
       me = this;
       if (lonlat.length === 2) {
-        lonlat = new kartograph.LonLat(lonlat[0], lonlat[1]);
+        lonlat = new LonLat(lonlat[0], lonlat[1]);
       }
       if (lonlat.length === 3) {
-        lonlat = new kartograph.LonLat(lonlat[0], lonlat[1], lonlat[2]);
+        lonlat = new LonLat(lonlat[0], lonlat[1], lonlat[2]);
       }
       a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt);
       return me.viewBC.project(me.viewAB.project(a));
@@ -1029,9 +1029,9 @@
 
   })(LonLat);
 
-  kartograph.LonLat = LonLat;
+  root.kartograph.LonLat = LonLat;
 
-  kartograph.LatLon = LatLon;
+  root.kartograph.LatLon = LatLon;
 
   /*
       kartograph - a svg mapping library 
@@ -1603,9 +1603,7 @@
   */
 
 
-  if ((_ref4 = kartograph.geom) == null) {
-    kartograph.geom = {};
-  }
+  geom = (_ref4 = kartograph.geom) != null ? _ref4 : kartograph.geom = {};
 
   Path = (function() {
     /*
@@ -1852,12 +1850,12 @@
         contours.push(contour);
         contour = [];
       }
-      res = new kartograph.geom.Path(type, contours, closed);
+      res = new geom.Path(type, contours, closed);
     } else if (type === "circle") {
       cx = path.getAttribute("cx");
       cy = path.getAttribute("cy");
       r = path.getAttribute("r");
-      res = new kartograph.geom.Circle(cx, cy, r);
+      res = new geom.Circle(cx, cy, r);
     }
     return res;
   };
@@ -1874,7 +1872,7 @@
       var clip, err, i, last_in, lines, p0x, p0y, p1x, p1y, pts, self, x0, x1, y0, y1, _i, _ref5, _ref6, _ref7, _ref8;
 
       self = this;
-      clip = new kartograph.geom.clipping.CohenSutherland().clip;
+      clip = new geom.clipping.CohenSutherland().clip;
       pts = [];
       lines = [];
       last_in = false;
@@ -1987,7 +1985,7 @@
   */
 
 
-  __proj = root.kartograph.proj = {};
+  proj = kartograph.proj = root.kartograph.proj = {};
 
   Function.prototype.bind = function(scope) {
     var _function;
@@ -2085,7 +2083,7 @@
 
       p = this.project.bind(this);
       sea = this.sea();
-      bbox = new kartograph.BBox();
+      bbox = new BBox();
       for (_i = 0, _len = sea.length; _i < _len; _i++) {
         s = sea[_i];
         bbox.update(s[0], s[1]);
@@ -2109,7 +2107,7 @@
     reconstructs a projection from xml description
     */
 
-    var attr, i, id, opts, proj, _i, _ref5;
+    var attr, i, id, opts, _i, _ref5;
 
     id = xml.getAttribute('id');
     opts = {};
@@ -2119,7 +2117,7 @@
         opts[attr.name] = attr.value;
       }
     }
-    proj = new kartograph.proj[id](opts);
+    proj = new proj[id](opts);
     proj.name = id;
     return proj;
   };
@@ -2205,7 +2203,7 @@
 
   })(Cylindrical);
 
-  __proj['lonlat'] = Equirectangular;
+  proj['lonlat'] = Equirectangular;
 
   CEA = (function(_super) {
     __extends(CEA, _super);
@@ -2242,7 +2240,7 @@
 
   })(Cylindrical);
 
-  __proj['cea'] = CEA;
+  proj['cea'] = CEA;
 
   GallPeters = (function(_super) {
     __extends(GallPeters, _super);
@@ -2265,7 +2263,7 @@
 
   })(CEA);
 
-  __proj['gallpeters'] = GallPeters;
+  proj['gallpeters'] = GallPeters;
 
   HoboDyer = (function(_super) {
     __extends(HoboDyer, _super);
@@ -2288,7 +2286,7 @@
 
   })(CEA);
 
-  __proj['hobodyer'] = HoboDyer;
+  proj['hobodyer'] = HoboDyer;
 
   Behrmann = (function(_super) {
     __extends(Behrmann, _super);
@@ -2311,7 +2309,7 @@
 
   })(CEA);
 
-  __proj['behrmann'] = Behrmann;
+  proj['behrmann'] = Behrmann;
 
   Balthasart = (function(_super) {
     __extends(Balthasart, _super);
@@ -2334,7 +2332,7 @@
 
   })(CEA);
 
-  __proj['balthasart'] = Balthasart;
+  proj['balthasart'] = Balthasart;
 
   Mercator = (function(_super) {
     __extends(Mercator, _super);
@@ -2369,7 +2367,7 @@
 
   })(Cylindrical);
 
-  __proj['mercator'] = Mercator;
+  proj['mercator'] = Mercator;
 
   PseudoCylindrical = (function(_super) {
     __extends(PseudoCylindrical, _super);
@@ -2444,7 +2442,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['naturalearth'] = NaturalEarth;
+  proj['naturalearth'] = NaturalEarth;
 
   Robinson = (function(_super) {
     __extends(Robinson, _super);
@@ -2504,7 +2502,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['robinson'] = Robinson;
+  proj['robinson'] = Robinson;
 
   EckertIV = (function(_super) {
     __extends(EckertIV, _super);
@@ -2565,7 +2563,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['eckert4'] = EckertIV;
+  proj['eckert4'] = EckertIV;
 
   Sinusoidal = (function(_super) {
     __extends(Sinusoidal, _super);
@@ -2598,7 +2596,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['sinusoidal'] = Sinusoidal;
+  proj['sinusoidal'] = Sinusoidal;
 
   Mollweide = (function(_super) {
     __extends(Mollweide, _super);
@@ -2678,7 +2676,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['mollweide'] = Mollweide;
+  proj['mollweide'] = Mollweide;
 
   WagnerIV = (function(_super) {
     __extends(WagnerIV, _super);
@@ -2698,7 +2696,7 @@
 
   })(Mollweide);
 
-  __proj['wagner4'] = WagnerIV;
+  proj['wagner4'] = WagnerIV;
 
   WagnerV = (function(_super) {
     __extends(WagnerV, _super);
@@ -2718,7 +2716,7 @@
 
   })(Mollweide);
 
-  __proj['wagner5'] = WagnerV;
+  proj['wagner5'] = WagnerV;
 
   Loximuthal = (function(_super) {
     var maxLat, minLat;
@@ -2760,7 +2758,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['loximuthal'] = Loximuthal;
+  proj['loximuthal'] = Loximuthal;
 
   CantersModifiedSinusoidalI = (function(_super) {
     var C1, C3, C3x3, C5, C5x5;
@@ -2813,7 +2811,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['canters1'] = CantersModifiedSinusoidalI;
+  proj['canters1'] = CantersModifiedSinusoidalI;
 
   Hatano = (function(_super) {
     var CN, CS, EPS, FXC, FYCN, FYCS, NITER, ONETOL, RCN, RCS, RXC, RYCN, RYCS;
@@ -2876,7 +2874,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['hatano'] = Hatano;
+  proj['hatano'] = Hatano;
 
   GoodeHomolosine = (function(_super) {
     __extends(GoodeHomolosine, _super);
@@ -2912,7 +2910,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['goodehomolosine'] = GoodeHomolosine;
+  proj['goodehomolosine'] = GoodeHomolosine;
 
   Nicolosi = (function(_super) {
     var EPS;
@@ -2991,14 +2989,14 @@
       var r;
 
       r = this.r;
-      return new kartograph.BBox(-r, -r, r * 2, r * 2);
+      return new BBox(-r, -r, r * 2, r * 2);
     };
 
     return Nicolosi;
 
   })(PseudoCylindrical);
 
-  __proj['nicolosi'] = Nicolosi;
+  proj['nicolosi'] = Nicolosi;
 
   Azimuthal = (function(_super) {
     __extends(Azimuthal, _super);
@@ -3077,7 +3075,7 @@
       var r;
 
       r = this.r;
-      return new kartograph.BBox(0, 0, r * 2, r * 2);
+      return new BBox(0, 0, r * 2, r * 2);
     };
 
     return Azimuthal;
@@ -3119,7 +3117,7 @@
 
   })(Azimuthal);
 
-  __proj['ortho'] = Orthographic;
+  proj['ortho'] = Orthographic;
 
   LAEA = (function(_super) {
     __extends(LAEA, _super);
@@ -3165,7 +3163,7 @@
 
   })(Azimuthal);
 
-  __proj['laea'] = LAEA;
+  proj['laea'] = LAEA;
 
   LAEA_Alaska = (function(_super) {
     __extends(LAEA_Alaska, _super);
@@ -3241,7 +3239,7 @@
 
   })(LAEA);
 
-  __proj['laea-usa'] = LAEA_USA;
+  proj['laea-usa'] = LAEA_USA;
 
   Stereographic = (function(_super) {
     __extends(Stereographic, _super);
@@ -3282,7 +3280,7 @@
 
   })(Azimuthal);
 
-  __proj['stereo'] = Stereographic;
+  proj['stereo'] = Stereographic;
 
   Satellite = (function(_super) {
     __extends(Satellite, _super);
@@ -3385,7 +3383,7 @@
 
   })(Azimuthal);
 
-  __proj['satellite'] = Satellite;
+  proj['satellite'] = Satellite;
 
   EquidistantAzimuthal = (function(_super) {
     __extends(EquidistantAzimuthal, _super);
@@ -3432,7 +3430,7 @@
 
   })(Azimuthal);
 
-  __proj['equi'] = EquidistantAzimuthal;
+  proj['equi'] = EquidistantAzimuthal;
 
   Aitoff = (function(_super) {
     var COSPHI1;
@@ -3494,7 +3492,7 @@
 
   })(PseudoCylindrical);
 
-  __proj['aitoff'] = Aitoff;
+  proj['aitoff'] = Aitoff;
 
   Winkel3 = (function(_super) {
     __extends(Winkel3, _super);
@@ -3510,7 +3508,7 @@
 
   })(Aitoff);
 
-  __proj['winkel3'] = Winkel3;
+  proj['winkel3'] = Winkel3;
 
   Conic = (function(_super) {
     __extends(Conic, _super);
@@ -3612,7 +3610,7 @@
 
   })(Conic);
 
-  __proj['lcc'] = LCC;
+  proj['lcc'] = LCC;
 
   PseudoConic = (function(_super) {
     __extends(PseudoConic, _super);
@@ -3703,13 +3701,13 @@
           }
           contours.push(cont);
         }
-        new_path = new kartograph.geom.Path(path.type, contours, path.closed);
+        new_path = new geom.Path(path.type, contours, path.closed);
         new_path._bbox = bbox;
         return new_path;
       } else if (path.type === "circle") {
         _ref17 = me.project(path.x, path.y), x = _ref17[0], y = _ref17[1];
         r = path.r * me.scale;
-        return new kartograph.geom.Circle(x, y, r);
+        return new geom.Circle(x, y, r);
       }
     };
 
@@ -3717,7 +3715,7 @@
       var me;
 
       me = this;
-      return new kartograph.BBox(0, 0, me.width, me.height);
+      return new BBox(0, 0, me.width, me.height);
     };
 
     return View;
@@ -3736,7 +3734,7 @@
     pad = Number(xml.getAttribute('padding'));
     bbox_xml = xml.getElementsByTagName('bbox')[0];
     bbox = BBox.fromXML(bbox_xml);
-    return new kartograph.View(bbox, w, h, pad);
+    return new View(bbox, w, h, pad);
   };
 
   root.kartograph.View = View;
@@ -3921,7 +3919,7 @@
     me = this;
     doc = window.document;
     if (kartograph.filter[type] != null) {
-      fltr = new kartograph.filter[type](params).getFilter(id);
+      fltr = new filter[type](params).getFilter(id);
     } else {
       throw 'unknown filter type ' + type;
     }
@@ -4474,25 +4472,25 @@
 
   })(Scale);
 
-  kartograph.scale = {};
+  scale = root.kartograph.scale = {};
 
-  kartograph.scale.identity = function(s) {
+  scale.identity = function(s) {
     return new Scale(domain, prop, filter).rangedScale;
   };
 
-  kartograph.scale.linear = function(domain, prop, filter) {
+  scale.linear = function(domain, prop, filter) {
     return new LinearScale(domain, prop, filter).rangedScale;
   };
 
-  kartograph.scale.log = function(domain, prop, filter) {
+  scale.log = function(domain, prop, filter) {
     return new LogScale(domain, prop, filter).rangedScale;
   };
 
-  kartograph.scale.sqrt = function(domain, prop, filter) {
+  scale.sqrt = function(domain, prop, filter) {
     return new SqrtScale(domain, prop, filter).rangedScale;
   };
 
-  kartograph.scale.quantile = function(domain, prop, filter) {
+  scale.quantile = function(domain, prop, filter) {
     return new QuantileScale(domain, prop, filter).rangedScale;
   };
 
@@ -4669,7 +4667,7 @@
       SymbolType = me.type;
       ll = me._evaluate(me.location, data, key);
       if (__type(ll) === 'array') {
-        ll = new kartograph.LonLat(ll[0], ll[1]);
+        ll = new LonLat(ll[0], ll[1]);
       }
       sprops = {
         layers: me.layers,
@@ -5494,7 +5492,7 @@ function kdtree() {
 
   Bubble.layers = [];
 
-  kartograph.Bubble = Bubble;
+  root.kartograph.Bubble = Bubble;
 
   /*
       kartograph - a svg mapping library 
@@ -5587,7 +5585,7 @@ function kdtree() {
 
   Icon.layers = [];
 
-  kartograph.Icon = Icon;
+  root.kartograph.Icon = Icon;
 
   /*
       kartograph - a svg mapping library
@@ -5666,7 +5664,7 @@ function kdtree() {
 
   SvgLabel.layers = [];
 
-  kartograph.Label = SvgLabel;
+  root.kartograph.Label = SvgLabel;
 
   HtmlLabel = (function(_super) {
     __extends(HtmlLabel, _super);
@@ -5743,7 +5741,7 @@ function kdtree() {
     }
   ];
 
-  kartograph.HtmlLabel = HtmlLabel;
+  root.kartograph.HtmlLabel = HtmlLabel;
 
   /*
       kartograph - a svg mapping library
@@ -5867,7 +5865,7 @@ function kdtree() {
 
   LabeledBubble.layers = [];
 
-  kartograph.LabeledBubble = LabeledBubble;
+  root.kartograph.LabeledBubble = LabeledBubble;
 
   /*
       kartograph - a svg mapping library
@@ -6006,7 +6004,7 @@ function kdtree() {
 
   PieChart.layers = [];
 
-  kartograph.PieChart = PieChart;
+  root.kartograph.PieChart = PieChart;
 
   /*
   pie chart extension for RaphaelJS
@@ -6250,6 +6248,6 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
 
   StackedBarChart.layers = [];
 
-  kartograph.StackedBarChart = StackedBarChart;
+  root.kartograph.StackedBarChart = StackedBarChart;
 
 }).call(this);

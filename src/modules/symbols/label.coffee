@@ -52,7 +52,7 @@ class SvgLabel extends kartograph.Symbol
 SvgLabel.props = ['text', 'style', 'class', 'offset']
 SvgLabel.layers = []
 
-kartograph.Label = SvgLabel
+root.kartograph.Label = SvgLabel
 
 
 
@@ -105,6 +105,6 @@ class HtmlLabel extends kartograph.Symbol
 HtmlLabel.props = ['text', 'css', 'class']
 HtmlLabel.layers = [{ id: 'lbl', type: 'html' }]
 
-kartograph.HtmlLabel = HtmlLabel
+root.kartograph.HtmlLabel = HtmlLabel
 
 

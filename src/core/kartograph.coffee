@@ -142,13 +142,13 @@ class Kartograph
             me.viewport = new BBox 0, 0, w, h
 
         vp = me.viewport
-        me.viewAB = AB = kartograph.View.fromXML $view[0]
+        me.viewAB = AB = View.fromXML $view[0]
         padding = me.opts.padding ? 0
         halign = me.opts.halign ? 'center'
         valign = me.opts.valign ? 'center'
-        # me.viewBC = new kartograph.View AB.asBBox(),vp.width,vp.height, padding, halign, valign
+        # me.viewBC = new View AB.asBBox(),vp.width,vp.height, padding, halign, valign
         zoom = me.opts.zoom ? 1
-        me.viewBC = new kartograph.View me.viewAB.asBBox(), vp.width*zoom, vp.height*zoom, padding,halign,valign
+        me.viewBC = new View me.viewAB.asBBox(), vp.width*zoom, vp.height*zoom, padding,halign,valign
         me.proj = kartograph.Proj.fromXML $('proj', $view)[0]
         if me.mapLoadCallback?
             me.mapLoadCallback me
@@ -305,7 +305,7 @@ class Kartograph
         cnt = me.container
         w ?= cnt.width()
         h ?= cnt.height()
-        me.viewport = vp = new kartograph.BBox 0,0,w,h
+        me.viewport = vp = new BBox 0,0,w,h
         if me.paper?
             me.paper.setSize vp.width, vp.height
         # update size for other svg layers as well
@@ -316,7 +316,7 @@ class Kartograph
         halign = me.opts.halign ? 'center'
         valign = me.opts.valign ? 'center'
         zoom = me.opts.zoom
-        me.viewBC = new kartograph.View me.viewAB.asBBox(),vp.width*zoom,vp.height*zoom, padding,halign,valign
+        me.viewBC = new View me.viewAB.asBBox(),vp.width*zoom,vp.height*zoom, padding,halign,valign
         for id,layer of me.layers
             layer.setView(me.viewBC)
 
@@ -328,8 +328,8 @@ class Kartograph
 
     lonlat2xy: (lonlat) ->
         me = @
-        lonlat = new kartograph.LonLat(lonlat[0], lonlat[1]) if lonlat.length == 2
-        lonlat = new kartograph.LonLat(lonlat[0], lonlat[1], lonlat[2]) if lonlat.length == 3
+        lonlat = new LonLat(lonlat[0], lonlat[1]) if lonlat.length == 2
+        lonlat = new LonLat(lonlat[0], lonlat[1], lonlat[2]) if lonlat.length == 3
         a = me.proj.project(lonlat.lon, lonlat.lat, lonlat.alt)
         me.viewBC.project(me.viewAB.project(a))
 

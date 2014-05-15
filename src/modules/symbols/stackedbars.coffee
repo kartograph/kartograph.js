@@ -140,6 +140,6 @@ class StackedBarChart extends kartograph.Symbol
 StackedBarChart.props = ['values','styles','class','titles','colors','width','height']
 StackedBarChart.layers = [] #{ id:'a', type: 'svg' }
 
-kartograph.StackedBarChart = StackedBarChart
+root.kartograph.StackedBarChart = StackedBarChart
 
 

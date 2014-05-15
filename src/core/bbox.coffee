@@ -76,7 +76,7 @@ BBox.fromXML = (xml) ->
     y = Number(xml.getAttribute('y'))
     w = Number(xml.getAttribute('w'))
     h = Number(xml.getAttribute('h'))
-    new kartograph.BBox x,y,w,h
+    new BBox x,y,w,h
 
 
 kartograph.BBox = BBox

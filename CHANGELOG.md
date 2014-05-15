@@ -1,3 +1,6 @@
+### 0.8.7
+* fixed exposure of global classes
+
 ### 0.8.6
 * exposing projections and View for projection showcase
 

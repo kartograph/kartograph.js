@@ -43,7 +43,7 @@ class LatLon extends LonLat
 		super lon, lat, alt
 
 
-kartograph.LonLat = LonLat
-kartograph.LatLon = LatLon
+root.kartograph.LonLat = LonLat
+root.kartograph.LatLon = LatLon
 
 

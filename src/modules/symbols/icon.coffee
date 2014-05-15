@@ -68,6 +68,6 @@ class Icon extends kartograph.Symbol
 Icon.props = ['icon','offset','class','title','iconsize']
 Icon.layers = []
 
-kartograph.Icon = Icon
+root.kartograph.Icon = Icon
 
 

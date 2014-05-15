@@ -34,7 +34,7 @@ Kartograph::addFilter = (id, type, params = {}) ->
     me = @
     doc = window.document
     if kartograph.filter[type]?
-        fltr = new kartograph.filter[type](params).getFilter(id)
+        fltr = new filter[type](params).getFilter(id)
     else
         throw 'unknown filter type '+type
 

@@ -77,17 +77,17 @@ class View
 					bbox[2] = Math.max bbox[2],x
 					bbox[3] = Math.max bbox[3],y
 				contours.push(cont)
-			new_path = new kartograph.geom.Path path.type,contours, path.closed
+			new_path = new geom.Path path.type,contours, path.closed
 			new_path._bbox = bbox
 			new_path
 		else if path.type == "circle"
 			[x,y] = me.project path.x,path.y
 			r = path.r * me.scale
-			new kartograph.geom.Circle x,y,r
+			new geom.Circle x,y,r
 
 	asBBox: ->
 		me = @
-		new kartograph.BBox 0,0,me.width,me.height
+		new BBox 0,0,me.width,me.height
 
 View.fromXML = (xml) ->
 	###
@@ -98,7 +98,7 @@ View.fromXML = (xml) ->
 	pad = Number(xml.getAttribute('padding'))
 	bbox_xml = xml.getElementsByTagName('bbox')[0]
 	bbox = BBox.fromXML bbox_xml
-	new kartograph.View bbox,w,h,pad
+	new View bbox,w,h,pad
 
 root.kartograph.View = View
 

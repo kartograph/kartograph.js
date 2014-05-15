@@ -92,7 +92,7 @@ class PieChart extends Symbol
 PieChart.props = ['radius','values','styles','class','titles', 'colors','border','borderWidth']
 PieChart.layers = [] #{ id:'a', type: 'svg' }
 
-kartograph.PieChart = PieChart
+root.kartograph.PieChart = PieChart
 
 
 ###

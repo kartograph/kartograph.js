@@ -16,7 +16,7 @@
     License along with this library. If not, see <http://www.gnu.org/licenses/>.
 ###
 
-kartograph.geom ?= {}
+geom = kartograph.geom ?= {}
 
 class Path
 	###
@@ -200,7 +200,7 @@ Path.fromSVG = (path) ->
 			contours.push contour
 			contour = []
 
-		res = new kartograph.geom.Path(type, contours, closed)
+		res = new geom.Path(type, contours, closed)
 
 	else if type == "circle"
 
@@ -208,7 +208,7 @@ Path.fromSVG = (path) ->
 		cy = path.getAttribute "cy"
 		r = path.getAttribute "r"
 
-		res = new kartograph.geom.Circle(cx,cy,r)
+		res = new geom.Circle(cx,cy,r)
 
 	res
 
@@ -223,7 +223,7 @@ class Line
 	clipToBBox: (bbox) ->
 		self = @
 		# line clipping here
-		clip = new kartograph.geom.clipping.CohenSutherland().clip
+		clip = new geom.clipping.CohenSutherland().clip
 		pts = []
 		lines = []
 		last_in = false
