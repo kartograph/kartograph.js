@@ -1,0 +1,7 @@
+{
+  "name": "proso.kartograph.js",
+  "version": "0.8.2",
+  "description": "PROSO fork of kartograph.js",
+  "main": "dist/kartograph.js",
+  "license": "GNU Lesser General Public License"
+}
