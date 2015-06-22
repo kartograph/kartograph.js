@@ -6023,19 +6023,23 @@ function kdtree() {
     paper = this;
     rad = Math.PI / 180;
     chart = paper.set();
-    sector = function(cx, cy, r, startAngle, endAngle, params) {
-      var x1, x2, y1, y2;
+    sector = function(cx, cy, r, startAngle, endAngle, circ, params) {
+		if(circ==1) {
+			return paper.circle(cx, cy, r).attr(params);
+		} else {
+		  var x1, x2, y1, y2;
 
-      x1 = cx + r * Math.cos(-startAngle * rad);
-      x2 = cx + r * Math.cos(-endAngle * rad);
-      y1 = cy + r * Math.sin(-startAngle * rad);
-      y2 = cy + r * Math.sin(-endAngle * rad);
-      return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle > 180), 0, x2, y2, "z"]).attr(params);
+		  x1 = cx + r * Math.cos(-startAngle * rad);
+		  x2 = cx + r * Math.cos(-endAngle * rad);
+		  y1 = cy + r * Math.sin(-startAngle * rad);
+		  y2 = cy + r * Math.sin(-endAngle * rad);
+		  return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle > 180), 0, x2, y2, "z"]).attr(params);
+		}
     };
     angle = -270;
     total = 0;
     process = function(j) {
-      var angleplus, color, delta, ms, p, popangle, value;
+      var angleplus, color, delta, ms, p, popangle, value, circ;
 
       value = values[j];
       angleplus = 360 * value / total;
@@ -6043,23 +6047,26 @@ function kdtree() {
       color = colors[j];
       ms = 500;
       delta = 30;
-      p = sector(cx, cy, r, angle, angle + angleplus, {
-        fill: color,
-        stroke: stroke,
-        'stroke-width': 1
-      });
-      p.mouseover(function() {
-        p.stop().animate({
-          transform: "s1.1 1.1 " + cx + " " + cy
-        }, ms, "elastic");
-      });
-      p.mouseout(function() {
-        p.stop().animate({
-          transform: ""
-        }, ms, "elastic");
-      });
+	  if (value == total) circ=1; else circ =0;
+	  if (value > 0) {
+		  p = sector(cx, cy, r, angle, angle + angleplus, circ, {
+			fill: color,
+			stroke: stroke,
+			'stroke-width': 1
+		  });
+		  p.mouseover(function() {
+			p.stop().animate({
+			  transform: "s1.1 1.1 " + cx + " " + cy
+			}, ms, "elastic");
+		  });
+		  p.mouseout(function() {
+			p.stop().animate({
+			  transform: ""
+			}, ms, "elastic");
+		  });
+		  chart.push(p);
+	  }
       angle += angleplus;
-      chart.push(p);
     };
     for (_i = 0, _len = values.length; _i < _len; _i++) {
       v = values[_i];
