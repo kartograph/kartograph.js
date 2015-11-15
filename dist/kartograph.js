@@ -5952,7 +5952,8 @@ function kdtree() {
           fill: me.border
         });
       }
-      me.chart = me.layers.mapcanvas.pieChart(me.x, me.y, me.radius, me.values, me.titles, me.colors, "none");
+	  bg.node.setAttribute("class",me["class"]);
+      me.chart = me.layers.mapcanvas.pieChart(me.x, me.y, me.radius, me.values, me.titles, me.colors, "none", me["class"]);
       me.chart.push(bg);
       return me;
     };
@@ -6014,7 +6015,7 @@ function kdtree() {
   */
 
 
-  drawPieChart = function(cx, cy, r, values, labels, colors, stroke) {
+  drawPieChart = function(cx, cy, r, values, labels, colors, stroke, classObj) {
     var angle, chart, i, paper, process, rad, sector, total, v, _i, _len;
 
     if (isNaN(cx) || isNaN(cy) || isNaN(r)) {
@@ -6033,7 +6034,10 @@ function kdtree() {
 		  x2 = cx + r * Math.cos(-endAngle * rad);
 		  y1 = cy + r * Math.sin(-startAngle * rad);
 		  y2 = cy + r * Math.sin(-endAngle * rad);
-		  return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle > 180), 0, x2, y2, "z"]).attr(params);
+		 /* if (x1==x2 && y1==y2) { 
+			return paper.circle(cx, cy, r).attr(params);
+		  } else 
+		*/	return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle > 180), 0, x2, y2, "z"]).attr(params);
 		}
     };
     angle = -270;
@@ -6054,6 +6058,7 @@ function kdtree() {
 			stroke: stroke,
 			'stroke-width': 1
 		  });
+		  p.node.setAttribute("class",classObj);
 		  p.mouseover(function() {
 			p.stop().animate({
 			  transform: "s1.1 1.1 " + cx + " " + cy
@@ -6099,7 +6104,7 @@ function kdtree() {
 
   
 
-drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
+drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke, classObj) {
     var paper = this,
         chart = this.set();
     function bar(x, y, w, h, params) {
@@ -6119,7 +6124,7 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
                 p = bar(x, y-bh, bw, bh, {fill: color, stroke: stroke, "stroke-width": 1});
             
             yo += bh;
-            
+			p.node.setAttribute("class",classObj);
             p.mouseover(function () {
                 p.stop().animate({transform: "s1.1 1.1 " + cx + " " + cy}, ms, "elastic");
             }).mouseout(function () {
@@ -6200,7 +6205,8 @@ drawStackedBars = function (cx, cy, w, h, values, labels, colors, stroke) {
         stroke: 'none',
         fill: '#fff'
       });
-      me.chart = me.layers.mapcanvas.drawStackedBarChart(me.x, me.y, me.width, me.height, me.values, me.titles, me.colors, "none");
+	  bg.node.setAttribute("class",me["class"]);
+      me.chart = me.layers.mapcanvas.drawStackedBarChart(me.x, me.y, me.width, me.height, me.values, me.titles, me.colors, "none", me["class"]);
       me.chart.push(bg);
       return me;
     };
