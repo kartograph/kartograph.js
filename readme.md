@@ -1,20 +1,19 @@
-# Kartograph.js
 
-This project is not maintained anymore. The original author decided to move on with his life. 
+### This project is not maintained anymore. 
 
 Here are a few reasons why I stopped working on kartograph.js:
 
 * there's no need to support non-SVG browsers anymore, so if I would touch kartograph.js again I would through out the Raphael.js dependency, which would result in a complete re-write which I don't want to spend my time on, because...
-* D3.js is an amazing library that can do all the vector mapping that you need! Also d3.js has much more map projections and is more fun to work with.
+* d3.js is an amazing library that can do all the vector mapping that you need! Also d3.js has much more map projections and is more fun to work with.
 * Finally, TopoJSON beats SVG as vector geo data format.
 
 So, thanks for the good time we had!
 
 Of course, if you still want to take over from here, kartograph.js is all yours. Just send me an email.
 
-
-
 -------------
+
+# Kartograph.js
 
 Kartograph.js is a JavaScript library that renders [SVG maps](https://github.com/kartograph/kartograph.py/) in web browsers. It is built on top of [jQuery](http://jquery.com) and [RaphaelJS](http://raphaeljs.com). Please have a look at the [API docs](https://github.com/kartograph/kartograph.js/wiki/API) for more details. 
 
