@@ -61,7 +61,9 @@ class LabeledBubble extends Bubble
                     'stroke-linecap': 'round'
                     'stroke-width': 6
             me.label.attr attrs
-            me.label.toFront()
+            me.label.toFront
+            me.label.node.setAttribute 'style', attrs['style']
+            me.label.node.setAttribute 'class', attrs['class']
         me
 
 
