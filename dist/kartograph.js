@@ -1780,7 +1780,7 @@
       this.x = x;
       this.y = y;
       this.r = r;
-      Circle.__super__.constructor.call(this, 'circle', null, true);
+      Circle.__super__.constructor.call(this, 'circle', [], true);
     }
 
     Circle.prototype.toSVG = function(paper) {
