@@ -19,7 +19,7 @@ Kartograph.js is a JavaScript library that renders [SVG maps](https://github.com
 
 Initializing a new map
 
-````javascript
+```javascript
 map = $K.map('#map', 600, 400);
 map.loadMap('world.svg', function() {
 	map.addLayer('countries', {
